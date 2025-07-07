@@ -7,6 +7,20 @@
     <meta name="author" content="Sistem Akuntansi SGM" />
     <title>Sistem Akuntansi SGM</title>
     <style>
+      .form-step {
+  display: none; /* Sembunyikan semua langkah secara default */
+  animation: fadeIn 0.5s ease; /* Gunakan animasi yang sudah ada */
+}
+.form-step.active {
+  display: block; /* Tampilkan hanya langkah yang aktif */
+}
+/* Styling untuk grup tombol navigasi antar langkah */
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
       :root {
         --primary: #1e3a8a; /* Biru laut */
         --primary-dark: #172554; /* Biru lebih gelap untuk hover */
@@ -32,7 +46,7 @@
       body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           Helvetica, Arial, sans-serif;
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); /* Gradien lembut */
+        background: linear-gradient(135deg, #292929 0%, #303030 100%); /* Gradien lembut */
         color: var(--text);
         min-height: 100vh;
         padding: 20px;
@@ -310,7 +324,7 @@
       }
 
       .data-table thead th {
-        background: var(--primary);
+        background: #2e3133;
         color: white;
         font-weight: 600;
         position: sticky;
@@ -1069,50 +1083,13 @@
       <div id="suratJalan" class="tab-content" role="tabpanel"></div> 
 
       <div id="pengaturan" class="tab-content" role="tabpanel">
-        <div class="form-section">
-          <h3 class="form-section-title">Pengaturan Informasi Perusahaan</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="config-namaPerusahaan">Nama Perusahaan</label
-              ><input type="text" id="config-namaPerusahaan" required />
-            </div>
-            <div class="form-group">
-              <label for="config-alamatPerusahaan">Alamat Perusahaan</label
-              ><input type="text" id="config-alamatPerusahaan" required />
-            </div>
-            <div class="form-group">
-              <label for="config-kontak">Kontak</label
-              ><input type="text" id="config-kontak" required />
-            </div>
-            <div class="form-group">
-              <label for="config-rekening">Info Rekening Bank (Umum/Non-PPN)</label
-              ><input type="text" id="config-rekening" />
-            </div>
-            <div class="form-group">
-              <label for="config-rekeningPpn">Info Rekening Bank (Khusus Invoice PPN)</label
-              ><input type="text" id="config-rekeningPpn" />
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1">
-              <label for="config-logoUrl"
-                >URL Logo (Ganti dengan link logo Anda)</label
-              ><input type="url" id="config-logoUrl" />
-            </div>
-            <div class="form-group" style="grid-column: 1 / -1">
-              <label for="config-tagline">Tagline/Deskripsi (untuk SJ)</label
-              ><textarea id="config-tagline" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="actions-group">
-            <button type="button" id="saveConfigBtn" class="btn btn-primary">
-              Simpan Informasi
-            </button>
-          </div>
-        </div>
+        
         <div class="form-section">
     <h3 class="form-section-title">Manajemen Data Barang</h3>
 
-    <div id="item-editor-modal" style="display:none; /* Atur style untuk modal/pop-up */">
-        <form id="item-editor-form">
+    <div id="item-editor-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; display:flex; align-items:center; justify-content:center; display:none;">
+        <form id="item-editor-form" style="background:white; padding:25px; border-radius:10px; width:90%; max-width:800px;">
+            <h4 class="form-section-title" style="margin-top:0;">Editor Barang</h4>
             <input type="hidden" id="edit-item-original-code">
             <div class="form-grid">
                 <div class="form-group"><label>Kode Barang</label><input type="text" id="edit-item-code" required></div>
@@ -1129,11 +1106,10 @@
 
     <div class="actions-group" style="justify-content: space-between;">
         <button id="show-add-item-form" class="btn btn-success">
-            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
-            Tambah Barang Baru
+             Tambah Barang Baru
         </button>
-        <div class="form-group" style="min-width: 300px;">
-            <input type="text" id="search-master-items" placeholder="Cari barang...">
+        <div class="form-group" style="min-width: 300px; margin-bottom:0;">
+            <input type="text" id="search-master-items" placeholder="Cari barang berdasarkan nama atau kode...">
         </div>
     </div>
 
@@ -1152,34 +1128,42 @@
                 </tbody>
         </table>
     </div>
-    <p style="margin-top: 15px; font-weight: bold;">
-        Total Barang: <span id="master-item-count">0</span>
-    </p>
+    <div class="actions-group" id="master-items-pagination" style="justify-content: space-between; align-items: center;">
+        <p style="font-weight: bold;">
+            Total Barang: <span id="master-item-count">0</span>
+        </p>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn btn-primary btn-sm" id="prev-item-page">&laquo; Sebelumnya</button>
+            <span>Halaman <span id="current-item-page">1</span> dari <span id="total-item-pages">1</span></span>
+            <button class="btn btn-primary btn-sm" id="next-item-page">Berikutnya &raquo;</button>
+        </div>
+    </div>
+    </div> <div id="npwp-management-section"></div>
+    <div class="form-section">
+      <h3 class="form-section-title">Backup & Restore</h3>
+      <p style="margin-bottom: 15px">
+        Simpan semua data transaksi dan data barang ke dalam satu file JSON,
+        atau pulihkan dari file cadangan.
+      </p>
+      <div class="actions-group">
+        <button type="button" id="backupDataBtn" class="btn btn-success">
+          Backup Semua Data
+        </button>
+        <button type="button" id="restoreDataBtn" class="btn btn-warning">
+          Restore Data
+        </button>
+        <input
+          type="file"
+          id="restoreFileInput"
+          style="display: none"
+          accept=".json"
+        />
+      </div>
+    </div>
+    <div id="trash-section"></div>
 </div>
         </div>
-        <div id="npwp-management-section"></div>
-        <div class="form-section">
-          <h3 class="form-section-title">Backup & Restore</h3>
-          <p style="margin-bottom: 15px">
-            Simpan semua data transaksi dan data barang ke dalam satu file JSON,
-            atau pulihkan dari file cadangan.
-          </p>
-          <div class="actions-group">
-            <button type="button" id="backupDataBtn" class="btn btn-success">
-              Backup Semua Data
-            </button>
-            <button type="button" id="restoreDataBtn" class="btn btn-warning">
-              Restore Data
-            </button>
-            <input
-              type="file"
-              id="restoreFileInput"
-              style="display: none"
-              accept=".json"
-            />
-          </div>
-        </div>
-        <div id="trash-section"></div>
+        
       </div>
     </div>
 
@@ -1253,6 +1237,12 @@
           this.activeDropdown = null;
           this.tempItems = { sale: [], purchase: [] };
           this.draftForms = { sale: null, purchase: null };
+
+          this.formSteps = { sale: 1, purchase: 1 };
+
+          this.masterItemsPage = 1
+
+          this.npwpPage = 1
           
           this.partyDetails = {
             customer: new Map(),
@@ -1338,166 +1328,159 @@
         }
 
         generateFormHTML(type) {
-            const isTransaction = type === "sale" || type === "purchase";
-            if (!isTransaction) return '';
+  const isTransaction = type === "sale" || type === "purchase";
+  if (!isTransaction) return '';
 
-            const title = type === "sale" ? "Penjualan" : "Pembelian";
-            const partyLabel = type === "sale" ? "Customer" : "Pemasok";
-            const partyType = type === "sale" ? "customer" : "pemasok";
-            
-            const ppnCheckboxHTML = `
-            <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
-                    <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: var(--primary); cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
-                </div>
-            </div>`;
+  const title = type === "sale" ? "Penjualan" : "Pembelian";
+  const partyLabel = type === "sale" ? "Customer" : "Pemasok";
+  const partyType = type === "sale" ? "customer" : "pemasok";
 
-            const formFields = `
-                ${ppnCheckboxHTML}
-                <div class="form-group-cluster">
-                    <h4 class="form-group-cluster-title">Informasi ${partyLabel}</h4>
-                    <div class="form-group filterable-dropdown">
-                        <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
-                        <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
-                        <div class="dropdown-options" id="party-dropdown-${type}"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
-                        <input type="text" id="${partyType}Address-${type}">
-                    </div>
-                    <div class="form-group">
-                        <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
-                        <input type="tel" id="${partyType}Phone-${type}" placeholder="Contoh: 0812...">
-                    </div>
-                    <div class="form-group npwp-group hidden" id="npwp-group-${type}">
-                        <label for="${partyType}Npwp-${type}">NPWP/NIK</label>
-                        <input type="text" id="${partyType}Npwp-${type}" placeholder="Contoh: 01.234.567.8-901.000">
-                    </div>
-                </div>
+  const step1_infoDasar = `
+    <div class="form-step active" id="form-step-1-${type}">
+      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 1: Informasi Dasar</h4>
+      ${/* PPN Checkbox dipindah ke langkah 1 */ `
+      <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
+          <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: red; cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
+        </div>
+      </div>`}
+      <div class="form-grid">
+        <div class="form-group-cluster">
+          <h4 class="form-group-cluster-title">Informasi ${partyLabel}</h4>
+          <div class="form-group filterable-dropdown">
+            <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
+            <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
+            <div class="dropdown-options" id="party-dropdown-${type}"></div>
+          </div>
+          <div class="form-group">
+            <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
+            <input type="text" id="${partyType}Address-${type}">
+          </div>
+          <div class="form-group">
+            <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
+            <input type="tel" id="${partyType}Phone-${type}" placeholder="Contoh: 0812...">
+          </div>
+          <div class="form-group npwp-group hidden" id="npwp-group-${type}">
+            <label for="${partyType}Npwp-${type}">NPWP/NIK</label>
+            <input type="text" id="${partyType}Npwp-${type}" placeholder="Contoh: 01.234.567.8-901.000">
+          </div>
+        </div>
+        <div class="form-group-cluster">
+          <h4 class="form-group-cluster-title">Informasi Transaksi</h4>
+          <div class="form-group">
+            <label for="transNo-${type}">No. Transaksi</label>
+            <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
+          </div>
+          <div class="form-group">
+            <label for="invoiceDate-${type}">Tanggal</label>
+            <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
+          </div>
+          <div class="form-group">
+            <label for="paymentMethod-${type}">Metode Pembayaran</label>
+            <select id="paymentMethod-${type}"><option value="Transfer">Transfer</option><option value="Tunai">Tunai</option><option value="Kredit">Kredit</option></select>
+          </div>
+          <div class="form-group">
+            <label for="vehicleNo-${type}">No. Kendaraan</label>
+            <input type="text" id="vehicleNo-${type}">
+          </div>
+          ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
+        </div>
+      </div>
+      <div class="step-actions">
+        <span></span> <button type="button" class="btn btn-primary" onclick="app.navigateToStep('${type}', 2)">Lanjutkan ke Tambah Barang &rarr;</button>
+      </div>
+    </div>`;
 
-                <div class="form-group-cluster">
-                    <h4 class="form-group-cluster-title">Informasi Transaksi</h4>
-                    <div class="form-group">
-                        <label for="transNo-${type}">No. Transaksi</label>
-                        <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
-                    </div>
-                    <div class="form-group">
-                        <label for="invoiceDate-${type}">Tanggal</label>
-                        <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
-                    </div>
-                    <div class="form-group">
-                        <label for="paymentMethod-${type}">Metode Pembayaran</label>
-                        <select id="paymentMethod-${type}">
-                            <option value="Transfer">Transfer</option>
-                            <option value="Tunai">Tunai</option>
-                            <option value="Kredit">Kredit</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="vehicleNo-${type}">No. Kendaraan</label>
-                        <input type="text" id="vehicleNo-${type}">
-                    </div>
-                     ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
-                </div>
-                `;
+  const step2_tambahBarang = `
+    <div class="form-step" id="form-step-2-${type}">
+      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 2: Tambah Barang</h4>
+      <div class="form-section" style="padding:15px; margin-top:0;">
+        <div class="form-grid">
+          <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;"><label for="item-selector-${type}">Cari Barang (Nama/Kode)</label><input type="text" id="item-selector-${type}" autocomplete="off" placeholder="Ketik nama atau kode barang..."><div class="dropdown-options" id="dropdown-options-${type}"></div></div>
+          <div class="form-group"><label for="itemCode-${type}">Kode Barang</label><input type="text" id="itemCode-${type}" readonly></div>
+          <div class="form-group"><label for="itemQty-${type}">Jumlah</label><input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required></div>
+          <div class="form-group"><label for="itemUnit-${type}">Satuan</label><input type="text" id="itemUnit-${type}"></div>
+          <div class="form-group"><label for="itemPrice-${type}">Harga Satuan (Rp)</label><input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required></div>
+          <div class="form-group" style="grid-column: 1 / -1; align-self: flex-end; display: flex; align-items: center; justify-content: flex-end; gap: 15px;"><button type="button" id="addItemBtn-${type}" class="btn btn-primary">Tambah</button><span style="color: red; font-weight: 600; white-space: nowrap;">TAMBAHKAN BARANG TERLEBIH DAHULU</span></div>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="data-table" id="temp-items-table-${type}">
+          <thead><tr><th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="step-actions">
+        <button type="button" class="btn btn-warning" onclick="app.navigateToStep('${type}', 1)">&larr; Kembali ke Info Dasar</button>
+        <button type="button" class="btn btn-primary" onclick="app.navigateToStep('${type}', 3)">Lanjutkan ke Ringkasan &rarr;</button>
+      </div>
+    </div>`;
 
-            const itemFields = `
-                <div class="form-section">
-                <h3 class="form-section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
-                    Tambah Barang
-                </h3>
-                <div class="form-grid">
-                    <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;">
-                    <label for="item-selector-${type}">Cari Barang (Nama/Kode)</label>
-                    <input type="text" id="item-selector-${type}" autocomplete="off" placeholder="Ketik nama atau kode barang...">
-                    <div class="dropdown-options" id="dropdown-options-${type}"></div>
-                    </div>
-                    <div class="form-group">
-                    <label for="itemCode-${type}">Kode Barang</label>
-                    <input type="text" id="itemCode-${type}" readonly>
-                    </div>
-                    <div class="form-group">
-                    <label for="itemQty-${type}">Jumlah</label>
-                    <input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required>
-                    </div>
-                    <div class="form-group">
-                    <label for="itemUnit-${type}">Satuan</label>
-                    <input type="text" id="itemUnit-${type}">
-                    </div>
-                    <div class="form-group">
-                    <label for="itemPrice-${type}">Harga Satuan (Rp)</label>
-                    <input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required>
-                    </div>
-                    <div class="form-group" style="align-self: flex-end;">
-                    <button type="button" id="addItemBtn-${type}" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
-                        Tambah
-                    </button>
-                    </div>
-                </div>
-                </div>`;
+  const step3_ringkasan = `
+    <div class="form-step" id="form-step-3-${type}">
+      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 3: Ringkasan & Simpan</h4>
+      <div class="summary-section">
+        <div class="summary-grid">
+          <label>Subtotal:</label>
+          <div><div class="total-amount-display" id="subtotal-${type}">Rp 0</div><div class="dpp-info-display" id="dpp-info-${type}"></div></div>
+          <label for="discount-${type}">Diskon (Rp):</label><input type="text" id="discount-${type}" class="rupiah-input" value="0">
+          <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label><input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
+          <label for="dp-${type}">Uang Muka / DP (Rp):</label><input type="text" id="dp-${type}" class="rupiah-input" value="0">
+          <label>PPN 11%:</label><div class="total-amount-display" id="ppn-${type}">Rp 0</div>
+          <label>Grand Total:</label><div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
+        </div>
+      </div>
+      <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
+        <label for="notes-${type}">Catatan</label>
+        <textarea id="notes-${type}" rows="3" placeholder="Tambahkan catatan untuk transaksi ini..."></textarea>
+      </div>
+      <div class="actions-group step-actions">
+        <button type="button" class="btn btn-warning" onclick="app.navigateToStep('${type}', 2)">&larr; Kembali ke Tambah Barang</button>
+        <div>
+          <button type="submit" class="btn btn-success">Simpan Transaksi</button>
+          <button type="button" class="btn btn-danger" onclick="app.resetForm('${type}')">Reset Form</button>
+        </div>
+      </div>
+    </div>`;
 
-            const tableHeaders = `<th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th>`;
+  return `<div class="form-section">
+            <h3 class="form-section-title">Form ${title}</h3>
+            <form id="${type}Form">
+              ${step1_infoDasar}
+              ${step2_tambahBarang}
+              ${step3_ringkasan}
+            </form>
+          </div>`;
+}
 
-            const summarySection = `<div class="summary-section">
-                <div class="summary-grid">
-                    <label>Subtotal:</label>
-                    <div>
-                        <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
-                        <div class="dpp-info-display" id="dpp-info-${type}"></div>
-                    </div>
+// ▼▼▼ TAMBAHKAN FUNGSI BARU INI DI DALAM CLASS ▼▼▼
+navigateToStep(type, step) {
+  // Validasi sederhana: jangan biarkan ke langkah 2 atau 3 jika item kosong di langkah 2
+  if (step > 1 && this.tempItems[type].length === 0) {
+      const partyInput = document.getElementById(`${type === 'sale' ? 'customer' : 'pemasok'}Name-${type}`);
+      if (!partyInput.value.trim()) {
+        this.showNotification("Harap isi Nama Customer/Pemasok terlebih dahulu.", false);
+        partyInput.focus();
+        return;
+      }
+  }
+  if (step === 3 && this.tempItems[type].length === 0) {
+    this.showNotification("Harap tambahkan minimal satu barang sebelum melanjutkan.", false);
+    return;
+  }
+  
+  this.formSteps[type] = step;
+  const form = document.getElementById(`${type}Form`);
+  if (!form) return;
 
-                    <label for="discount-${type}">Diskon (Rp):</label>
-                    <input type="text" id="discount-${type}" class="rupiah-input" value="0">
-
-                    <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label>
-                    <input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
-                    
-                    <label for="dp-${type}">Uang Muka / DP (Rp):</label>
-                    <input type="text" id="dp-${type}" class="rupiah-input" value="0">
-                    
-                    <label>PPN 11%:</label>
-                    <div class="total-amount-display" id="ppn-${type}">Rp 0</div>
-
-                    <label>Grand Total:</label>
-                    <div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
-                </div>
-            </div>`;
-
-            return `<div class="form-section">
-                <h3 class="form-section-title">
-                     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h360l200 200v520q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/></svg>
-                     Form ${title}
-                </h3>
-                <form id="${type}Form">
-                    <div class="form-grid">${formFields}</div>
-                    ${itemFields}
-                    <div class="table-container">
-                        <table class="data-table" id="temp-items-table-${type}">
-                            <thead><tr>${tableHeaders}</tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    ${summarySection}
-                    <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
-                        <label for="notes-${type}">Catatan</label>
-                        <textarea id="notes-${type}" rows="3" placeholder="Tambahkan catatan untuk transaksi ini..."></textarea>
-                    </div>
-                    <div class="actions-group">
-                        <button type="submit" class="btn btn-success">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Z"/></svg>
-                            Simpan Transaksi
-                        </button>
-                        <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 128.5 27.5T720-690v-110h80v280H520v-80h168q-32-54-87-87t-121-33q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
-                            Reset Form
-                        </button>
-                    </div>
-                </form>
-                </div>`;
-        }
+  form.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  const activeStep = form.querySelector(`#form-step-${step}-${type}`);
+  if (activeStep) {
+    activeStep.classList.add('active');
+  }
+}
+// ▲▲▲ TAMBAHKAN FUNGSI BARU INI DI DALAM CLASS ▲▲▲
         
         bindGlobalEvents() {
             this.cleanup();
@@ -1513,26 +1496,51 @@
 
             // Settings tab listeners
             document.getElementById("saveConfigBtn")?.addEventListener("click", () => this.saveConfig(), { signal });
-            document.getElementById("saveMasterItemsBtn")?.addEventListener("click", () => this.saveMasterItemsFromTextarea(), { signal });
-            document.getElementById("clearMasterItemsBtn")?.addEventListener("click", () => this.clearMasterItems(), { signal });
             document.getElementById("backupDataBtn")?.addEventListener("click", () => this.backupData(), { signal });
             document.getElementById("restoreDataBtn")?.addEventListener("click", () => document.getElementById("restoreFileInput")?.click(), { signal });
             document.getElementById("restoreFileInput")?.addEventListener("change", (e) => this.restoreData(e), { signal });
-            document.getElementById("exportCsvBtn")?.addEventListener("click", () => this.exportMasterItemsToCsv(), { signal });
-            document.getElementById("importCsvBtn")?.addEventListener("click", () => document.getElementById("csvFileInput")?.click(), { signal });
-            document.getElementById("csvFileInput")?.addEventListener("change", (e) => this.importMasterItemsFromCsv(e), { signal });
-            document.getElementById("add-master-item-form-element")?.addEventListener("submit", (e) => {
-                e.preventDefault();
-                this.addNewMasterItem();
-            }, { signal });
 
-            // PENAMBAHAN FITUR: NPWP Management Listeners
-            document.getElementById("add-npwp-form")?.addEventListener("submit", (e) => {
-                e.preventDefault();
-                this.addNewNpwp();
-            }, { signal });
-            document.getElementById("save-npwp-json-btn")?.addEventListener("click", () => this.saveNpwpFromJson(), { signal });
-            document.getElementById("clear-npwp-btn")?.addEventListener("click", () => this.clearAllNpwp(), { signal });
+    // Listener untuk manajemen barang yang baru
+    document.getElementById("show-add-item-form")?.addEventListener("click", () => this.showItemEditor(), { signal });
+    document.getElementById("item-editor-form")?.addEventListener("submit", (e) => this.saveMasterItemFromModal(e), { signal });
+    document.getElementById("cancel-edit-btn")?.addEventListener("click", () => this.hideItemEditor(), { signal });
+    document.getElementById("search-master-items")?.addEventListener("input", Utils.debounce(() => {
+        this.masterItemsPage = 1; // Reset ke halaman 1 setiap kali mencari
+        this.renderMasterItemsTable();
+    }, 300), { signal });
+
+    document.getElementById("prev-item-page")?.addEventListener("click", () => {
+        if (this.masterItemsPage > 1) {
+            this.masterItemsPage--;
+            this.renderMasterItemsTable();
+        }
+    }, { signal });
+
+    document.getElementById("next-item-page")?.addEventListener("click", () => {
+        this.masterItemsPage++;
+        this.renderMasterItemsTable();
+    }, { signal });
+
+            // ▼▼▼ TAMBAHKAN LISTENER BARU INI ▼▼▼
+document.getElementById("show-add-npwp-form")?.addEventListener("click", () => this.showNpwpEditor(), { signal });
+document.getElementById("npwp-editor-form")?.addEventListener("submit", (e) => this.saveNpwpFromModal(e), { signal });
+document.getElementById("cancel-npwp-edit-btn")?.addEventListener("click", () => this.hideNpwpEditor(), { signal });
+document.getElementById("search-npwp-items")?.addEventListener("input", Utils.debounce(() => {
+    this.npwpPage = 1;
+    this.renderNpwpTable();
+}, 300), { signal });
+
+document.getElementById("prev-npwp-page")?.addEventListener("click", () => {
+    if (this.npwpPage > 1) {
+        this.npwpPage--;
+        this.renderNpwpTable();
+    }
+}, { signal });
+
+document.getElementById("next-npwp-page")?.addEventListener("click", () => {
+    this.npwpPage++;
+    this.renderNpwpTable();
+}, { signal });
 
 
             const dashboardFilters = document.getElementById("dashboard-filters");
@@ -1675,116 +1683,265 @@
         // ... (rest of the class methods are mostly unchanged)
         
         async updateAllUI() {
-            try {
-                this.showLoading(true);
-                this.renderAllHistoryTables();
-                await this.renderDashboard();
-                await this.renderMasterItemsTextarea();
-                await this.renderNpwpTextarea(); // PENAMBAHAN FITUR
-                this.updateMasterItemCountDisplay();
-                this.loadConfigToForm();
-                this.renderTrashTable();
-            } catch (error) {
-                Utils.logError("UI update failed", error);
-                this.showNotification("Gagal memperbarui UI", false);
-            } finally {
-                this.showLoading(false);
-            }
-        }
+    try {
+        this.showLoading(true);
+        this.renderAllHistoryTables();
+        await this.renderDashboard();
+
+        // ▼▼▼ GANTI BARIS INI ▼▼▼
+        // await this.renderMasterItemsTextarea();
+        await this.renderMasterItemsTable(); // Menjadi ini
+        // ▲▲▲ SELESAI ▲▲▲
+
+        await this.renderNpwpTable();
+        // this.updateMasterItemCountDisplay(); // Fungsi ini sekarang dipanggil di dalam renderMasterItemsTable
+        this.loadConfigToForm();
+        this.renderTrashTable();
+    } catch (error) {
+        Utils.logError("UI update failed", error);
+        this.showNotification("Gagal memperbarui UI", false);
+    } finally {
+        this.showLoading(false);
+    }
+}
         
         // PENAMBAHAN FITUR: All new methods for NPWP management
         
         generateNpwpManagementHTML() {
-            return `<div class="form-section">
-                <h3 class="form-section-title">Manajemen Data NPWP/NIK</h3>
-                <form id="add-npwp-form">
-                    <p style="margin-bottom:15px;">Tambah data NPWP/NIK untuk customer atau pemasok. Data ini akan tersimpan dan dapat digunakan pada form transaksi.</p>
-                    <div class="form-grid" style="align-items: flex-end;">
-                        <div class="form-group">
-                            <label for="new-npwp-number">No. NPWP / NIK</label>
-                            <input type="text" id="new-npwp-number" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-npwp-name">Nama Customer / Pemasok</label>
-                            <input type="text" id="new-npwp-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-npwp-type">Jenis</label>
-                            <select id="new-npwp-type" required>
-                                <option value="customer">Customer</option>
-                                <option value="pemasok">Pemasok</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Tambah NPWP</button>
-                        </div>
-                    </div>
-                </form>
-                <hr style="margin: 25px 0;">
-                <div class="form-group">
-                    <label for="npwp-json-data">Edit Massal Data NPWP (Format JSON)</label>
-                    <textarea id="npwp-json-data" rows="10" placeholder="Data NPWP dalam format JSON akan tampil di sini..."></textarea>
+    return `<div class="form-section">
+        <h3 class="form-section-title">Manajemen Data NPWP/NIK</h3>
+
+        <div id="npwp-editor-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; display:flex; align-items:center; justify-content:center; display:none;">
+            <form id="npwp-editor-form" style="background:white; padding:25px; border-radius:10px; width:90%; max-width:800px;">
+                <h4 class="form-section-title" style="margin-top:0;">Editor Data Customer/Pemasok</h4>
+                <input type="hidden" id="edit-npwp-original-name">
+                <input type="hidden" id="edit-npwp-original-type">
+                <div class="form-grid">
+                    <div class="form-group"><label>Nama Customer/Pemasok</label><input type="text" id="edit-npwp-name" required></div>
+                    <div class="form-group"><label>Jenis</label><select id="edit-npwp-type" required><option value="customer">Customer</option><option value="pemasok">Pemasok</option></select></div>
+                    <div class="form-group"><label>NPWP/NIK</label><input type="text" id="edit-npwp-number"></div>
+                    <div class="form-group"><label>Alamat</label><input type="text" id="edit-npwp-address"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Telepon</label><input type="text" id="edit-npwp-phone"></div>
                 </div>
                 <div class="actions-group">
-                    <button type="button" id="save-npwp-json-btn" class="btn btn-primary">Simpan dari JSON</button>
-                    <button type="button" id="clear-npwp-btn" class="btn btn-danger">Hapus Semua Data NPWP</button>
+                    <button type="submit" class="btn btn-primary">Simpan Data</button>
+                    <button type="button" id="cancel-npwp-edit-btn" class="btn btn-warning">Batal</button>
                 </div>
-            </div>`;
+            </form>
+        </div>
+
+        <div class="actions-group" style="justify-content: space-between;">
+            <button id="show-add-npwp-form" class="btn btn-success">Tambah Data Baru</button>
+            <div class="form-group" style="min-width: 300px; margin-bottom:0;">
+                <input type="text" id="search-npwp-items" placeholder="Cari berdasarkan nama, NPWP, atau alamat...">
+            </div>
+        </div>
+
+        <div class="table-container" style="margin-top: 20px;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Jenis</th>
+                        <th>NPWP/NIK</th>
+                        <th>Alamat</th>
+                        <th>Telepon</th>
+                        <th class="action-cell">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="npwp-table-body"></tbody>
+            </table>
+        </div>
+        <div class="actions-group" id="npwp-items-pagination" style="justify-content: space-between; align-items: center;">
+            <p style="font-weight: bold;">Total Data: <span id="npwp-item-count">0</span></p>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn btn-primary btn-sm" id="prev-npwp-page">&laquo; Sebelumnya</button>
+                <span>Halaman <span id="current-npwp-page">1</span> dari <span id="total-npwp-pages">1</span></span>
+                <button class="btn btn-primary btn-sm" id="next-npwp-page">Berikutnya &raquo;</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ▼▼▼ TAMBAHKAN FUNGSI INI ▼▼▼
+renderNpwpTable() {
+    const tableBody = document.getElementById("npwp-table-body");
+    if (!tableBody) return;
+
+    // 1. Gabungkan data customer dan pemasok menjadi satu array
+    const allParties = [];
+    this.partyDetails.customer.forEach((details, name) => allParties.push({ type: 'customer', name, ...details }));
+    this.partyDetails.pemasok.forEach((details, name) => allParties.push({ type: 'pemasok', name, ...details }));
+    allParties.sort((a, b) => a.name.localeCompare(b.name));
+
+    // 2. Filter berdasarkan input pencarian
+    const searchInput = document.getElementById("search-npwp-items");
+    const filter = searchInput ? searchInput.value.toUpperCase() : "";
+    const filteredData = allParties.filter(p =>
+        p.name.toUpperCase().includes(filter) ||
+        (p.npwp || '').toUpperCase().includes(filter) ||
+        (p.alamat || p.address || '').toUpperCase().includes(filter)
+    );
+
+    // 3. Logika Paginasi
+    const itemsPerPage = 10;
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    this.npwpPage = Math.max(1, Math.min(this.npwpPage, totalPages));
+    const startIndex = (this.npwpPage - 1) * itemsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+    // 4. Render baris tabel
+    tableBody.innerHTML = paginatedData.map(p => `
+        <tr>
+            <td>${this.sanitizeInput(p.name)}</td>
+            <td><span class="btn btn-sm ${p.type === 'customer' ? 'btn-info' : 'btn-warning'}">${p.type}</span></td>
+            <td>${this.sanitizeInput(p.npwp || '-')}</td>
+            <td>${this.sanitizeInput(p.alamat || p.address || '-')}</td>
+            <td>${this.sanitizeInput(p.telepon || p.phone || '-')}</td>
+            <td class="action-cell">
+                <button class="btn btn-sm btn-warning" onclick="app.showNpwpEditor('${this.sanitizeInput(p.name)}', '${p.type}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="app.deleteNpwpEntry('${this.sanitizeInput(p.name)}', '${p.type}')">Hapus</button>
+            </td>
+        </tr>
+    `).join('');
+
+    // 5. Update info paginasi
+    document.getElementById('npwp-item-count').textContent = filteredData.length;
+    document.getElementById('current-npwp-page').textContent = this.npwpPage;
+    document.getElementById('total-npwp-pages').textContent = totalPages;
+    document.getElementById('prev-npwp-page').disabled = this.npwpPage === 1;
+    document.getElementById('next-npwp-page').disabled = this.npwpPage >= totalPages;
+}
+
+// ▼▼▼ TAMBAHKAN 3 FUNGSI INI ▼▼▼
+showNpwpEditor(name = null, type = 'customer') {
+    const modal = document.getElementById('npwp-editor-modal');
+    const form = document.getElementById('npwp-editor-form');
+    form.reset();
+
+    if (name) { // Mode Edit
+        const details = this.partyDetails[type]?.get(name);
+        if (details) {
+            document.getElementById('edit-npwp-original-name').value = name;
+            document.getElementById('edit-npwp-original-type').value = type;
+            document.getElementById('edit-npwp-name').value = name;
+            document.getElementById('edit-npwp-type').value = type;
+            document.getElementById('edit-npwp-number').value = details.npwp || '';
+            document.getElementById('edit-npwp-address').value = details.alamat || details.address || '';
+            document.getElementById('edit-npwp-phone').value = details.telepon || details.phone || '';
+            document.getElementById('edit-npwp-name').readOnly = true; // Kunci tidak bisa diubah
+            document.getElementById('edit-npwp-type').disabled = true;
         }
+    } else { // Mode Tambah
+        document.getElementById('edit-npwp-original-name').value = '';
+        document.getElementById('edit-npwp-original-type').value = '';
+        document.getElementById('edit-npwp-name').readOnly = false;
+        document.getElementById('edit-npwp-type').disabled = false;
+    }
+    modal.style.display = 'flex';
+    document.getElementById('edit-npwp-name').focus();
+}
+
+hideNpwpEditor() {
+    document.getElementById('npwp-editor-modal').style.display = 'none';
+}
+
+saveNpwpFromModal(event) {
+    event.preventDefault();
+    const originalName = document.getElementById('edit-npwp-original-name').value;
+    const originalType = document.getElementById('edit-npwp-original-type').value;
+
+    const name = document.getElementById('edit-npwp-name').value.trim();
+    const type = document.getElementById('edit-npwp-type').value;
+    const npwp = document.getElementById('edit-npwp-number').value.trim();
+    const address = document.getElementById('edit-npwp-address').value.trim();
+    const phone = document.getElementById('edit-npwp-phone').value.trim();
+
+    if (!name) {
+        this.showNotification("Nama harus diisi.", false);
+        return;
+    }
+
+    const newDetails = { npwp, address, phone };
+
+    if (originalName) { // Mode Edit
+        this.partyDetails[originalType].set(originalName, newDetails);
+        this.showNotification(`Data untuk '${name}' berhasil diperbarui.`);
+    } else { // Mode Tambah
+        if (this.partyDetails[type].has(name)) {
+            this.showNotification(`Nama '${name}' sudah ada untuk jenis '${type}'.`, false);
+            return;
+        }
+        this.partyDetails[type].set(name, newDetails);
+        this.showNotification(`Data '${name}' berhasil ditambahkan.`);
+    }
+
+    this.saveData();
+    this.renderNpwpTable();
+    this.hideNpwpEditor();
+}
+
+// ▼▼▼ TAMBAHKAN FUNGSI INI ▼▼▼
+deleteNpwpEntry(name, type) {
+    if (confirm(`Yakin ingin menghapus data untuk: ${name}?`)) {
+        if (this.partyDetails[type]?.has(name)) {
+            this.partyDetails[type].delete(name);
+            this.saveData();
+            this.renderNpwpTable();
+            this.showNotification(`Data '${name}' berhasil dihapus.`);
+        }
+    }
+}
         
         async renderNpwpTextarea() {
-            const textarea = document.getElementById("npwp-json-data");
-            if (!textarea) return;
+    const textarea = document.getElementById("npwp-json-data");
+    if (!textarea) return;
 
-            const combinedList = [];
-            
-            // Mengambil data customer
-            this.partyDetails.customer.forEach((details, name) => {
-                // Perbaikan: Menyertakan semua detail (alamat, phone, npwp)
-                combinedList.push({ 
-                    name, 
-                    type: 'customer', 
-                    npwp: details.npwp || '',
-                    alamat: details.address || details.alamat || '',
-                    phone: details.phone || details.telepon || ''
-                });
-            });
+    const combinedList = [];
+    
+    this.partyDetails.customer.forEach((details, name) => {
+        combinedList.push({ 
+            name, 
+            type: 'customer', 
+            npwp: details.npwp || '',
+            alamat: details.address || details.alamat || '',
+            phone: details.phone || details.telepon || ''
+        });
+    });
 
-            // Mengambil data pemasok
-            this.partyDetails.pemasok.forEach((details, name) => {
-                // Perbaikan: Menyertakan semua detail (alamat, phone, npwp)
-                combinedList.push({ 
-                    name, 
-                    type: 'pemasok',
-                    npwp: details.npwp || '',
-                    alamat: details.address || details.alamat || '',
-                    phone: details.phone || details.telepon || ''
-                });
-            });
+    this.partyDetails.pemasok.forEach((details, name) => {
+        combinedList.push({ 
+            name, 
+            type: 'pemasok',
+            npwp: details.npwp || '',
+            alamat: details.address || details.alamat || '',
+            phone: details.phone || details.telepon || ''
+        });
+    });
 
-            combinedList.sort((a, b) => a.name.localeCompare(b.name));
-            textarea.value = JSON.stringify(combinedList, null, 2);
-        }
+    combinedList.sort((a, b) => a.name.localeCompare(b.name));
+    textarea.value = JSON.stringify(combinedList, null, 2);
+}
 
-        async addNewNpwp() {
-            const number = document.getElementById('new-npwp-number').value.trim();
-            const name = document.getElementById('new-npwp-name').value.trim();
-            const type = document.getElementById('new-npwp-type').value;
+async addNewNpwp() {
+    const number = document.getElementById('new-npwp-number').value.trim();
+    const name = document.getElementById('new-npwp-name').value.trim();
+    const type = document.getElementById('new-npwp-type').value;
 
-            if (!number || !name) {
-                this.showNotification("Nomor NPWP/NIK dan Nama harus diisi.", false);
-                return;
-            }
+    if (!number || !name) {
+        this.showNotification("Nomor NPWP/NIK dan Nama harus diisi.", false);
+        return;
+    }
 
-            const existingDetails = this.partyDetails[type].get(name) || { address: '', phone: '', npwp: '' };
-            existingDetails.npwp = number;
-            
-            this.partyDetails[type].set(name, existingDetails);
-            this.saveData();
-            await this.renderNpwpTextarea();
-            this.showNotification(`Data NPWP untuk ${name} berhasil disimpan.`);
-            document.getElementById('add-npwp-form').reset();
-        }
+    const existingDetails = this.partyDetails[type].get(name) || { address: '', phone: '', npwp: '' };
+    existingDetails.npwp = number;
+    
+    this.partyDetails[type].set(name, existingDetails);
+    this.saveData();
+    await this.renderNpwpTextarea();
+    this.showNotification(`Data NPWP untuk ${name} berhasil disimpan.`);
+    document.getElementById('add-npwp-form').reset();
+}
 
         async saveNpwpFromJson() {
             const textarea = document.getElementById("npwp-json-data");
@@ -2720,12 +2877,14 @@
                     if (!draft || !draft.formData || !Array.isArray(draft.tempItems) || new Date(draft.expires) <= now) {
                         delete this.draftForms[type];
                     } else if (draft.tempItems.length > 0 || Object.values(draft.formData).some(v => !!v)) {
-                        if (confirm(`Ditemukan draft ${type} yang belum disimpan. Pulihkan?`)) {
-                            this.restoreDraft(type);
-                        } else {
-                            delete this.draftForms[type];
-                        }
-                    } else {
+  /* --- NOTIFIKASI DRAFT DINONAKTIFKAN ---
+  if (confirm(`Ditemukan draft ${type} yang belum disimpan. Pulihkan?`)) {
+    this.restoreDraft(type);
+  } else {
+    delete this.draftForms[type];
+  }
+  */
+} else {
                         delete this.draftForms[type];
                     }
                 });
@@ -3056,6 +3215,8 @@
             
             this.draftForms[type] = null;
             localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
+
+            this.navigateToStep(type, 1)
         }
 
         generateHistoryHTML(type) {
@@ -3271,6 +3432,15 @@
                     </div>`;
         }
 
+        switchToTab(tabName) {
+        const tabButton = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+        if (tabButton) {
+          tabButton.click();
+        } else {
+          console.error(`Tombol untuk tab "${tabName}" tidak ditemukan.`);
+        }
+      }
+
         generateAddItemFormHTML() {
             return `<form id="add-master-item-form-element">
                         <div class="form-grid" style="align-items: flex-end;">
@@ -3282,6 +3452,134 @@
                         </div>
                     </form>`;
         }
+
+        renderMasterItemsTable() {
+    const tableBody = document.getElementById("master-items-table-body");
+    if (!tableBody) return;
+
+    const searchInput = document.getElementById("search-master-items");
+    const filter = searchInput ? searchInput.value.toUpperCase() : "";
+    
+    const filteredItems = this.data.masterItems.filter(item =>
+        item.name.toUpperCase().includes(filter) || item.code.toUpperCase().includes(filter)
+    );
+
+    // Logika Paginasi
+    const itemsPerPage = 5;
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage) || 1;
+    this.masterItemsPage = Math.max(1, Math.min(this.masterItemsPage, totalPages));
+    
+    const startIndex = (this.masterItemsPage - 1) * itemsPerPage;
+    const paginatedItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
+
+    // Render baris tabel
+    tableBody.innerHTML = paginatedItems.map(item => `
+        <tr>
+            <td>${this.sanitizeInput(item.code)}</td>
+            <td>${this.sanitizeInput(item.name)}</td>
+            <td>${this.sanitizeInput(item.unit)}</td>
+            <td class="text-right">${this.formatCurrency(item.price || 0)}</td>
+            <td class="action-cell">
+                <button class="btn btn-sm btn-warning" onclick="app.showItemEditor('${item.code}')">Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="app.deleteMasterItem('${item.code}')">Hapus</button>
+            </td>
+        </tr>
+    `).join('');
+
+    // Update info paginasi dan tombol
+    document.getElementById('current-item-page').textContent = this.masterItemsPage;
+    document.getElementById('total-item-pages').textContent = totalPages;
+    document.getElementById('prev-item-page').disabled = this.masterItemsPage === 1;
+    document.getElementById('next-item-page').disabled = this.masterItemsPage >= totalPages;
+
+    this.updateMasterItemCountDisplay(filteredItems.length);
+}
+
+/**
+ * Menampilkan modal/pop-up untuk menambah atau mengedit barang.
+ * @param {string|null} itemCode - Kode barang yang akan diedit. Jika null, mode tambah baru.
+ */
+showItemEditor(itemCode = null) {
+    const modal = document.getElementById('item-editor-modal');
+    const form = document.getElementById('item-editor-form');
+    form.reset();
+
+    if (itemCode) { // Mode Edit
+        const item = this.data.masterItems.find(i => i.code === itemCode);
+        if (item) {
+            document.getElementById('edit-item-original-code').value = item.code;
+            document.getElementById('edit-item-code').value = item.code;
+            document.getElementById('edit-item-name').value = item.name;
+            document.getElementById('edit-item-unit').value = item.unit;
+            document.getElementById('edit-item-price').value = this.formatNumber(item.price || 0);
+        }
+    } else { // Mode Tambah Baru
+        document.getElementById('edit-item-original-code').value = '';
+    }
+    
+    modal.style.display = 'block';
+    document.getElementById('edit-item-code').focus();
+}
+
+/**
+ * Menyembunyikan modal editor barang.
+ */
+hideItemEditor() {
+    const modal = document.getElementById('item-editor-modal');
+    modal.style.display = 'none';
+}
+
+/**
+ * Menyimpan data barang dari modal (baik tambah baru maupun edit).
+ */
+saveMasterItemFromModal(event) {
+    event.preventDefault();
+    const originalCode = document.getElementById('edit-item-original-code').value.trim();
+    const code = document.getElementById('edit-item-code').value.trim();
+    const name = document.getElementById('edit-item-name').value.trim();
+    const unit = document.getElementById('edit-item-unit').value.trim();
+    const price = parseInt(document.getElementById('edit-item-price').value.replace(/[^0-9]/g, ""), 10) || 0;
+
+    if (!code || !name) {
+        this.showNotification("Kode dan Nama Barang harus diisi.", false);
+        return;
+    }
+
+    // Cek duplikasi kode, kecuali jika kodenya tidak berubah saat edit
+    if (this.data.masterItems.some(item => item.code.toUpperCase() === code.toUpperCase() && item.code !== originalCode)) {
+        this.showNotification(`Kode barang '${code}' sudah ada. Gunakan kode lain.`, false);
+        return;
+    }
+
+    if (originalCode) { // Mode Edit
+        const itemIndex = this.data.masterItems.findIndex(i => i.code === originalCode);
+        if (itemIndex > -1) {
+            this.data.masterItems[itemIndex] = { code, name, unit, price };
+            this.showNotification(`Barang '${name}' berhasil diperbarui.`);
+        }
+    } else { // Mode Tambah Baru
+        this.data.masterItems.unshift({ code, name, unit, price });
+        this.showNotification(`Barang '${name}' berhasil ditambahkan.`);
+    }
+
+    this.buildItemIndex();
+    this.saveData();
+    this.renderMasterItemsTable();
+    this.hideItemEditor();
+}
+
+/**
+ * Menghapus data master barang.
+ */
+deleteMasterItem(itemCode) {
+    if (confirm(`Yakin ingin menghapus barang dengan kode: ${itemCode}?`)) {
+        this.data.masterItems = this.data.masterItems.filter(item => item.code !== itemCode);
+        this.buildItemIndex();
+        this.saveData();
+        this.renderMasterItemsTable();
+        this.showNotification(`Barang '${itemCode}' telah dihapus.`);
+    }
+}
         
         generatePrintHTML(transaction, template) {
             let printId = transaction.id || 'N/A';
@@ -3445,7 +3743,7 @@
 
             const blankPageContent = `<div class="page" style="page-break-before: always;"></div>`;
 
-            return `${pageContent}${copyPageContent}${blankPageContent}`;
+            return `${pageContent}${copyPageContent}${copyPageContent}${blankPageContent}`;
         }
         
         async renderDashboard() {
@@ -3556,10 +3854,17 @@
             if (textarea) textarea.value = JSON.stringify(this.data.masterItems, null, 2);
         }
 
-        updateMasterItemCountDisplay() {
-            const countSpan = document.getElementById("master-item-count");
-            if (countSpan) countSpan.textContent = this.data.masterItems.length;
+        updateMasterItemCountDisplay(filteredCount = null) {
+    const countSpan = document.getElementById("master-item-count");
+    if (countSpan) {
+        const totalCount = this.data.masterItems.length;
+        if (filteredCount !== null && filteredCount !== totalCount) {
+            countSpan.textContent = `${filteredCount} dari ${totalCount}`;
+        } else {
+            countSpan.textContent = totalCount;
         }
+    }
+}
 
         loadConfigToForm() {
             const config = this.data.config;
@@ -3763,7 +4068,8 @@
             if (tab.dataset.tab === "dashboard") window.app.renderDashboard();
             if (tab.dataset.tab === "pengaturan") {
                 window.app.renderTrashTable();
-                window.app.renderNpwpTextarea();
+                window.app.renderNpwpTable();
+                
             }
           });
         });
