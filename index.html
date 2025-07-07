@@ -1,0 +1,3455 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistem Penjualan dan Pembelian dengan Ekspor PDF & Excel" />
+    <meta name="author" content="Sistem Akuntansi SGM" />
+    <title>Sistem Akuntansi SGM</title>
+    <style>
+      :root {
+        --primary: #1e3a8a; /* Biru laut */
+        --primary-dark: #172554; /* Biru lebih gelap untuk hover */
+        --secondary: #f97316; /* Oranye lembut */
+        --success: #16a34a; /* Hijau untuk sukses */
+        --warning: #d97706; /* Kuning untuk peringatan */
+        --danger: #dc2626; /* Merah untuk bahaya */
+        --info: #0284c7; /* Biru muda untuk info */
+        --dark: #1f2937; /* Abu-abu gelap untuk teks */
+        --light: #ffffff; /* Putih untuk latar belakang */
+        --shadow: 0 6px 16px rgba(0, 0, 0, 0.08); /* Bayangan lebih lembut */
+        --border: #e5e7eb; /* Abu-abu muda untuk border */
+        --text: var(--dark);
+        --background: #f9fafb; /* Latar belakang kontainer */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); /* Gradien lembut */
+        color: var(--text);
+        min-height: 100vh;
+        padding: 20px;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1440px;
+        margin: 0 auto;
+        background: var(--light);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 25px;
+        margin-bottom: 35px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header img {
+        max-height: 70px;
+        border-radius: 8px;
+      }
+
+      .header h1 {
+        color: var(--primary);
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .header .subtitle {
+        color: #6b7280;
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .nav-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-tab {
+        padding: 12px 30px;
+        background: var(--light);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        cursor: pointer;
+        font-weight: 600;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        margin-right: 6px;
+        transition: all 0.3s ease;
+        color: var(--text);
+        margin-bottom: -1px;
+      }
+
+      .nav-tab.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: inset 0 -2px 0 var(--primary-dark);
+      }
+
+      .nav-tab:hover:not(.active) {
+        background: #f3f4f6;
+        color: var(--primary);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-section {
+        background: var(--background);
+        border-radius: 10px;
+        padding: 25px;
+        margin-top: 15px;
+        margin-bottom: 25px;
+        border: 1px solid var(--border);
+        transition: box-shadow 0.3s ease;
+      }
+
+      .form-section:hover {
+        box-shadow: var(--shadow);
+      }
+
+      .form-section-title {
+        color: var(--primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--primary);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .form-group label {
+        color: var(--dark);
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: #ffffff;
+        color: var(--dark);
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1);
+      }
+
+      .form-group input[readonly] {
+        background: #f3f4f6;
+        cursor: not-allowed;
+        font-weight: 500;
+      }
+
+      .form-group input:invalid {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+      }
+
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+
+      .btn-success:hover:not(:disabled) {
+        background: #15803d;
+        transform: translateY(-1px);
+      }
+
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+
+      .btn-danger:hover:not(:disabled) {
+        background: #b91c1c;
+        transform: translateY(-1px);
+      }
+
+      .btn-warning {
+        background: var(--warning);
+        color: white;
+      }
+
+      .btn-warning:hover:not(:disabled) {
+        background: #b45309;
+        transform: translateY(-1px);
+      }
+
+      .btn-info {
+        background: var(--info);
+        color: white;
+      }
+
+      .btn-info:hover:not(:disabled) {
+        background: #0369a1;
+        transform: translateY(-1px);
+      }
+
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+
+      .actions-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 25px;
+      }
+
+      .table-container {
+        margin-top: 25px;
+        overflow-x: auto;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 12px 15px;
+        border: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .data-table thead th {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .data-table tbody tr {
+        transition: background-color 0.3s ease;
+      }
+
+      .data-table tbody tr:hover {
+        background-color: #f1f5f9;
+      }
+
+      .data-table tbody tr:nth-child(even) {
+        background-color: #f9fafb;
+      }
+
+      .data-table td.text-right,
+      .data-table th.text-right {
+        text-align: right;
+      }
+
+      .data-table .action-cell {
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .data-table .action-cell .btn {
+        margin: 3px;
+      }
+
+      .summary-section {
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .summary-grid {
+        width: 100%;
+        max-width: 550px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 15px 20px;
+        align-items: center;
+      }
+
+      .summary-grid label {
+        font-weight: 600;
+        text-align: right;
+        padding-right: 12px;
+        white-space: nowrap;
+      }
+
+      .total-amount-display {
+        font-size: 1rem;
+        font-weight: 700;
+        padding: 12px;
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        text-align: right;
+      }
+
+      .notification {
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        display: none;
+        animation: fadeIn 0.5s ease;
+        font-weight: 500;
+      }
+
+      .notification.success {
+        background-color: #dcfce7;
+        border-color: #bbf7d0;
+        color: #166534;
+      }
+
+      .notification.error {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+      }
+
+      .notification button {
+        float: right;
+        background: none;
+        border: none;
+        font-size: 1.3rem;
+        cursor: pointer;
+        line-height: 1;
+        color: inherit;
+        transition: transform 0.3s ease;
+      }
+
+      .notification button:hover {
+        transform: scale(1.2);
+      }
+
+      .filterable-dropdown {
+        position: relative;
+      }
+
+      .dropdown-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: white;
+        border: 1px solid var(--border);
+        border-top: none;
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: var(--shadow);
+        border-radius: 0 0 8px 8px;
+      }
+
+      .dropdown-option {
+        padding: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .dropdown-option:hover,
+      .dropdown-option.focused {
+        background-color: #f1f5f9;
+      }
+
+      .dropdown-option small {
+        color: #6b7280;
+        display: block;
+        font-size: 0.85rem;
+      }
+
+      .stat-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 25px;
+        margin-bottom: 25px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+      }
+
+      .stat-card-title {
+        font-size: 1rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+        font-weight: 500;
+      }
+
+      .stat-card-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        word-wrap: break-word;
+      }
+
+      .stat-card-value.profit {
+        color: var(--success);
+      }
+
+      .stat-card-value.loss {
+        color: var(--danger);
+      }
+
+      .history-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        background-color: #f3f4f6;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-spinner {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      #print-area {
+        display: none;
+      }
+
+      /* Tambahkan aturan baru ini di CSS utama (di luar @media print) */
+    body.printing > *:not(#print-area) {
+        display: none !important;
+    }
+
+    body.printing #print-area {
+        display: block !important;
+    }
+
+      @media print {
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-size: 10pt !important;
+        }
+
+        body,
+        html {
+          width: 210mm;
+          height: 100%;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        body,
+        .printable-content {
+          margin: 0;
+          padding: 0;
+          font-family: 'Arial', Helvetica, sans-serif;
+          color: #000;
+          font-size: 10pt;
+        }
+
+        /*body > *:not(#print-area) {
+          display: none !important;
+        }*/
+
+        #print-area {
+          display: block !important;
+        }
+
+        .page {
+          width: 210mm;
+          min-height: 297mm;
+          padding: 10mm !important;
+          margin: 0 auto;
+          page-break-after: always;
+          box-sizing: border-box;
+        }
+
+        .page:last-child {
+          page-break-after: avoid;
+        }
+
+        .print-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          margin-bottom: 8mm;
+          border-bottom: 2px solid #000;
+          padding-bottom: 5mm;
+          page-break-inside: avoid;
+        }
+
+        .print-header .company-info {
+          text-align: left;
+          max-width: 120mm;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .print-header .logo {
+          max-height: 40mm;
+          max-width: 50mm;
+          object-fit: contain;
+        }
+
+        .print-header h3 {
+          font-size: 14pt;
+          margin: 0;
+          color: #000;
+        }
+
+        .print-header p {
+          font-size: 9pt;
+          margin: 2px 0;
+          color: #000;
+        }
+
+        .print-section {
+          border: 1px solid #000;
+          padding: 5mm;
+          margin-top: 5mm;
+          max-width: 190mm;
+          box-sizing: border-box;
+          page-break-inside: avoid;
+        }
+
+        .print-section.kwitansi {
+          border: 1px solid #000;
+        }
+
+        .print-section h4 {
+          text-align: center;
+          margin-bottom: 5mm;
+          text-decoration: underline;
+          font-size: 12pt;
+        }
+
+        .meta-tables {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 5mm;
+          max-width: 190mm;
+        }
+
+        .meta-table {
+          width: 48%;
+          table-layout: fixed;
+          font-size: 10pt;
+        }
+
+        .meta-table td {
+          vertical-align: top;
+          padding: 1mm 2mm;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
+        }
+
+        .meta-table td:nth-child(1) {
+          width: 30mm;
+          font-weight: bold;
+        }
+
+        .meta-table td:nth-child(2) {
+          width: calc(100% - 30mm);
+        }
+
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 5mm;
+          font-size: 10pt;
+          page-break-inside: auto;
+        }
+
+        .items-table th,
+        .items-table td {
+          border: 0.1mm solid #000 !important;
+          padding: 2mm !important;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
+        }
+
+        .items-table th {
+          background-color: #eee !important;
+        }
+
+        .items-table td:nth-child(2) {
+          max-width: 80mm;
+        }
+
+        .items-table tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+
+        .items-table tbody tr:nth-child(25) ~ tr {
+          page-break-before: always;
+        }
+
+        .summary-table {
+          width: 70mm;
+          margin-left: auto;
+          margin-top: 8mm;
+          border-collapse: collapse;
+          font-size: 10pt;
+          page-break-inside: avoid;
+        }
+
+        .summary-table td {
+          padding: 2mm 3mm;
+          word-wrap: break-word;
+        }
+
+        .kwitansi-box {
+          border: 1px solid #000;
+          padding: 6mm;
+          margin: 8mm 0;
+          page-break-inside: avoid;
+          max-width: 190mm;
+        }
+
+        .kwitansi-box .meta-table {
+          border-collapse: collapse;
+          font-size: 10pt;
+        }
+
+        .kwitansi-box .meta-table td {
+          padding: 2mm 3mm;
+          vertical-align: top;
+        }
+
+        .kwitansi-box .terbilang {
+          font-style: italic;
+          font-weight: bold;
+          max-width: calc(190mm - 40mm);
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
+        }
+
+        .print-section p,
+        .print-section div:not(.print-signatures) {
+          max-width: 190mm;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+
+        .print-footer {
+          margin-top: 10mm;
+          page-break-inside: avoid;
+        }
+
+        .print-signatures {
+          display: flex;
+          justify-content: space-between;
+          text-align: center;
+          width: 100%;
+          margin-top: 20mm;
+          page-break-inside: avoid;
+        }
+
+        .print-signatures > div {
+          width: 45mm;
+          word-wrap: break-word;
+        }
+
+        .signature-space {
+          height: 30mm;
+          margin-bottom: 2mm;
+        }
+      }
+
+      @media (max-width: 992px) {
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .form-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .summary-grid {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .container {
+            padding: 15px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .header img {
+            max-height: 60px;
+        }
+
+        .nav-tabs {
+            gap: 5px;
+        }
+
+        .nav-tab {
+            width: 100%;
+            text-align: center;
+            margin-right: 0;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-tab.active {
+            box-shadow: none; /* Hilangkan shadow pada tab aktif di mobile */
+        }
+
+        .form-grid,
+        .history-filters,
+        .stat-cards {
+            grid-template-columns: 1fr; /* Ubah semua grid menjadi satu kolom */
+        }
+
+        .actions-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .actions-group .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .summary-section {
+            justify-content: center;
+        }
+        
+        .summary-grid {
+            grid-template-columns: auto 1fr;
+            width: 100%;
+        }
+
+        .summary-grid label {
+            text-align: left;
+            padding-right: 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 10px 8px;
+            font-size: 0.85rem;
+        }
+        
+        /* Penyesuaian untuk tabel agar lebih baik di mobile */
+        .table-container {
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+        }
+        
+        .data-table thead {
+            position: relative;
+        }
+        
+        .data-table .action-cell .btn {
+            margin: 2px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+        
+        /* Tombol cetak di riwayat */
+        .data-table .action-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* === PERBAIKAN UTAMA DI SINI === */
+        .print-signatures {
+            /* Biarkan flex-direction default (row) dan pastikan ada jarak */
+            justify-content: space-between; 
+        }
+
+        .print-signatures > div {
+            /* Atur lebar agar keduanya muat berdampingan */
+            width: 48%;
+            max-width: 200px; /* Batas maksimal agar tidak terlalu lebar */
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding: 5px;
+        }
+
+        .container {
+            padding: 10px;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .form-section-title {
+            font-size: 1.3rem;
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            font-size: 0.9rem;
+        }
+        
+        .summary-grid {
+            grid-template-columns: 1fr; /* Jadikan 1 kolom penuh untuk layar sangat kecil */
+            gap: 10px;
+        }
+        
+        .summary-grid label {
+            text-align: left;
+        }
+
+        .total-amount-display {
+            text-align: left;
+            padding: 10px;
+        }
+    }
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-spinner"></div>
+    </div>
+    <div class="container">
+      <div class="header">
+        <img
+          src="logo.png"
+          id="header-logo"
+          alt="Logo Perusahaan"
+          onerror="this.onerror=null; this.src='https://via.placeholder.com/150x50.png?text=Logo';"
+        />
+        <div>
+          <h1 id="header-title">Sistem Akuntansi SGM</h1>
+          <p class="subtitle" id="header-tagline">
+            Pencatatan Penjualan, Pembelian, dan Surat Jalan
+          </p>
+        </div>
+      </div>
+
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab active" data-tab="dashboard" role="tab">Dashboard</button>
+        <button class="nav-tab" data-tab="penjualan" role="tab">Penjualan</button>
+        <button class="nav-tab" data-tab="pembelian" role="tab">Pembelian</button>
+        <button class="nav-tab" data-tab="invoices" role="tab">Data Invoice</button>
+        <button class="nav-tab" data-tab="pengaturan" role="tab">Pengaturan</button>
+      </div>
+
+      <div id="notification-area" class="notification"></div>
+
+      <div id="dashboard" class="tab-content active" role="tabpanel"></div>
+      <div id="penjualan" class="tab-content" role="tabpanel"></div>
+      <div id="pembelian" class="tab-content" role="tabpanel"></div>
+      <div id="invoices" class="tab-content" role="tabpanel"></div>
+      <div id="suratJalan" class="tab-content" role="tabpanel"></div> 
+
+      <div id="pengaturan" class="tab-content" role="tabpanel">
+        <div class="form-section">
+          <h3 class="form-section-title">Pengaturan Informasi Perusahaan</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="config-namaPerusahaan">Nama Perusahaan</label
+              ><input type="text" id="config-namaPerusahaan" required />
+            </div>
+            <div class="form-group">
+              <label for="config-alamatPerusahaan">Alamat Perusahaan</label
+              ><input type="text" id="config-alamatPerusahaan" required />
+            </div>
+            <div class="form-group">
+              <label for="config-kontak">Kontak</label
+              ><input type="text" id="config-kontak" required />
+            </div>
+            <div class="form-group">
+              <label for="config-rekening">Info Rekening Bank (Umum/Non-PPN)</label
+              ><input type="text" id="config-rekening" />
+            </div>
+            <div class="form-group">
+              <label for="config-rekeningPpn">Info Rekening Bank (Khusus Invoice PPN)</label
+              ><input type="text" id="config-rekeningPpn" />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="config-logoUrl"
+                >URL Logo (Ganti dengan link logo Anda)</label
+              ><input type="url" id="config-logoUrl" />
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label for="config-tagline">Tagline/Deskripsi (untuk SJ)</label
+              ><textarea id="config-tagline" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="actions-group">
+            <button type="button" id="saveConfigBtn" class="btn btn-primary">
+              Simpan Informasi
+            </button>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Manajemen Data Barang</h3>
+          <div id="add-master-item-form"></div>
+          <hr style="margin: 20px 0" />
+          <p style="margin-bottom: 15px; font-weight: bold">
+            Status: <span id="master-item-count">0</span> barang termuat.
+          </p>
+          <div class="form-group">
+            <label for="masterItemJson"
+              >Edit Massal Data Master (Format JSON)</label
+            >
+            <textarea
+              id="masterItemJson"
+              rows="10"
+              placeholder="Tempel (paste) data JSON di sini..."
+            ></textarea>
+          </div>
+          <div class="actions-group">
+            <button
+              type="button"
+              id="saveMasterItemsBtn"
+              class="btn btn-primary"
+            >
+              Simpan dari JSON
+            </button>
+            <button type="button" id="exportCsvBtn" class="btn btn-success">
+              Export CSV
+            </button>
+            <button type="button" id="importCsvBtn" class="btn btn-warning">
+              Import CSV
+            </button>
+            <input
+              type="file"
+              id="csvFileInput"
+              style="display: none"
+              accept=".csv"
+            />
+            <button
+              type="button"
+              id="clearMasterItemsBtn"
+              class="btn btn-danger"
+            >
+              Hapus Semua Barang
+            </button>
+          </div>
+        </div>
+        <div class="form-section">
+          <h3 class="form-section-title">Backup & Restore</h3>
+          <p style="margin-bottom: 15px">
+            Simpan semua data transaksi dan data barang ke dalam satu file JSON,
+            atau pulihkan dari file cadangan.
+          </p>
+          <div class="actions-group">
+            <button type="button" id="backupDataBtn" class="btn btn-success">
+              Backup Semua Data
+            </button>
+            <button type="button" id="restoreDataBtn" class="btn btn-warning">
+              Restore Data
+            </button>
+            <input
+              type="file"
+              id="restoreFileInput"
+              style="display: none"
+              accept=".json"
+            />
+          </div>
+        </div>
+        <div id="trash-section"></div>
+      </div>
+    </div>
+
+    <div id="print-area"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+      /**
+       * Utility functions for common operations
+       */
+      const Utils = {
+        formatRupiahInput(input) {
+          let value = input.value.replace(/[^0-9]/g, "");
+          if (value === "") {
+            input.value = "";
+            return;
+          }
+          const number = parseInt(value, 10);
+          if (isNaN(number)) {
+            input.value = "";
+            return;
+          }
+          input.value = new Intl.NumberFormat("id-ID").format(number);
+        },
+        debounce(func, wait) {
+          let timeout;
+          return function (...args) {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+          };
+        },
+        validateInput: (value, type) => {
+          switch (type) {
+            case "required":
+              return !!value.trim();
+            case "number":
+              return !isNaN(value) && value >= 0;
+            case "url":
+              try {
+                new URL(value);
+                return true;
+              } catch (e) {
+                return false;
+              }
+            case "phone":
+              return /^\+?[\d\s-]{8,}$/.test(value);
+            default:
+              return true;
+          }
+        },
+        logError: (message, error) => {
+          console.error(`[SistemAkuntansi] ${message}`, error);
+        },
+      };
+
+      /**
+       * Main accounting system class
+       */
+      class SistemAkuntansi {
+        constructor() {
+          this.STORAGE_KEY = "sistemAkuntansiData_v4.9";
+          this.DRAFT_KEY = "sistemAkuntansiDraft_v4.9";
+          this.TRASH_KEY = "sistemAkuntansiTrash_v4.9";
+
+          this.data = null;
+          this.trash = [];
+          this.activeDropdown = null;
+          this.tempItems = { sale: [], purchase: [] }; // Surat jalan tidak butuh item temp
+          this.draftForms = { sale: null, purchase: null };
+          this.partyNames = {
+            customer: new Set(),
+            pemasok: new Set(),
+            recipient: new Set(),
+          };
+          this.itemIndex = new Map();
+          this.isLoading = false;
+          this.eventControllers = new Map();
+          this.notificationTimeout = null;
+        }
+
+        async init() {
+          try {
+            this.cleanup();
+            console.log("Starting init v4.9...");
+            this.showLoading(true);
+            await this.loadData();
+            this.buildDOM();
+            this.bindGlobalEvents();
+            await this.updateAllUI();
+            this.loadDrafts();
+          } catch (error) {
+            Utils.logError("Initialization failed", error);
+            this.showNotification(
+              "Gagal memuat sistem: " + error.message,
+              false
+            );
+          } finally {
+            this.showLoading(false);
+          }
+        }
+
+        showLoading(show) {
+          this.isLoading = show;
+          document.getElementById("loadingOverlay").style.display = show
+            ? "flex"
+            : "none";
+        }
+
+        cleanup() {
+          this.eventControllers.forEach((controller) => controller.abort());
+          this.eventControllers.clear();
+        }
+
+        buildDOM() {
+            this.cleanup();
+            // Generate forms for sale and purchase
+            ["sale", "purchase"].forEach((type) => {
+                const containerId = type === "sale" ? "penjualan" : "pembelian";
+                const container = document.getElementById(containerId);
+                if (container)
+                    container.innerHTML = this.generateFormHTML(type) + this.generateHistoryHTML(type);
+            });
+        
+            // Generate history tables for invoices and delivery notes
+            const invoiceContainer = document.getElementById("invoices");
+            if (invoiceContainer) invoiceContainer.innerHTML = this.generateHistoryHTML("invoice");
+        
+            // The suratJalan tab will be handled dynamically or can be a dedicated form if needed.
+            // For now, let's make it a simple placeholder or also a history view.
+            const suratJalanContainer = document.getElementById("suratJalan");
+            if (suratJalanContainer) suratJalanContainer.innerHTML = this.generateHistoryHTML("suratJalan");
+        
+            const dashboardContainer = document.getElementById("dashboard");
+            if (dashboardContainer) dashboardContainer.innerHTML = this.generateDashboardHTML();
+        
+            const addItemContainer = document.getElementById("add-master-item-form");
+            if (addItemContainer) addItemContainer.innerHTML = this.generateAddItemFormHTML();
+        
+            const pengaturanContainer = document.getElementById("pengaturan");
+            if (pengaturanContainer) {
+                let trashSection = document.getElementById("trash-section");
+                if (trashSection) {
+                    trashSection.remove();
+                }
+                trashSection = document.createElement("div");
+                trashSection.id = "trash-section";
+                pengaturanContainer.appendChild(trashSection);
+                trashSection.innerHTML = this.generateTrashHTML();
+                this.renderTrashTable();
+            }
+        }
+
+        generateFormHTML(type) {
+          const isTransaction = type === "sale" || type === "purchase";
+          if (!isTransaction) return ''; // Do not generate form for other types
+
+          const title = type === "sale" ? "Penjualan" : "Pembelian";
+          const partyLabel = type === "sale" ? "Customer" : "Pemasok";
+          const partyType = type === "sale" ? "customer" : "pemasok";
+
+          let formFields = `
+            <div class="form-group">
+              <label for="transNo-${type}">No. Transaksi</label>
+              <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
+            </div>
+            <div class="form-group">
+              <label for="invoiceDate-${type}">Tanggal</label>
+              <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
+            </div>
+            <div class="form-group filterable-dropdown">
+              <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
+              <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
+              <div class="dropdown-options" id="party-dropdown-${type}"></div>
+            </div>
+            <div class="form-group">
+              <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
+              <input type="text" id="${partyType}Address-${type}">
+            </div>
+            <div class="form-group">
+              <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
+              <input type="tel" id="${partyType}Phone-${type}">
+            </div>
+            <div class="form-group">
+              <label for="vehicleNo-${type}">No. Kendaraan</label>
+              <input type="text" id="vehicleNo-${type}">
+            </div>
+            ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
+            <div class="form-group">
+                <label for="paymentMethod-${type}">Metode Pembayaran</label>
+                <select id="paymentMethod-${type}">
+                    <option value="Transfer">Transfer</option>
+                    <option value="Tunai">Tunai</option>
+                    <option value="Kredit">Kredit</option>
+                </select>
+            </div>`;
+
+          const itemFields = `
+            <div class="form-section">
+              <h3 class="form-section-title">Tambah Barang</h3>
+              <div class="form-grid">
+                <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;">
+                  <label for="item-selector-${type}">Cari Barang (Nama/Kode)</label>
+                  <input type="text" id="item-selector-${type}" autocomplete="off">
+                  <div class="dropdown-options" id="dropdown-options-${type}"></div>
+                </div>
+                <div class="form-group">
+                  <label for="itemCode-${type}">Kode Barang</label>
+                  <input type="text" id="itemCode-${type}" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="itemQty-${type}">Jumlah</label>
+                  <input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="itemUnit-${type}">Satuan</label>
+                  <input type="text" id="itemUnit-${type}">
+                </div>
+                <div class="form-group">
+                  <label for="itemPrice-${type}">Harga Satuan (Rp)</label>
+                  <input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required>
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                  <button type="button" id="addItemBtn-${type}" class="btn btn-primary">Tambah Barang</button>
+                </div>
+              </div>
+            </div>`;
+
+          const tableHeaders = `<th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th>`;
+
+          const summarySection = `<div class="summary-section">
+              <div class="summary-grid">
+                  <label>Subtotal:</label>
+                  <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
+
+                  <label for="discount-${type}">Diskon (Rp):</label>
+                  <input type="text" id="discount-${type}" class="rupiah-input" value="0">
+
+                  <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label>
+                  <input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
+
+                  <label for="includePpn-${type}">PPN 11%:</label>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                      <input type="checkbox" id="includePpn-${type}" style="width: auto; margin-right: 5px; flex-shrink: 0;">
+                      <label for="includePpn-${type}" style="margin-bottom: 0; text-align: left; font-weight: normal; flex-grow: 1;">Sertakan</label>
+                      <div class="total-amount-display" id="ppn-${type}" style="flex-shrink: 0; text-align: right;">Rp 0</div>
+                  </div>
+
+                  <label for="dp-${type}">Uang Muka / DP (Rp):</label>
+                  <input type="text" id="dp-${type}" class="rupiah-input" value="0">
+
+                  <label>Grand Total:</label>
+                  <div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
+              </div>
+            </div>`;
+
+          return `<div class="form-section">
+              <h3 class="form-section-title">Form ${title}</h3>
+              <form id="${type}Form">
+                  <div class="form-grid">${formFields}</div>
+                  ${itemFields}
+                  <div class="table-container">
+                      <table class="data-table" id="temp-items-table-${type}">
+                          <thead><tr>${tableHeaders}</tr></thead>
+                          <tbody></tbody>
+                      </table>
+                  </div>
+                  ${summarySection}
+                  <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
+                      <label for="notes-${type}">Catatan</label>
+                      <textarea id="notes-${type}" rows="3"></textarea>
+                  </div>
+                  <div class="actions-group">
+                      <button type="submit" class="btn btn-success">Simpan Transaksi</button>
+                      <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">Reset Form</button>
+                  </div>
+              </form>
+            </div>`;
+        }
+        
+        bindGlobalEvents() {
+            this.cleanup();
+            const globalController = new AbortController();
+            this.eventControllers.set("global", globalController);
+            const { signal } = globalController;
+
+            // Listener umum untuk menutup dropdown
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".filterable-dropdown")) {
+                    this.closeAllDropdowns();
+                }
+            }, { signal });
+
+            // Listener untuk semua tombol di tab Pengaturan
+            document.getElementById("saveConfigBtn")?.addEventListener("click", () => this.saveConfig(), { signal });
+            document.getElementById("saveMasterItemsBtn")?.addEventListener("click", () => this.saveMasterItemsFromTextarea(), { signal });
+            document.getElementById("clearMasterItemsBtn")?.addEventListener("click", () => this.clearMasterItems(), { signal });
+            document.getElementById("backupDataBtn")?.addEventListener("click", () => this.backupData(), { signal });
+            document.getElementById("restoreDataBtn")?.addEventListener("click", () => document.getElementById("restoreFileInput")?.click(), { signal });
+            document.getElementById("restoreFileInput")?.addEventListener("change", (e) => this.restoreData(e), { signal });
+            document.getElementById("exportCsvBtn")?.addEventListener("click", () => this.exportMasterItemsToCsv(), { signal });
+            document.getElementById("importCsvBtn")?.addEventListener("click", () => document.getElementById("csvFileInput")?.click(), { signal });
+            document.getElementById("csvFileInput")?.addEventListener("change", (e) => this.importMasterItemsFromCsv(e), { signal });
+            document.getElementById("add-master-item-form-element")?.addEventListener("submit", (e) => {
+                e.preventDefault();
+                this.addNewMasterItem();
+            }, { signal });
+
+            // Listener untuk filter di Dashboard
+            const dashboardFilters = document.getElementById("dashboard-filters");
+            if (dashboardFilters) {
+                dashboardFilters.addEventListener("input", Utils.debounce(() => this.renderDashboard(), 300), { signal });
+            }
+
+            // Listener untuk semua form (Penjualan & Pembelian)
+            ["sale", "purchase"].forEach((type) => {
+                this.bindFormEvents(type);
+            });
+
+            // === PERBAIKAN UTAMA DI SINI ===
+            // Satu event listener untuk menangani semua tombol ekspor dan filter riwayat
+            document.querySelector('.container').addEventListener('input', (e) => {
+                if (e.target.closest('.history-filters')) {
+                    const historyFilters = e.target.closest('.history-filters');
+                    const type = historyFilters.id.replace('history-filters-', ''); // e.g., 'sale', 'invoice'
+                    const dataKey = type === 'sale' ? 'penjualan' : type === 'purchase' ? 'pembelian' : type;
+                    Utils.debounce(() => this.renderHistoryTable(dataKey, `${type}-history-table`), 300)();
+                }
+            });
+
+            document.querySelector('.container').addEventListener('click', (e) => {
+                const button = e.target.closest('button[data-key]');
+                if (!button) return;
+
+                const dataKey = button.getAttribute('data-key');
+                if (button.id.startsWith('export-excel-btn-')) {
+                    this.exportHistoryToExcel(dataKey);
+                } else if (button.id.startsWith('export-pdf-btn-')) {
+                    this.exportHistoryToPdf(dataKey);
+                }
+            });
+        }
+
+        bindFormEvents(type) {
+            const controller = new AbortController();
+            this.eventControllers.set(`form-${type}`, controller);
+            const { signal } = controller;
+
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                this.saveTransaction(type);
+            }, { signal });
+
+            form.addEventListener("input", Utils.debounce(() => this.saveDraft(type), 1000), { signal });
+            
+            const partyType = type === 'sale' ? 'customer' : 'pemasok';
+            const partyInput = form.querySelector(`#${partyType}Name-${type}`);
+            if (partyInput) {
+                partyInput.addEventListener("input", Utils.debounce(() => this.filterPartyNames(type), 300), { signal });
+                partyInput.addEventListener("focus", () => this.filterPartyNames(type, true), { signal });
+                const dropdown = form.querySelector(`#party-dropdown-${type}`);
+                if (dropdown) {
+                    dropdown.addEventListener("click", (e) => {
+                        const option = e.target.closest(".dropdown-option");
+                        if (option) {
+                            partyInput.value = option.textContent;
+                            this.closeAllDropdowns();
+                        }
+                    }, { signal });
+                }
+            }
+
+            const itemSelector = form.querySelector(`#item-selector-${type}`);
+            const dropdownOptions = form.querySelector(`#dropdown-options-${type}`);
+
+            itemSelector?.addEventListener("input", Utils.debounce(() => this.filterDropdown(type), 300), { signal });
+            itemSelector?.addEventListener("focus", () => this.filterDropdown(type, true), { signal });
+            itemSelector?.addEventListener("keydown", (e) => {
+                if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    e.preventDefault();
+                    const options = Array.from(dropdownOptions.querySelectorAll(".dropdown-option"));
+                    if (!options.length) return;
+                    const current = dropdownOptions.querySelector(".dropdown-option.focused");
+                    let index = current ? options.indexOf(current) : -1;
+                    if (e.key === "ArrowDown") {
+                        index = (index + 1) % options.length;
+                    } else if (e.key === "ArrowUp") {
+                        index = (index - 1 + options.length) % options.length;
+                    }
+                    options.forEach(o => o.classList.remove("focused"));
+                    if (index >= 0) {
+                        options[index].classList.add("focused");
+                        options[index].scrollIntoView({ block: "nearest" });
+                    }
+                } else if (e.key === "Enter" && dropdownOptions.style.display === "block") {
+                    e.preventDefault();
+                    const focused = dropdownOptions.querySelector(".dropdown-option.focused");
+                    if (focused && focused.dataset.code) {
+                        this.selectItemFromDropdown(focused.dataset.code, type);
+                    }
+                }
+            }, { signal });
+
+            dropdownOptions?.addEventListener("click", (e) => {
+                const option = e.target.closest(".dropdown-option");
+                if (option && option.dataset.code) {
+                    this.selectItemFromDropdown(option.dataset.code, type);
+                }
+            }, { signal });
+
+            form.querySelector(`#addItemBtn-${type}`)?.addEventListener("click", () => this.addItemToTempList(type), { signal });
+            form.querySelector(`#temp-items-table-${type}`)?.addEventListener("click", (e) => {
+                if (e.target.classList.contains("delete-temp-item-btn")) {
+                    this.deleteItemFromTempList(parseInt(e.target.dataset.id, 10), type);
+                }
+            }, { signal });
+
+            // Event listeners for calculation fields
+            ["itemPrice", "shippingCost", "discount", "dp"].forEach((id) => {
+                const input = form.querySelector(`#${id}-${type}`);
+                if (input) {
+                    input.addEventListener("input", (e) => {
+                      if(input.classList.contains('rupiah-input')) Utils.formatRupiahInput(e.target);
+                    });
+                    input.addEventListener("blur", () => this.calculateTotals(type));
+                }
+            });
+            form.querySelector(`#includePpn-${type}`)?.addEventListener("change", () => this.calculateTotals(type), { signal });
+        }
+
+        selectItemFromDropdown(code, type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const item = this.data.masterItems.find((i) => i.code === code);
+            if (!item) return;
+
+            form.querySelector(`#item-selector-${type}`).value = item.name;
+            form.querySelector(`#itemCode-${type}`).value = item.code;
+            form.querySelector(`#itemUnit-${type}`).value = item.unit || "";
+            form.querySelector(`#itemPrice-${type}`).value = this.formatNumber(item.price || 0);
+            form.querySelector(`#itemQty-${type}`).focus();
+            this.closeAllDropdowns();
+        }
+
+        formatCurrency(value, withSymbol = true) {
+            const number = Number(value) || 0;
+            const options = {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            };
+            if (!withSymbol) {
+                return new Intl.NumberFormat("id-ID").format(number);
+            }
+            return new Intl.NumberFormat("id-ID", options).format(number);
+        }
+
+        formatNumber(value) {
+            return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
+        }
+
+        addItemToTempList(type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const itemCode = form.querySelector(`#itemCode-${type}`).value;
+            const qty = parseFloat(form.querySelector(`#itemQty-${type}`).value) || 0;
+            const price = parseInt((form.querySelector(`#itemPrice-${type}`).value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const unit = form.querySelector(`#itemUnit-${type}`).value;
+
+            const item = this.data.masterItems.find((i) => i.code === itemCode);
+            if (!item) {
+                this.showNotification("Kode barang tidak ditemukan.", false);
+                return;
+            }
+
+            if (qty <= 0) {
+                this.showNotification("Jumlah barang harus lebih dari 0.", false);
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                code: itemCode,
+                name: item.name,
+                qty,
+                unit: unit || item.unit || "-",
+                price: price,
+                total: qty * price,
+            };
+
+            this.tempItems[type].push(newItem);
+            this.renderTempItemsTable(type);
+            form.querySelector(`#item-selector-${type}`).value = "";
+            form.querySelector(`#itemCode-${type}`).value = "";
+            form.querySelector(`#itemQty-${type}`).value = "0";
+            form.querySelector(`#itemPrice-${type}`).value = "0";
+            form.querySelector(`#itemUnit-${type}`).value = "";
+            form.querySelector(`#item-selector-${type}`).focus();
+        }
+
+        filterPartyNames(type, showAll = false) {
+            const partyType = type === "sale" ? "customer" : type === "purchase" ? "pemasok" : "recipient";
+            const input = document.getElementById(`${partyType}Name-${type}`);
+            const filter = input?.value?.toUpperCase() || "";
+            const dropdown = document.getElementById(`party-dropdown-${type}`);
+            if (!dropdown || !input) return;
+
+            this.closeAllDropdowns();
+            this.activeDropdown = dropdown;
+
+            const names = [...this.partyNames[partyType]].sort();
+            const filteredNames = showAll ? names : names.filter(name => name.toUpperCase().includes(filter));
+            
+            dropdown.innerHTML = filteredNames
+                .map(name => `<div class="dropdown-option">${name}</div>`)
+                .join("");
+            
+            dropdown.style.display = dropdown.innerHTML ? "block" : "none";
+        }
+        
+        loadData() {
+            const defaultData = {
+                penjualan: [],
+                pembelian: [],
+                invoices: [],
+                suratJalan: [],
+                masterItems: [
+    {"code": "BRG-2", "name": "ALMUNIUM", "unit": "Kg", "price": 0},
+    {"code": "BRG-3", "name": "UNP", "unit": "Kg", "price": 0},
+    {"code": "j", "name": "SCRAP", "unit": "Kg", "price": 0},
+    {"code": "BRG-5", "name": "SIKU + UNP", "unit": "Kg", "price": 0},
+    {"code": "BRG-6", "name": "ASH", "unit": "Kg", "price": 0},
+    {"code": "BRG-7", "name": "RANGKA BETON BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-8", "name": "PARALON", "unit": "Kg", "price": 0},
+    {"code": "BRG-9", "name": "PULI", "unit": "Kg", "price": 0},
+    {"code": "BRG-10", "name": "TB", "unit": "Kg", "price": 0},
+    {"code": "BRG-11", "name": "CSR", "unit": "Kg", "price": 0},
+    {"code": "BRG-12", "name": "RONGSOK KABIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-13", "name": "ACP", "unit": "Kg", "price": 0},
+    {"code": "BRG-14", "name": "TEMBAGA", "unit": "Kg", "price": 0},
+    {"code": "BRG-15", "name": "PIPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-16", "name": "WF", "unit": "Kg", "price": 0},
+    {"code": "BRG-17", "name": "BON DIMINTA", "unit": "", "price": 0},
+    {"code": "BRG-18", "name": "HBEAM + PIPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-19", "name": "KIRIM", "unit": "", "price": 0},
+    {"code": "BRG-20", "name": "PLONGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-21", "name": "PCB", "unit": "Kg", "price": 0},
+    {"code": "BRG-22", "name": "TS", "unit": "Kg", "price": 0},
+    {"code": "BRG-23", "name": "JEMBATAN WF", "unit": "Rad", "price": 0},
+    {"code": "BRG-24", "name": "STAINLESS INDIA", "unit": "Kg", "price": 0},
+    {"code": "BRG-25", "name": "STAINLESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-26", "name": "SLINDER", "unit": "Kg", "price": 0},
+    {"code": "BRG-27", "name": "DINAMO", "unit": "Kg", "price": 0},
+    {"code": "BRG-28", "name": "KANAL U", "unit": "Kg", "price": 0},
+    {"code": "BRG-29", "name": "SPEARPART ALMUNIUM", "unit": "Kg", "price": 0},
+    {"code": "BRG-30", "name": "SPEARPART PLASTIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-31", "name": "SPEARPART BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-32", "name": "CK AYAM + STEK", "unit": "Kg", "price": 0},
+    {"code": "BRG-33", "name": "BESI UNP", "unit": "Kg", "price": 0},
+    {"code": "BRG-34", "name": "VIBRATOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-36", "name": "CK AYAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-37", "name": "SIKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-38", "name": "ACCU", "unit": "Kg", "price": 0},
+    {"code": "BRG-39", "name": "MINGGUAN", "unit": "Pcs", "price": 0},
+    {"code": "BRG-40", "name": "SPEARPART", "unit": "Rad", "price": 0},
+    {"code": "BRG-41", "name": "CNP", "unit": "Kg", "price": 0},
+    {"code": "BRG-42", "name": "CINCIN BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-43", "name": "HOLLO", "unit": "Kg", "price": 0},
+    {"code": "BRG-44", "name": "TABUNG PEREON", "unit": "Kg", "price": 0},
+    {"code": "BRG-45", "name": "BESI CAMPUR", "unit": "Kg", "price": 0},
+    {"code": "BRG-46", "name": "RANGKA BETON BARU", "unit": "Kg", "price": 0},
+    {"code": "BRG-47", "name": "KENI", "unit": "Kg", "price": 0},
+    {"code": "BRG-48", "name": "SENG GALVALUME", "unit": "M", "price": 0},
+    {"code": "BRG-49", "name": "BAJA RINGAN", "unit": "Pcs", "price": 0},
+    {"code": "BRG-50", "name": "HBEAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-51", "name": "DP H BEAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-52", "name": "KALENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-53", "name": "BAJA RINGAN BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-54", "name": "TIANG VOLLY", "unit": "Kg", "price": 0},
+    {"code": "BRG-55", "name": "OKSIGEN", "unit": "Tabung", "price": 0},
+    {"code": "BRG-56", "name": "BESI BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-57", "name": "GRAM BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-58", "name": "FEE", "unit": "Kg", "price": 0},
+    {"code": "BRG-59", "name": "PLATE", "unit": "Kg", "price": 0},
+    {"code": "BRG-60", "name": "PALET PLASTIK", "unit": "Pcs", "price": 0},
+    {"code": "BRG-61", "name": "WIREMESH  BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-62", "name": "KALENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-63", "name": "Cakar Ayam Bekas", "unit": "Kg", "price": 0},
+    {"code": "BRG-64", "name": "CICALENGKA - RANCAEKEK DC", "unit": "TF", "price": 0},
+    {"code": "BRG-65", "name": "RANCAEKEK - RANCAEKEK DC", "unit": "TF", "price": 0},
+    {"code": "BRG-66", "name": "KOORDINASI", "unit": "Rad", "price": 0},
+    {"code": "BRG-67", "name": "WIREMESH", "unit": "Lembar", "price": 0},
+    {"code": "BRG-68", "name": "ALMUNIUM KALENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-69", "name": "KOMPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-70", "name": "PRINTER", "unit": "Pcs", "price": 0},
+    {"code": "BRG-71", "name": "RONGSOK MOTOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-72", "name": "TREGSTANG", "unit": "Kg", "price": 0},
+    {"code": "BRG-73", "name": "SIEBEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-74", "name": "KUNINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-75", "name": "BOLA LAHER", "unit": "Kg", "price": 0},
+    {"code": "BRG-76", "name": "LOGAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-77", "name": "SENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-78", "name": "KERAN STAINLESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-79", "name": "HIDROLIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-80", "name": "TS 2", "unit": "Kg", "price": 0},
+    {"code": "BRG-81", "name": "BC", "unit": "Kg", "price": 0},
+    {"code": "BRG-82", "name": "TB", "unit": "Kg", "price": 0},
+    {"code": "BRG-83", "name": "KN", "unit": "Kg", "price": 0},
+    {"code": "BRG-84", "name": "RADIATOR KUNINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-85", "name": "ALM KAWAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-86", "name": "SKA", "unit": "Kg", "price": 0},
+    {"code": "BRG-87", "name": "BM", "unit": "Kg", "price": 0},
+    {"code": "BRG-88", "name": "ALM PLAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-89", "name": "ALM ARO", "unit": "Kg", "price": 0},
+    {"code": "BRG-90", "name": "ALM KREY", "unit": "Kg", "price": 0},
+    {"code": "BRG-91", "name": "PLASTIK PVC", "unit": "Kg", "price": 0},
+    {"code": "BRG-92", "name": "BETON 10 MM URIL", "unit": "Btg", "price": 0},
+    {"code": "BRG-93", "name": "BETON 16 MM URIL", "unit": "Btg", "price": 0},
+    {"code": "BRG-94", "name": "KAWAT TALI BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-95", "name": "MOBIL", "unit": "Unit", "price": 0},
+    {"code": "BRG-96", "name": "PLATE POTONG", "unit": "Kg", "price": 0},
+    {"code": "BRG-97", "name": "SARINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-98", "name": "ACP", "unit": "Kg", "price": 0},
+    {"code": "BRG-99", "name": "RAK", "unit": "Kg", "price": 0},
+    {"code": "BRG-100", "name": "BAUD BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-101", "name": "SENG ROLL", "unit": "Kg", "price": 0},
+    {"code": "BRG-102", "name": "KAWAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-103", "name": "DRUM", "unit": "Pcs", "price": 0},
+    {"code": "BRG-104", "name": "LAHER", "unit": "Kg", "price": 0},
+    {"code": "BRG-105", "name": "FORKLIFT", "unit": "Kg", "price": 0},
+    {"code": "BRG-106", "name": "TOREN", "unit": "Pcs", "price": 0},
+    {"code": "BRG-107", "name": "KEREN", "unit": "Kg", "price": 0},
+    {"code": "BRG-108", "name": "KABEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-109", "name": "DRUM", "unit": "PCS", "price": 0},
+    {"code": "BRG-110", "name": "JELIGEN", "unit": "PCS", "price": 0},
+    {"code": "BRG-111", "name": "DP RANGKA", "unit": "Rad", "price": 0},
+    {"code": "BRG-112", "name": "SELANG HIDROLIK", "unit": "Pcs", "price": 0},
+    {"code": "BRG-113", "name": "KABIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-114", "name": "GRAM ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-115", "name": "SENG ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-116", "name": "WIREMESH BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-117", "name": "TONG", "unit": "Pcs", "price": 0},
+    {"code": "BRG-118", "name": "BONDEX 0,7 MM", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-119", "name": "BETON 8 MM FULL", "unit": "BATANG", "price": 0},
+    {"code": "BRG-120", "name": "BETON 6 MM FULL", "unit": "BATANG", "price": 0},
+    {"code": "BRG-121", "name": "CNP 150 X 2,3 MM X 6 M", "unit": "BATANG", "price": 0},
+    {"code": "BRG-122", "name": "CNP 75 X 1,6 MM X 6M", "unit": "BATANG", "price": 0},
+    {"code": "BRG-123", "name": "CNP BAJA RINGAN 0,75 MM", "unit": "BATANG", "price": 0},
+    {"code": "BRG-124", "name": "RENG BAJA RINGAN 0,4 MM", "unit": "BATANG", "price": 0},
+    {"code": "BRG-125", "name": "KUNINGAN TEMBAGA", "unit": "Kg", "price": 0},
+    {"code": "BRG-126", "name": "ALM ATAP", "unit": "Kg", "price": 0},
+    {"code": "BRG-127", "name": "RADIATOR ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-128", "name": "ACU", "unit": "Kg", "price": 0},
+    {"code": "BRG-129", "name": "TIMAH", "unit": "Kg", "price": 0},
+    {"code": "BRG-130", "name": "RONGSOK A", "unit": "Kg", "price": 0},
+    {"code": "BRG-131", "name": "RONGSOK B", "unit": "Kg", "price": 0},
+    {"code": "BRG-132", "name": "KAWAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-133", "name": "CINCIN BETON BARU", "unit": "Kg", "price": 0},
+    {"code": "BRG-134", "name": "BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-135", "name": "KONTAKTOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-136", "name": "DP WF", "unit": "Rad", "price": 0},
+    {"code": "BRG-137", "name": "DP Seng", "unit": "Kg", "price": 0},
+    {"code": "BRG-139", "name": "SATU SET ALAT POTONG", "unit": "Kg", "price": 0},
+    {"code": "BRG-140", "name": "Win Sling", "unit": "Pcs", "price": 0},
+    {"code": "BRG-141", "name": "BETON 13 URIL", "unit": "BATANG", "price": 0},
+    {"code": "BRG-142", "name": "NCB", "unit": "Kg", "price": 0},
+    {"code": "BRG-143", "name": "BAK PEEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-144", "name": "ALMUNIUM SIKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-145", "name": "PER", "unit": "Kg", "price": 0},
+    {"code": "BRG-146", "name": "TONG", "unit": "Pcs", "price": 0},
+    {"code": "BRG-147", "name": "SIMER SIBEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-148", "name": "TANGGA PUTAR", "unit": "Kg", "price": 0},
+    {"code": "BRG-149", "name": "KABINET", "unit": "Kg", "price": 0},
+    {"code": "BRG-150", "name": "LUBANG", "unit": "Pcs", "price": 0},
+    {"code": "BRG-151", "name": "TIANG LISTRIK 8 M", "unit": "Pcs", "price": 0},
+    {"code": "BRG-152", "name": "WF DAN HBEAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-153", "name": "BESI BETON REJECT", "unit": "Kg", "price": 0},
+    {"code": "BRG-154", "name": "HBEAM 300 PLUS BESPLAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-155", "name": "HBEAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-156", "name": "SOBLEKER", "unit": "Pcs", "price": 0},
+    {"code": "BRG-157", "name": "TABUNG KECIL", "unit": "PCS", "price": 0},
+    {"code": "BRG-158", "name": "TABUNG BESAR", "unit": "PCS", "price": 0},
+    {"code": "BRG-159", "name": "KAYU GELONDONGAN", "unit": "Rad", "price": 0},
+    {"code": "BRG-160", "name": "KAYU DAN GENTENG", "unit": "Rad", "price": 0},
+    {"code": "BRG-161", "name": "WF 300", "unit": "Kg", "price": 0},
+    {"code": "BRG-162", "name": "WF 250", "unit": "Kg", "price": 0},
+    {"code": "BRG-163", "name": "HENPALET DAN SPERPART", "unit": "Kg", "price": 0},
+    {"code": "BRG-164", "name": "PIPA BOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-165", "name": "ROLINGDOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-166", "name": "KAWAT BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-167", "name": "PAKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-168", "name": "LAHER", "unit": "Kg", "price": 0},
+    {"code": "BRG-169", "name": "BAN BEKAS", "unit": "PCS", "price": 0},
+    {"code": "BRG-170", "name": "ALM SENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-171", "name": "PLAT POTONG", "unit": "Kg", "price": 0},
+    {"code": "BRG-172", "name": "TIHANG PIPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-173", "name": "CONTAKTOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-174", "name": "FEE SENG", "unit": "M", "price": 0},
+    {"code": "BRG-175", "name": "PARALON 12''", "unit": "BATANG", "price": 0},
+    {"code": "BRG-176", "name": "GRAM KUNINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-177", "name": "CILER", "unit": "Pcs", "price": 0},
+    {"code": "BRG-178", "name": "IBEAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-179", "name": "PLAT WAJIT", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-180", "name": "ONGKOS LUBANG", "unit": "LUBANG", "price": 0},
+    {"code": "BRG-181", "name": "TANGGA", "unit": "Kg", "price": 0},
+    {"code": "BRG-182", "name": "KERAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-183", "name": "GRAM ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-184", "name": "KABEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-185", "name": "KONTAKTOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-186", "name": "MESIN PRESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-187", "name": "DRUM RONGSOK", "unit": "Kg", "price": 0},
+    {"code": "BRG-188", "name": "KAWAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-189", "name": "PAKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-190", "name": "CIN CIN BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-191", "name": "GRAM TEMBAGA", "unit": "Kg", "price": 0},
+    {"code": "BRG-192", "name": "KURSI CHITOSE", "unit": "Kg", "price": 0},
+    {"code": "BRG-193", "name": "DRUM", "unit": "PCS", "price": 0},
+    {"code": "BRG-194", "name": "BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-195", "name": "GEAR BOX DLL", "unit": "Kg", "price": 0},
+    {"code": "BRG-196", "name": "RANGKA BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-197", "name": "SEPERPART PLASTIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-198", "name": "MESIN ROTI", "unit": "Kg", "price": 0},
+    {"code": "BRG-199", "name": "PLASTIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-200", "name": "TOREN STENLIS", "unit": "Kg", "price": 0},
+    {"code": "BRG-201", "name": "RAK", "unit": "Kg", "price": 0},
+    {"code": "BRG-202", "name": "PIPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-203", "name": "PARALON 8\"", "unit": "BATANG", "price": 0},
+    {"code": "BRG-204", "name": "BAUD", "unit": "Kg", "price": 0},
+    {"code": "BRG-205", "name": "SENG", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-206", "name": "WARMES M.8", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-207", "name": "MESIN DISEL", "unit": "PCS", "price": 0},
+    {"code": "BRG-208", "name": "BONDEX 0,75 MM", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-209", "name": "DINAMO", "unit": "Kg", "price": 0},
+    {"code": "BRG-210", "name": "SEPANDEX", "unit": "M", "price": 0},
+    {"code": "BRG-211", "name": "BLEKER", "unit": "Kg", "price": 0},
+    {"code": "BRG-212", "name": "GEAR BOX DINAMO", "unit": "Kg", "price": 0},
+    {"code": "BRG-213", "name": "RONGSOK MESIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-214", "name": "MESIN BEJING", "unit": "RAD", "price": 0},
+    {"code": "BRG-215", "name": "BLOWER", "unit": "Kg", "price": 0},
+    {"code": "BRG-216", "name": "GEAR BOX", "unit": "Kg", "price": 0},
+    {"code": "BRG-217", "name": "GEAR BOX ALM DINAMO ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-218", "name": "NCB", "unit": "Kg", "price": 0},
+    {"code": "BRG-219", "name": "PINTU BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-220", "name": "PANEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-221", "name": "KAP LAMPU", "unit": "Kg", "price": 0},
+    {"code": "BRG-222", "name": "ALAT TEKNIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-223", "name": "INP & H-BEEM", "unit": "Kg", "price": 0},
+    {"code": "BRG-224", "name": "HOIS 0,5 TON", "unit": "UNIT", "price": 0},
+    {"code": "BRG-225", "name": "HOIS 1 TON", "unit": "UNIT", "price": 0},
+    {"code": "BRG-226", "name": "TROSFAL", "unit": "Kg", "price": 0},
+    {"code": "BRG-227", "name": "EMBER", "unit": "Pcs", "price": 0},
+    {"code": "BRG-228", "name": "PREON", "unit": "Kg", "price": 0},
+    {"code": "BRG-229", "name": "ONERDIL", "unit": "Kg", "price": 0},
+    {"code": "BRG-230", "name": "HBEAM DAN PIPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-231", "name": "UNP & BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-232", "name": "BESI COR", "unit": "Kg", "price": 0},
+    {"code": "BRG-233", "name": "TIHANG 8 M", "unit": "BATANG", "price": 0},
+    {"code": "BRG-234", "name": "PARALON", "unit": "Kg", "price": 0},
+    {"code": "BRG-235", "name": "WF 500", "unit": "Kg", "price": 0},
+    {"code": "BRG-236", "name": "BEARING", "unit": "Kg", "price": 0},
+    {"code": "BRG-237", "name": "BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-238", "name": "WF 200", "unit": "Kg", "price": 0},
+    {"code": "BRG-239", "name": "LADIATOR KUNINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-240", "name": "GARDAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-241", "name": "BAUD", "unit": "Kg", "price": 0},
+    {"code": "BRG-242", "name": "KARET", "unit": "Kg", "price": 0},
+    {"code": "BRG-243", "name": "KABEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-244", "name": "PARALON", "unit": "Kg", "price": 0},
+    {"code": "BRG-245", "name": "PAGER", "unit": "Kg", "price": 0},
+    {"code": "BRG-246", "name": "MESIN DOMPLENG LENGKAP", "unit": "Kg", "price": 0},
+    {"code": "BRG-247", "name": "MESIN DOMPLENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-248", "name": "TABUNG", "unit": "Kg", "price": 0},
+    {"code": "BRG-249", "name": "BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-250", "name": "SAKLAR", "unit": "Kg", "price": 0},
+    {"code": "BRG-251", "name": "SEPERPART SETENLIS", "unit": "Kg", "price": 0},
+    {"code": "BRG-252", "name": "WF 200", "unit": "Kg", "price": 0},
+    {"code": "BRG-253", "name": "SEPANDEX BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-254", "name": "CINCIN TROSFAL", "unit": "Kg", "price": 0},
+    {"code": "BRG-255", "name": "KOMPRESOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-256", "name": "SELING", "unit": "Kg", "price": 0},
+    {"code": "BRG-257", "name": "KOMPA", "unit": "Kg", "price": 0},
+    {"code": "BRG-258", "name": "TUTUP DYNAMO", "unit": "Kg", "price": 0},
+    {"code": "BRG-259", "name": "DRUM", "unit": "Kg", "price": 0},
+    {"code": "BRG-260", "name": "BESI SIKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-261", "name": "CNP 20", "unit": "Kg", "price": 0},
+    {"code": "BRG-262", "name": "KERAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-263", "name": "TAKEL", "unit": "Pcs", "price": 0},
+    {"code": "BRG-264", "name": "TRAFO", "unit": "Kg", "price": 0},
+    {"code": "BRG-265", "name": "NEVEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-266", "name": "BAUD", "unit": "Kg", "price": 0},
+    {"code": "BRG-267", "name": "WF", "unit": "Kg", "price": 0},
+    {"code": "BRG-268", "name": "BOX PLASTIK", "unit": "Pcs", "price": 0},
+    {"code": "BRG-269", "name": "ASH", "unit": "Kg", "price": 0},
+    {"code": "BRG-270", "name": "CNP 10", "unit": "Kg", "price": 0},
+    {"code": "BRG-271", "name": "CUBIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-272", "name": "RONGSOK ROLL", "unit": "Kg", "price": 0},
+    {"code": "BRG-273", "name": "PALET", "unit": "Kg", "price": 0},
+    {"code": "BRG-274", "name": "COMPUTER", "unit": "PCS", "price": 0},
+    {"code": "BRG-275", "name": "MONITOR", "unit": "PCS", "price": 0},
+    {"code": "BRG-276", "name": "PLATE ALUMUNIUM", "unit": "Kg", "price": 0},
+    {"code": "BRG-277", "name": "MESIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-278", "name": "AC", "unit": "Kg", "price": 0},
+    {"code": "BRG-279", "name": "SPARE PART STAINLESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-280", "name": "HANDKLIP", "unit": "Pcs", "price": 0},
+    {"code": "BRG-281", "name": "TROLLY", "unit": "Pcs", "price": 0},
+    {"code": "BRG-282", "name": "GEAR BOX", "unit": "Kg", "price": 0},
+    {"code": "BRG-283", "name": "MESIN GERGAJI", "unit": "Kg", "price": 0},
+    {"code": "BRG-284", "name": "WF-200", "unit": "BTG", "price": 0},
+    {"code": "BRG-285", "name": "CNP 100", "unit": "BTG", "price": 0},
+    {"code": "BRG-286", "name": "BETON 12 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-287", "name": "PAGAR BRC", "unit": "Kg", "price": 0},
+    {"code": "BRG-288", "name": "RODA", "unit": "Kg", "price": 0},
+    {"code": "BRG-289", "name": "ALAT LISTRIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-290", "name": "MESIN STENLIS", "unit": "UNIT", "price": 0},
+    {"code": "BRG-291", "name": "TALANG AIR", "unit": "Kg", "price": 0},
+    {"code": "BRG-292", "name": "ANGKUR", "unit": "PCS", "price": 0},
+    {"code": "BRG-293", "name": "BAUD", "unit": "PCS", "price": 0},
+    {"code": "BRG-294", "name": "RING", "unit": "PCS", "price": 0},
+    {"code": "BRG-295", "name": "SPAN SCROEP", "unit": "PCS", "price": 0},
+    {"code": "BRG-296", "name": "TOREN KEMPU", "unit": "PCS", "price": 0},
+    {"code": "BRG-297", "name": "KAWAT DURI", "unit": "Kg", "price": 0},
+    {"code": "BRG-298", "name": "UNP", "unit": "Kg", "price": 0},
+    {"code": "BRG-299", "name": "TIANG 9 M", "unit": "BTG", "price": 0},
+    {"code": "BRG-300", "name": "CNP", "unit": "Kg", "price": 0},
+    {"code": "BRG-301", "name": "KONTRAKTOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-302", "name": "BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-303", "name": "LADIATOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-304", "name": "RITASE CICALENGKA", "unit": "TF", "price": 0},
+    {"code": "BRG-305", "name": "RITASE RANCAEKEK", "unit": "TF", "price": 0},
+    {"code": "BRG-306", "name": "CNP 100", "unit": "BTG", "price": 0},
+    {"code": "BRG-307", "name": "MESIN", "unit": "UNIT", "price": 0},
+    {"code": "BRG-308", "name": "KOMPLAYER", "unit": "UNIT", "price": 0},
+    {"code": "BRG-309", "name": "TIHANG LISTRIK 9 M", "unit": "BTG", "price": 0},
+    {"code": "BRG-310", "name": "KABIN", "unit": "UNIT", "price": 0},
+    {"code": "BRG-311", "name": "GRAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-312", "name": "TIANG PLANG", "unit": "Pcs", "price": 0},
+    {"code": "BRG-313", "name": "HIDROLIK KECIL", "unit": "PCS", "price": 0},
+    {"code": "BRG-314", "name": "PAKU BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-315", "name": "PAKU BETON", "unit": "Kg", "price": 0},
+    {"code": "BRG-316", "name": "TIHANG TLP 7 M", "unit": "BTG", "price": 0},
+    {"code": "BRG-317", "name": "PAGAR", "unit": "RAD", "price": 0},
+    {"code": "BRG-318", "name": "ARSIP", "unit": "Kg", "price": 0},
+    {"code": "BRG-319", "name": "PAKU ROOFING", "unit": "Kg", "price": 0},
+    {"code": "BRG-320", "name": "BAJA RINGAN 0,75", "unit": "BTG", "price": 0},
+    {"code": "BRG-321", "name": "BAJA RINGAN 0,70", "unit": "BTG", "price": 0},
+    {"code": "BRG-322", "name": "SPANDECK", "unit": "M", "price": 0},
+    {"code": "BRG-323", "name": "BESI BOLA", "unit": "Kg", "price": 0},
+    {"code": "BRG-324", "name": "KANAL C", "unit": "Kg", "price": 0},
+    {"code": "BRG-325", "name": "DINAMO STATER", "unit": "PCS", "price": 0},
+    {"code": "BRG-326", "name": "LETTER C BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-327", "name": "SIKAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-328", "name": "DAUN PINTU BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-329", "name": "PARALON 2\"", "unit": "BTG", "price": 0},
+    {"code": "BRG-330", "name": "SELANG VVC", "unit": "ROLL", "price": 0},
+    {"code": "BRG-331", "name": "HIDROLIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-332", "name": "TENGKI 16 LITER", "unit": "UNIT", "price": 0},
+    {"code": "BRG-333", "name": "KARDUS", "unit": "Kg", "price": 0},
+    {"code": "BRG-334", "name": "SOLAR", "unit": "RAD", "price": 0},
+    {"code": "BRG-335", "name": "ANGKUTAN ELOD / SLUDGE", "unit": "RIT", "price": 0},
+    {"code": "BRG-336", "name": "BUBUK BESI / SKIL", "unit": "Kg", "price": 0},
+    {"code": "BRG-337", "name": "ONGKOS KERJA", "unit": "RAD", "price": 0},
+    {"code": "BRG-338", "name": "BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-339", "name": "TIHANG LISTRIK 11 M", "unit": "BTG", "price": 0},
+    {"code": "BRG-340", "name": "ROLLINGDOR", "unit": "PCS", "price": 0},
+    {"code": "BRG-341", "name": "PLATE PLENES", "unit": "Kg", "price": 0},
+    {"code": "BRG-342", "name": "BETON 19 mm", "unit": "PCS", "price": 0},
+    {"code": "BRG-343", "name": "BETON 10 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-344", "name": "KOMPRESOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-345", "name": "RONGSOK", "unit": "Kg", "price": 0},
+    {"code": "BRG-346", "name": "KAWAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-347", "name": "BAUT", "unit": "Kg", "price": 0},
+    {"code": "BRG-348", "name": "BESI BETON 10 MM FULL", "unit": "BTG", "price": 0},
+    {"code": "BRG-349", "name": "DUS", "unit": "Kg", "price": 0},
+    {"code": "BRG-350", "name": "BETON BAKAR", "unit": "Kg", "price": 0},
+    {"code": "BRG-351", "name": "LOGAM CAMPUR", "unit": "Kg", "price": 0},
+    {"code": "BRG-352", "name": "ALM ACP", "unit": "RAD", "price": 0},
+    {"code": "BRG-353", "name": "PINTU POLINGGET", "unit": "Kg", "price": 0},
+    {"code": "BRG-354", "name": "BOLA LAHER", "unit": "Kg", "price": 0},
+    {"code": "BRG-355", "name": "RENG BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-356", "name": "ATAP 0,35", "unit": "LBR", "price": 0},
+    {"code": "BRG-357", "name": "ATAP PIBER", "unit": "LBR", "price": 0},
+    {"code": "BRG-358", "name": "RUFING 5 CM", "unit": "Pcs", "price": 0},
+    {"code": "BRG-359", "name": "RUFING 3 CM", "unit": "Pcs", "price": 0},
+    {"code": "BRG-360", "name": "SENG TALANG", "unit": "M", "price": 0},
+    {"code": "BRG-361", "name": "KALENG PRES", "unit": "Kg", "price": 0},
+    {"code": "BRG-362", "name": "LPG BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-363", "name": "KARUNG GUNNY", "unit": "PCS", "price": 0},
+    {"code": "BRG-364", "name": "BAJA RINGAN BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-365", "name": "KANDANG MAGOT", "unit": "UNIT", "price": 0},
+    {"code": "BRG-366", "name": "DINDING KANDANG MAGOT", "unit": "UNIT", "price": 0},
+    {"code": "BRG-367", "name": "FIBER", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-368", "name": "TALANG PARALON", "unit": "BTG", "price": 0},
+    {"code": "BRG-369", "name": "WASTAPEL KENCING", "unit": "PCS", "price": 0},
+    {"code": "BRG-370", "name": "OPEN COKLAT", "unit": "Kg", "price": 0},
+    {"code": "BRG-371", "name": "ALDELON", "unit": "LBR", "price": 0},
+    {"code": "BRG-372", "name": "SEKIL", "unit": "Kg", "price": 0},
+    {"code": "BRG-373", "name": "DP SEWA BANGUNAN", "unit": "RAD", "price": 0},
+    {"code": "BRG-374", "name": "CAKAR  AYAM", "unit": "Kg", "price": 0},
+    {"code": "BRG-375", "name": "BESI BAHAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-376", "name": "HOICE", "unit": "Pcs", "price": 0},
+    {"code": "BRG-377", "name": "TENGKI", "unit": "Kg", "price": 0},
+    {"code": "BRG-378", "name": "RAK BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-379", "name": "PULI", "unit": "Kg", "price": 0},
+    {"code": "BRG-380", "name": "PELASTIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-381", "name": "WARMES BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-382", "name": "TIMBANGAN", "unit": "PCS", "price": 0},
+    {"code": "BRG-383", "name": "GERGAJI", "unit": "Kg", "price": 0},
+    {"code": "BRG-384", "name": "RDT", "unit": "Kg", "price": 0},
+    {"code": "BRG-385", "name": "TENGKI", "unit": "Kg", "price": 0},
+    {"code": "BRG-386", "name": "SENG BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-387", "name": "DRIL", "unit": "Kg", "price": 0},
+    {"code": "BRG-388", "name": "LEMARI KABINET", "unit": "UNIT", "price": 0},
+    {"code": "BRG-389", "name": "TANGGA", "unit": "Kg", "price": 0},
+    {"code": "BRG-390", "name": "PLATE STRIP", "unit": "Kg", "price": 0},
+    {"code": "BRG-391", "name": "SOKET", "unit": "Kg", "price": 0},
+    {"code": "BRG-392", "name": "SIWAR", "unit": "Kg", "price": 0},
+    {"code": "BRG-393", "name": "Dinabolt", "unit": "Kg", "price": 0},
+    {"code": "BRG-394", "name": "OLI BAGUS", "unit": "DRUM", "price": 0},
+    {"code": "BRG-395", "name": "ROLLING DOR", "unit": "UNIT", "price": 0},
+    {"code": "BRG-396", "name": "SENG PENDEK", "unit": "Kg", "price": 0},
+    {"code": "BRG-397", "name": "CNP BAJA RINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-398", "name": "SCRAP PLAT STRIP", "unit": "Kg", "price": 0},
+    {"code": "BRG-399", "name": "SCRAP REL", "unit": "Kg", "price": 0},
+    {"code": "BRG-400", "name": "SENG", "unit": "Kg", "price": 0},
+    {"code": "BRG-401", "name": "MAJALENGKA", "unit": "TF", "price": 0},
+    {"code": "BRG-402", "name": "RITASE MAJALENGKA", "unit": "TF", "price": 0},
+    {"code": "BRG-403", "name": "TANGKI", "unit": "UNIT", "price": 0},
+    {"code": "BRG-404", "name": "PILOW", "unit": "Kg", "price": 0},
+    {"code": "BRG-405", "name": "BETON 6 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-406", "name": "BETON 8 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-407", "name": "BETON 10 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-408", "name": "TIANG 7 M", "unit": "PCS", "price": 0},
+    {"code": "BRG-409", "name": "LAS SASIS", "unit": "RAD", "price": 0},
+    {"code": "BRG-410", "name": "JEMBATAN DRILL", "unit": "Kg", "price": 0},
+    {"code": "BRG-411", "name": "WF & HOLLOW", "unit": "Kg", "price": 0},
+    {"code": "BRG-412", "name": "RELL", "unit": "Kg", "price": 0},
+    {"code": "BRG-413", "name": "MESEN PERAHU", "unit": "UNIT", "price": 0},
+    {"code": "BRG-414", "name": "HOLLO 5 x 10", "unit": "BTG", "price": 0},
+    {"code": "BRG-415", "name": "HOLLO 4 x 6", "unit": "BTG", "price": 0},
+    {"code": "BRG-416", "name": "HOLLO 4 x 4", "unit": "BTG", "price": 0},
+    {"code": "BRG-417", "name": "HANDCLIFT 2000 KG", "unit": "UNIT", "price": 0},
+    {"code": "BRG-418", "name": "HANDCLIFT 3000 KG", "unit": "UNIT", "price": 0},
+    {"code": "BRG-419", "name": "DINAMO ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-420", "name": "GIGI", "unit": "Kg", "price": 0},
+    {"code": "BRG-421", "name": "RANTAI", "unit": "Kg", "price": 0},
+    {"code": "BRG-422", "name": "GRANIT", "unit": "M²", "price": 0},
+    {"code": "BRG-423", "name": "ASH STENLIS", "unit": "Kg", "price": 0},
+    {"code": "BRG-424", "name": "HENKLIF 2 TON", "unit": "PCS", "price": 0},
+    {"code": "BRG-425", "name": "TENGKI", "unit": "UNIT", "price": 0},
+    {"code": "BRG-426", "name": "JERIGEN", "unit": "Pcs", "price": 0},
+    {"code": "BRG-427", "name": "PAGAR BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-428", "name": "HOLLO BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-429", "name": "RANGKA BETON BARU", "unit": "Kg", "price": 0},
+    {"code": "BRG-430", "name": "BAJARINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-431", "name": "RONGSOK", "unit": "Kg", "price": 0},
+    {"code": "BRG-432", "name": "BETON 10", "unit": "Btg", "price": 0},
+    {"code": "BRG-433", "name": "BETON 8", "unit": "Kg", "price": 0},
+    {"code": "BRG-434", "name": "KERAMIK", "unit": "M", "price": 0},
+    {"code": "BRG-435", "name": "MAJALENGKA", "unit": "TF", "price": 0},
+    {"code": "BRG-436", "name": "MESIN PERAHU", "unit": "UNIT", "price": 0},
+    {"code": "BRG-437", "name": "BETON 6 MM", "unit": "BTG", "price": 0},
+    {"code": "BRG-438", "name": "STAINLESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-439", "name": "BAJARINGAN", "unit": "Kg", "price": 0},
+    {"code": "BRG-440", "name": "KRAN STAINLESS", "unit": "Kg", "price": 0},
+    {"code": "BRG-441", "name": "GEARBOX", "unit": "Kg", "price": 0},
+    {"code": "BRG-442", "name": "KRAN BESI", "unit": "Kg", "price": 0},
+    {"code": "BRG-443", "name": "SENG WUWUNG", "unit": "M", "price": 0},
+    {"code": "BRG-444", "name": "JENDELA ALMUNIUM", "unit": "PCS", "price": 0},
+    {"code": "BRG-445", "name": "BONDEX 0,70 MM", "unit": "LEMBAR", "price": 0},
+    {"code": "BRG-446", "name": "SPEARPART", "unit": "Kg", "price": 0},
+    {"code": "BRG-447", "name": "T.B.C", "unit": "Kg", "price": 0},
+    {"code": "BRG-448", "name": "RAM SIKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-449", "name": "TANGGA DAN RAK", "unit": "RAD", "price": 0},
+    {"code": "BRG-450", "name": "SENG GALVALUM DAN RENG", "unit": "M", "price": 0},
+    {"code": "BRG-451", "name": "PIPA 2,5\"", "unit": "BTG", "price": 0},
+    {"code": "BRG-452", "name": "SEPERPART BEKU", "unit": "Kg", "price": 0},
+    {"code": "BRG-453", "name": "OLI BEKAS", "unit": "DRUM", "price": 0},
+    {"code": "BRG-454", "name": "TOREN AIR 500 L", "unit": "PCS", "price": 0},
+    {"code": "BRG-455", "name": "TONG CIMOL 200 L", "unit": "PCS", "price": 0},
+    {"code": "BRG-456", "name": "ANGKUR BEKAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-457", "name": "MESIN", "unit": "Kg", "price": 0},
+    {"code": "BRG-458", "name": "DINAMO + STAINLIS + ALM", "unit": "Kg", "price": 0},
+    {"code": "BRG-459", "name": "TIHANG TAKEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-460", "name": "AYAKAN BATU ( 2 UNIT )", "unit": "RAD", "price": 0},
+    {"code": "BRG-461", "name": "TIANG LISTRIK 9 M", "unit": "PCS", "price": 0},
+    {"code": "BRG-462", "name": "SIBEL", "unit": "Kg", "price": 0},
+    {"code": "BRG-463", "name": "PARALON TALANG", "unit": "BTG", "price": 0},
+    {"code": "BRG-464", "name": "BONDEX", "unit": "LBR", "price": 0},
+    {"code": "BRG-465", "name": "WARMES M.10", "unit": "LBR", "price": 0},
+    {"code": "BRG-466", "name": "BREKER", "unit": "Kg", "price": 0},
+    {"code": "BRG-467", "name": "TIANG TELEPON 7 M", "unit": "PCS", "price": 0},
+    {"code": "BRG-468", "name": "TIANG TELEPON 9 M", "unit": "PCS", "price": 0},
+    {"code": "BRG-469", "name": "BESI BETON 8 FULL", "unit": "BTG", "price": 0},
+    {"code": "BRG-470", "name": "CATOK", "unit": "PCS", "price": 0},
+    {"code": "BRG-471", "name": "SCRAP HSS", "unit": "Kg", "price": 0},
+    {"code": "BRG-472", "name": "BATU GERINDA", "unit": "Kg", "price": 0},
+    {"code": "BRG-473", "name": "JACK HUMMER", "unit": "Kg", "price": 0},
+    {"code": "BRG-474", "name": "GEAR", "unit": "Kg", "price": 0},
+    {"code": "BRG-475", "name": "HSS", "unit": "Kg", "price": 0},
+    {"code": "BRG-476", "name": "TRAPO", "unit": "Kg", "price": 0},
+    {"code": "BRG-477", "name": "KIKIR", "unit": "Kg", "price": 0},
+    {"code": "BRG-478", "name": "HBEAM 250", "unit": "Kg", "price": 0},
+    {"code": "BRG-479", "name": "ALAT BOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-480", "name": "BESI BOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-481", "name": "KAWAT LAS", "unit": "Kg", "price": 0},
+    {"code": "BRG-482", "name": "ALAT BUBUT", "unit": "Kg", "price": 0},
+    {"code": "BRG-483", "name": "BAUD CAMPUR", "unit": "Kg", "price": 0},
+    {"code": "BRG-484", "name": "SPERPART ESKALATOR", "unit": "Kg", "price": 0},
+    {"code": "BRG-485", "name": "LAMPU NEON", "unit": "PCS", "price": 0},
+    {"code": "BRG-486", "name": "SENG GALVALUM", "unit": "M", "price": 0},
+    {"code": "BRG-487", "name": "KERAMIK LISTRIK", "unit": "Kg", "price": 0},
+    {"code": "BRG-488", "name": "MESIN KOMPESOR", "unit": "PCS", "price": 0},
+    {"code": "BRG-489", "name": "JENSET", "unit": "UNIT", "price": 0},
+    {"code": "BRG-490", "name": "ALUMUNIUM", "unit": "Kg", "price": 0},
+    {"code": "BRG-491", "name": "BAKET BEKO", "unit": "Kg", "price": 0},
+    {"code": "BRG-492", "name": "Filter Hydraulic Oil", "unit": "Pcs", "price": 0},
+    {"code": "BRG-493", "name": "Filter Solar", "unit": "Pcs", "price": 0},
+    {"code": "BRG-494", "name": "Filter Udara", "unit": "Pcs", "price": 0},
+    {"code": "BRG-495", "name": "Fan Belt", "unit": "Pcs", "price": 0},
+    {"code": "BRG-496", "name": "Cover Clutte", "unit": "Pcs", "price": 0},
+    {"code": "BRG-497", "name": "Pump Assy", "unit": "Pcs", "price": 0},
+    {"code": "BRG-498", "name": "Master Cluute", "unit": "Pcs", "price": 0},
+    {"code": "BRG-499", "name": "Minyak Rem", "unit": "Pcs", "price": 0},
+    {"code": "BRG-500", "name": "Bondex Busa", "unit": "Lembar", "price": 0},
+    {"code": "BRG-496", "name": "COUNTAINER 20 FIT", "unit": "UNIT", "price": 0},
+    {"code": "BRG-497", "name": "TIANG TLP 9 M", "unit": "BATANG", "price": 0},
+    {"code": "BRG-498", "name": "BETON 16 URIL FULL", "unit": "PCS", "price": 0},
+    {"code": "BRG-499", "name": "BETON 8 POLOS FULL", "unit": "PCS", "price": 0},
+    {"code": "BRG-450", "name": "TALANG", "unit": "Kg", "price": 0}
+],
+                config: {
+                    noPenjualan: 1,
+                    noPembelian: 1,
+                    noInvoice: 1,
+                    noSuratJalan: 1,
+                    namaPerusahaan: "PT. SUMBER GANDA MEKAR",
+                    alamatPerusahaan: "Jl. Raya Gedebage No. 95 Bandung",
+                    kontak: "CP. Irwan : 082117800626, CP. Uwem : 082318188863",
+                    rekening: "BANK BCA No. Rek. 2801011286 a.n Maman Suherman",
+                    rekeningPpn: "BANK BCA No. Rek. 2803024545 a.n PT. SUMBER GANDA MEKAR",
+                    tagline: "JUAL BELI BESI TUA/BARU - RANGKA BETON/LOGAM - TIANG LISTRIK/TELP - KONSTRUKSI BAJA DAN PAKAN TERNAK",
+                    logoUrl: "logo.png",
+                },
+                partyNames: { customer: [], pemasok: [], recipient: [] },
+            };
+
+            return new Promise((resolve, reject) => {
+                try {
+                    const dataFromStorage = localStorage.getItem(this.STORAGE_KEY);
+                    if (dataFromStorage) {
+                        const parsedData = JSON.parse(dataFromStorage);
+                        this.data = {
+                            ...defaultData,
+                            ...parsedData,
+                            config: { ...defaultData.config, ...(parsedData.config || {}) },
+                            partyNames: parsedData.partyNames || defaultData.partyNames,
+                            invoices: parsedData.invoices || [], // Ensure invoices array exists
+                        };
+                    } else {
+                        this.data = defaultData;
+                    }
+
+                    this.partyNames.customer = new Set(this.data.partyNames.customer || []);
+                    this.partyNames.pemasok = new Set(this.data.partyNames.pemasok || []);
+                    this.partyNames.recipient = new Set(this.data.partyNames.recipient || []);
+
+                    const trashData = localStorage.getItem(this.TRASH_KEY);
+                    if (trashData) {
+                        this.trash = JSON.parse(trashData);
+                        const cutoff = new Date();
+                        cutoff.setDate(cutoff.getDate() - 30);
+                        this.trash = this.trash.filter(item => new Date(item.deletedAt) >= cutoff);
+                        localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                    } else {
+                        this.trash = [];
+                    }
+
+                    this.buildItemIndex();
+                    resolve();
+                } catch (e) {
+                    this.data = defaultData;
+                    this.trash = [];
+                    this.buildItemIndex();
+                    reject(e);
+                }
+            });
+        }
+        
+        buildItemIndex() {
+            this.itemIndex.clear();
+            if (!this.data || !Array.isArray(this.data.masterItems)) return;
+            this.data.masterItems.forEach(item => {
+                if (item.code) this.itemIndex.set(item.code.toUpperCase(), item);
+                if (item.name && !this.itemIndex.has(item.name.toUpperCase())) {
+                    this.itemIndex.set(item.name.toUpperCase(), item);
+                }
+            });
+        }
+
+        async deleteTransaction(dataKey, id) {
+            if (confirm(`Apakah Anda yakin ingin menghapus transaksi ID: ${id}? Transaksi akan dipindahkan ke Trash.`)) {
+                try {
+                    this.showLoading(true);
+                    const index = this.data[dataKey].findIndex(item => item.id === id);
+                    if (index > -1) {
+                        const [transaction] = this.data[dataKey].splice(index, 1);
+                        const trashedItem = { ...transaction, dataKey, deletedAt: new Date().toISOString() };
+                        this.trash.unshift(trashedItem);
+                        
+                        localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                        this.saveData();
+                        await this.updateAllUI();
+                        
+                        this.showNotification(`Transaksi ${id} dipindahkan ke Trash. <button class="btn btn-sm btn-warning" onclick="app.restoreTransaction('${dataKey}', '${trashedItem.id}', true)">Undo</button>`);
+                    }
+                } catch (error) {
+                    Utils.logError("Transaction delete failed", error);
+                    this.showNotification("Gagal menghapus transaksi", false);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+        }
+
+        generateTrashHTML() {
+            return `<div class="form-section">
+                        <h3 class="form-section-title">Trash (Item dihapus < 30 hari)</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>Jenis</th><th>No. Transaksi</th><th>Tanggal</th><th>Nama</th><th>Dihapus Pada</th><th class="action-cell">Aksi</th></tr>
+                                </thead>
+                                <tbody id="trash-table"></tbody>
+                            </table>
+                        </div>
+                    </div>`;
+        }
+
+        renderTrashTable() {
+            const tableBody = document.getElementById("trash-table");
+            if (!tableBody) return;
+
+            tableBody.innerHTML = this.trash.map(item => {
+                const party = item.customer || item.pemasok || item.penerima || "N/A";
+                let typeName = "Unknown";
+                switch(item.dataKey){
+                    case "penjualan": typeName = "Penjualan"; break;
+                    case "pembelian": typeName = "Pembelian"; break;
+                    case "invoices": typeName = "Invoice"; break;
+                    case "suratJalan": typeName = "Surat Jalan"; break;
+                }
+
+                return `<tr>
+                            <td>${typeName}</td>
+                            <td>${item.id}</td>
+                            <td>${this.formatDate(item.tanggal)}</td>
+                            <td>${party}</td>
+                            <td>${this.formatDate(item.deletedAt)}</td>
+                            <td class="action-cell">
+                                <button class="btn btn-sm btn-success" onclick="app.restoreTransaction('${item.dataKey}', '${item.id}')">Pulihkan</button>
+                                <button class="btn btn-sm btn-danger" onclick="app.permanentlyDeleteTransaction('${item.id}')">Hapus Permanen</button>
+                            </td>
+                        </tr>`;
+            }).join('');
+        }
+
+        async restoreTransaction(dataKey, id, fromUndo = false) {
+            const index = this.trash.findIndex(t => t.id === id && t.dataKey === dataKey);
+            if (index === -1) {
+                if(fromUndo) this.showNotification("Transaksi sudah dipulihkan.", false);
+                return;
+            };
+
+            const [item] = this.trash.splice(index, 1);
+            delete item.deletedAt;
+            // The dataKey property is still needed to know where to push it back
+            const originalDataKey = item.dataKey;
+            delete item.dataKey;
+
+            this.data[originalDataKey].unshift(item);
+            this.data[originalDataKey].sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+            this.saveData();
+            await this.updateAllUI();
+            this.renderTrashTable();
+            this.showNotification(`Transaksi ${id} berhasil dipulihkan.`);
+        }
+
+        permanentlyDeleteTransaction(id) {
+            if (confirm(`Anda YAKIN ingin menghapus transaksi ${id} secara permanen? Tindakan ini tidak dapat dibatalkan.`)) {
+                this.trash = this.trash.filter(t => t.id !== id);
+                localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                this.renderTrashTable();
+                this.showNotification(`Transaksi ${id} telah dihapus permanen.`);
+            }
+        }
+        
+        filterDropdown(type, showAll = false) {
+            const input = document.getElementById(`item-selector-${type}`);
+            const filter = input?.value?.toUpperCase() || "";
+            const dropdown = document.getElementById(`dropdown-options-${type}`);
+            if (!dropdown) return;
+
+            this.closeAllDropdowns();
+            this.activeDropdown = dropdown;
+            
+            const uniqueItems = new Map();
+            if(this.itemIndex.has(filter)) {
+                const item = this.itemIndex.get(filter);
+                uniqueItems.set(item.code, item);
+            }
+
+            this.data.masterItems.forEach(item => {
+                if (showAll || filter === "" || item.name.toUpperCase().includes(filter) || item.code.toUpperCase().includes(filter)) {
+                    uniqueItems.set(item.code, item);
+                }
+            });
+
+            const sortedItems = [...uniqueItems.values()].sort((a, b) => a.name.localeCompare(b.name));
+            
+            dropdown.innerHTML = sortedItems.map(item => 
+                `<div class="dropdown-option" data-code="${item.code}">${item.name} <small>(${item.code})</small></div>`
+            ).join('');
+            
+            dropdown.style.display = dropdown.innerHTML ? "block" : "none";
+        }
+
+        saveData() {
+            try {
+                this.data.partyNames.customer = [...this.partyNames.customer].sort();
+                this.data.partyNames.pemasok = [...this.partyNames.pemasok].sort();
+                this.data.partyNames.recipient = [...this.partyNames.recipient].sort();
+                console.log('Saving data to localStorage:', this.data); // Debugging
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+            } catch (error) {
+                Utils.logError("Failed to save data", error);
+                this.showNotification("Gagal menyimpan data ke storage", false);
+            }
+        }
+
+        closeAllDropdowns() {
+            document.querySelectorAll(".dropdown-options").forEach((d) => (d.style.display = "none"));
+            if (this.activeDropdown) {
+                this.activeDropdown = null;
+            }
+        }
+
+        saveDraft(type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const draftData = {};
+            form.querySelectorAll("input, select, textarea").forEach((input) => {
+                if (input.id) {
+                    draftData[input.id] = input.type === "checkbox" ? input.checked : input.value;
+                }
+            });
+
+            const draft = {
+                formData: draftData,
+                tempItems: this.tempItems[type],
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            };
+
+            this.draftForms[type] = draft;
+            localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
+        }
+
+        loadDrafts() {
+            try {
+                const draftData = localStorage.getItem(this.DRAFT_KEY);
+                if (!draftData) return;
+                
+                this.draftForms = JSON.parse(draftData);
+                const now = new Date();
+
+                Object.keys(this.draftForms).forEach((type) => {
+                    const draft = this.draftForms[type];
+                    if (!draft || !draft.formData || !Array.isArray(draft.tempItems) || new Date(draft.expires) <= now) {
+                        delete this.draftForms[type];
+                    } else if (draft.tempItems.length > 0 || Object.values(draft.formData).some(v => !!v)) {
+                        if (confirm(`Ditemukan draft ${type} yang belum disimpan. Pulihkan?`)) {
+                            this.restoreDraft(type);
+                        } else {
+                            delete this.draftForms[type];
+                        }
+                    } else {
+                        delete this.draftForms[type];
+                    }
+                });
+                localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
+            } catch (error) {
+                Utils.logError("Failed to load drafts", error);
+                this.showNotification("Gagal memuat draft", false);
+            }
+        }
+
+        restoreDraft(type) {
+            const draft = this.draftForms[type];
+            if (!draft) return;
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            Object.entries(draft.formData).forEach(([id, value]) => {
+                const input = document.getElementById(id);
+                if (input) {
+                    if (input.type === "checkbox") input.checked = value;
+                    else input.value = value;
+                }
+            });
+            
+            this.tempItems[type] = Array.isArray(draft.tempItems) ? draft.tempItems.filter(item => item && item.id && item.code && item.name) : [];
+            this.renderTempItemsTable(type);
+        }
+        
+        async updateAllUI() {
+            try {
+                this.showLoading(true);
+                this.renderAllHistoryTables();
+                await this.renderDashboard();
+                await this.renderMasterItemsTextarea();
+                this.updateMasterItemCountDisplay();
+                this.loadConfigToForm();
+                this.renderTrashTable();
+            } catch (error) {
+                Utils.logError("UI update failed", error);
+                this.showNotification("Gagal memperbarui UI", false);
+            } finally {
+                this.showLoading(false);
+            }
+        }
+
+        _getFilteredHistoryData(dataKey) {
+            const type = dataKey === "penjualan" ? "sale" : dataKey === "pembelian" ? "purchase" : dataKey === "suratJalan" ? "suratJalan" : "invoice";
+            const filters = document.getElementById(`history-filters-${type}`);
+            const searchQuery = filters ? (filters.querySelector(".search-query")?.value || "").toUpperCase() : "";
+            const startDate = filters ? filters.querySelector(".start-date")?.value : "";
+            const endDate = filters ? filters.querySelector(".end-date")?.value : "";
+
+            const filteredData = (this.data[dataKey] || []).filter(item => {
+                const party = (item.customer || item.pemasok || item.penerima || "").toUpperCase();
+                const idMatch = item.id.toUpperCase().includes(searchQuery);
+                const partyMatch = party.includes(searchQuery);
+                const dateMatch = (!startDate || item.tanggal >= startDate) && (!endDate || item.tanggal <= endDate);
+                return (idMatch || partyMatch) && dateMatch;
+            });
+            return filteredData;
+        }
+
+        renderAllHistoryTables() {
+            this.renderHistoryTable("penjualan", "sale-history-table");
+            this.renderHistoryTable("pembelian", "purchase-history-table");
+            this.renderHistoryTable("invoices", "invoice-history-table");
+            this.renderHistoryTable("suratJalan", "suratJalan-history-table");
+        }
+
+        renderHistoryTable(dataKey, tableId, page = 1) {
+            const tableBody = document.getElementById(tableId);
+            if (!tableBody) return;
+            
+            const type = dataKey === "penjualan" ? "sale" : dataKey === "pembelian" ? "purchase" : dataKey === "suratJalan" ? "suratJalan" : "invoice";
+            const itemsPerPage = 25;
+
+            const filteredData = this._getFilteredHistoryData(dataKey);
+
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            page = Math.min(Math.max(1, page), totalPages || 1);
+            const startIndex = (page - 1) * itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+            tableBody.innerHTML = paginatedData.map(item => {
+                const party = item.customer || item.pemasok || item.penerima || "N/A";
+                const isTransaction = dataKey !== "suratJalan";
+                
+                let printButtons = '';
+                if (dataKey === 'invoices') {
+                    printButtons = `
+                            <button class="btn btn-sm btn-info" onclick="app.printTransaction('${dataKey}', '${item.id}', 'invoice')">Invoice</button>
+                            <button class="btn btn-sm btn-primary" onclick="app.printTransaction('${dataKey}', '${item.id}', 'surat_jalan')">Surat Jalan</button>
+                            <button class="btn btn-sm btn-warning" onclick="app.printTransaction('${dataKey}', '${item.id}', 'kwitansi')">Kwitansi</button>`;
+                } else if (dataKey === 'penjualan' || dataKey === 'pembelian') {
+                    printButtons = `
+                            <button class="btn btn-sm btn-info" onclick="app.printTransaction('${dataKey}', '${item.id}', 'faktur')">Faktur</button>
+                            <button class="btn btn-sm btn-primary" onclick="app.printTransaction('${dataKey}', '${item.id}', 'surat_jalan')">Surat Jalan</button>
+                            <button class="btn btn-sm btn-warning" onclick="app.printTransaction('${dataKey}', '${item.id}', 'kwitansi')">Kwitansi</button>`;
+                } else if (dataKey === 'suratJalan') {
+                     printButtons = `<button class="btn btn-sm btn-success" onclick="app.printTransaction('${dataKey}', '${item.id}', 'surat_jalan')">Cetak</button>`;
+                }
+
+                return `<tr>
+                            <td>${item.id}</td>
+                            <td>${this.formatDate(item.tanggal)}</td>
+                            <td>${party}<br><small>${item.telepon || ""}</small></td>
+                            ${isTransaction ? `<td class="text-right">${this.formatCurrency(item.grandTotal)}</td>` : `<td>${item.noKendaraan || ""}</td>`}
+                            <td class="action-cell">
+                                ${printButtons}
+                                <button class="btn btn-sm btn-danger" onclick="app.deleteTransaction('${dataKey}', '${item.id}')">Hapus</button>
+                            </td>
+                        </tr>`;
+            }).join('');
+            
+            const paginationContainer = document.getElementById(`pagination-${type}`);
+            if (paginationContainer) {
+                paginationContainer.querySelector(`#page-info-${type}`).textContent = `Halaman ${page} dari ${totalPages}`;
+                const prevButton = paginationContainer.querySelector(`#prev-${type}`);
+                const nextButton = paginationContainer.querySelector(`#next-${type}`);
+                prevButton.disabled = page === 1;
+                nextButton.disabled = page >= totalPages;
+                prevButton.onclick = () => this.renderHistoryTable(dataKey, tableId, page - 1);
+                nextButton.onclick = () => this.renderHistoryTable(dataKey, tableId, page + 1);
+            }
+        }
+
+        renderTempItemsTable(type) {
+            const tableBody = document.querySelector(`#temp-items-table-${type} tbody`);
+            if (!tableBody) return;
+            const list = this.tempItems[type];
+            
+            tableBody.innerHTML = list.map((item, index) => {
+                return `<tr>
+                            <td>${index + 1}</td>
+                            <td>${item.code}</td>
+                            <td>${item.name}</td>
+                            <td class="text-right">${this.formatNumber(item.qty)}</td>
+                            <td>${item.unit}</td>
+                            <td class="text-right">${this.formatCurrency(item.price)}</td>
+                            <td class="text-right">${this.formatCurrency(item.total)}</td>
+                            <td class="action-cell"><button type="button" class="btn btn-sm btn-danger delete-temp-item-btn" data-id="${item.id}">X</button></td>
+                        </tr>`;
+            }).join('');
+
+            this.calculateTotals(type);
+            this.saveDraft(type);
+        }
+
+        showNotification(message, isSuccess = true) {
+            const notifArea = document.getElementById("notification-area");
+            clearTimeout(this.notificationTimeout);
+
+            notifArea.innerHTML = `${message} <button onclick="this.parentElement.style.display='none';">&times;</button>`;
+            notifArea.className = `notification ${isSuccess ? "success" : "error"}`;
+            notifArea.style.display = "block";
+            window.scrollTo(0, 0);
+
+            notifArea.querySelectorAll("button[onclick]").forEach(button => {
+                const func = button.getAttribute('onclick');
+                button.onclick = () => {
+                    try { eval(func); } catch (e) { console.error("Error in notification button", e); }
+                };
+            });
+            
+            this.notificationTimeout = setTimeout(() => {
+                notifArea.style.display = "none";
+            }, 8000);
+        }
+
+        sanitizeInput(value) {
+            if (typeof value !== 'string') return value;
+            const div = document.createElement("div");
+            div.textContent = value;
+            return div.innerHTML;
+        }
+
+        calculateTotals(type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return { subtotal: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
+
+            const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
+            const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
+            const ppn = includePpn ? Math.round((subtotal - discount) * 0.11) : 0;
+            const grandTotal = subtotal - discount + shippingCost + ppn - dp;
+
+            form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
+            form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
+            form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
+
+            return { subtotal, ppn, discount, shippingCost, dp, grandTotal };
+        }
+
+        generateId(type, transType = null) {
+            let num, prefix, configKey;
+            const date = new Date();
+            const year = date.getFullYear().toString().slice(-2);
+            const month = (date.getMonth() + 1).toString().padStart(2, "0");
+
+            switch (type) {
+                case "sale":
+                    num = this.data.config.noPenjualan;
+                    prefix = "SGM.PJ";
+                    configKey = "noPenjualan";
+                    break;
+                case "purchase":
+                    num = this.data.config.noPembelian;
+                    prefix = "SGM.PB";
+                    configKey = "noPembelian";
+                    break;
+                case "invoice":
+                    num = this.data.config.noInvoice;
+                    prefix = transType === "sale" ? "SGM.PJF" : "SGM.PBF";
+                    configKey = "noInvoice";
+                    break;
+                case "suratJalan":
+                     num = this.data.config.noSuratJalan;
+                     prefix = "SGM.SJ";
+                     configKey = "noSuratJalan";
+                     break;
+                default:
+                    return "";
+            }
+
+            const id = `${String(num).padStart(3, "0")}.${prefix}.${year}${month}`;
+            const dataKey = type === "sale" ? "penjualan" : type === "purchase" ? "pembelian" : type;
+
+            if (this.data[dataKey] && this.data[dataKey].some(t => t.id === id)) {
+                this.data.config[configKey]++;
+                return this.generateId(type, transType);
+            }
+            return id;
+        }
+
+        async saveTransaction(type) {
+    try {
+        this.showLoading(true);
+        const form = document.getElementById(`${type}Form`);
+        const tempItems = this.tempItems[type];
+        if (tempItems.length === 0) throw new Error("Tambahkan minimal satu barang.");
+        for (const field of form.querySelectorAll("[required]")) {
+            const label = field.labels?.[0]?.textContent || field.name;
+            if (!Utils.validateInput(field.value, "required")) {
+                field.focus();
+                throw new Error(`Field '${label}' harus diisi.`);
+            }
+        }
+        const partyType = type === "sale" ? "customer" : "pemasok";
+        const partyName = this.sanitizeInput(form.querySelector(`#${partyType}Name-${type}`).value.trim());
+        if (partyName) this.partyNames[partyType].add(partyName);
+        const isTransaction = type === "sale" || type === "purchase";
+        const includePpn = isTransaction && form.querySelector(`#includePpn-${type}`)?.checked;
+        const dataKey = includePpn ? "invoices" : (type === "sale" ? "penjualan" : "pembelian");
+        const idType = includePpn ? "invoice" : type;
+        console.log(`Saving transaction to ${dataKey}, type: ${type}, includePpn: ${includePpn}`); // Debugging
+
+                const newId = this.generateId(idType, includePpn ? type : null);
+                const totals = this.calculateTotals(type);
+
+                const newTrans = {
+                    id: newId,
+                    tanggal: form.querySelector(`#invoiceDate-${type}`).value,
+                    notes: this.sanitizeInput(form.querySelector(`#notes-${type}`).value),
+                    items: [...tempItems],
+                    ...totals,
+                    [partyType]: partyName,
+                    alamat: this.sanitizeInput(form.querySelector(`#${partyType}Address-${type}`).value),
+                    telepon: this.sanitizeInput(form.querySelector(`#${partyType}Phone-${type}`).value),
+                    noKendaraan: this.sanitizeInput(form.querySelector(`#vehicleNo-${type}`)?.value),
+                    metodePembayaran: form.querySelector(`#paymentMethod-${type}`).value,
+                    transType: type, // Store original type (sale/purchase) for invoices
+                };
+                
+                if (type === "sale") {
+                    newTrans.ref = this.sanitizeInput(form.querySelector(`#ref-${type}`).value);
+                }
+
+                // Increment the correct counter
+                if (includePpn) {
+                    this.data.config.noInvoice++;
+                } else if (type === "sale") {
+                    this.data.config.noPenjualan++;
+                } else if (type === "purchase") {
+                    this.data.config.noPembelian++;
+                }
+
+                this.data[dataKey].unshift(newTrans);
+                this.saveData();
+                this.resetForm(type);
+                await this.updateAllUI();
+                this.showNotification(`Transaksi ${newTrans.id} berhasil disimpan di ${dataKey}.`);
+            } catch (error) {
+        Utils.logError("Transaction save failed", error);
+        this.showNotification(`Gagal: ${error.message}`, false);
+    } finally {
+        this.showLoading(false);
+    }
+        }
+
+        resetForm(type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+            form.reset();
+            this.tempItems[type] = [];
+            this.renderTempItemsTable(type);
+            form.querySelector(`#invoiceDate-${type}`).value = new Date().toISOString().slice(0, 10);
+            form.querySelector(`#transNo-${type}`).value = this.generateId(type);
+            this.draftForms[type] = null;
+            localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
+        }
+
+        generateHistoryHTML(type) {
+            const isInvoice = type === 'invoice';
+            const isSuratJalan = type === 'suratJalan';
+            let title, partyHeader, dataKey;
+        
+            switch (type) {
+                case 'sale':
+                    title = 'Penjualan (Tanpa PPN)';
+                    partyHeader = 'Customer';
+                    dataKey = 'penjualan';
+                    break;
+                case 'purchase':
+                    title = 'Pembelian (Tanpa PPN)';
+                    partyHeader = 'Pemasok';
+                    dataKey = 'pembelian';
+                    break;
+                case 'invoice':
+                    title = 'Invoice (Dengan PPN)';
+                    partyHeader = 'Customer/Pemasok';
+                    dataKey = 'invoices';
+                    break;
+                case 'suratJalan':
+                    title = 'Surat Jalan';
+                    partyHeader = 'Penerima';
+                    dataKey = 'suratJalan';
+                    break;
+                default:
+                    return '';
+            }
+        
+            const headers = `<th>No. Transaksi</th><th>Tanggal</th><th>${partyHeader} & Kontak</th>${!isSuratJalan ? '<th class="text-right">Total</th>' : '<th>No. Kendaraan</th>'}<th class="action-cell">Aksi</th>`;
+        
+            return `<div class="form-section" style="margin-top: 40px;">
+                <h3 class="form-section-title">Riwayat ${title}</h3>
+                <div class="history-filters" id="history-filters-${type}">
+                    <div class="form-group"><label>Cari (ID, Nama)</label><input type="text" class="search-query" placeholder="Ketik untuk mencari..."></div>
+                    <div class="form-group"><label>Dari Tanggal</label><input type="date" class="start-date"></div>
+                    <div class="form-group"><label>Sampai Tanggal</label><input type="date" class="end-date"></div>
+                </div>
+                <div class="actions-group" style="margin-bottom: 10px; justify-content: flex-start;">
+                    <button class="btn btn-success" onclick="app.exportHistoryToCsv('${dataKey}')">Export CSV</button>
+                    <button class="btn btn-danger" id="export-pdf-btn-${type}" data-key="${dataKey}">Export PDF</button>
+                    <button class="btn btn-primary" id="export-excel-btn-${type}" data-key="${dataKey}">Export Excel</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr>${headers}</tr></thead>
+                        <tbody id="${type}-history-table"></tbody>
+                    </table>
+                </div>
+                <div class="actions-group" id="pagination-${type}" style="justify-content: center;">
+                    <button class="btn btn-primary" id="prev-${type}" disabled>&laquo; Sebelumnya</button>
+                    <span id="page-info-${type}" style="align-self: center; margin: 0 15px;">Halaman 1 dari 1</span>
+                    <button class="btn btn-primary" id="next-${type}" disabled>Berikutnya &raquo;</button>
+                </div>
+            </div>`;
+        }
+        
+        exportHistoryToCsv(dataKey) {
+            this.showLoading(true);
+            const transactions = this._getFilteredHistoryData(dataKey);
+            if (transactions.length === 0) {
+                this.showNotification("Tidak ada data untuk diekspor.", false);
+                this.showLoading(false);
+                return;
+            }
+
+            const headers = ["No. Transaksi", "Tanggal", "Partner", "Alamat", "Telepon", "No. Kendaraan", "Metode Pembayaran", "Catatan", "Tipe Transaksi", "Subtotal", "Diskon", "PPN", "Ongkir", "DP", "Grand Total", "Kode Barang", "Nama Barang", "Jumlah", "Satuan", "Harga Satuan", "Total Barang"];
+            const csvRows = [headers.join(",")];
+            
+            transactions.forEach(t => {
+                t.items.forEach(item => {
+                    const row = [
+                        `"${t.id}"`, `"${t.tanggal}"`, `"${t.customer || t.pemasok || t.penerima || ''}"`,
+                        `"${t.alamat || ''}"`, `"${t.telepon || ''}"`, `"${t.noKendaraan || ''}"`, `"${t.metodePembayaran || ''}"`,
+                        `"${(t.notes || '').replace(/"/g, '""')}"`, `"${t.transType || dataKey}"`,
+                        t.subtotal ?? 0, t.discount ?? 0, t.ppn ?? 0, t.shippingCost ?? 0, t.dp ?? 0, t.grandTotal ?? 0,
+                        `"${item.code}"`, `"${(item.name || '').replace(/"/g, '""')}"`, item.qty, `"${item.unit}"`, item.price ?? 0, item.total ?? 0
+                    ];
+                    csvRows.push(row.join(','));
+                });
+            });
+
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([`\uFEFF${csvString}`], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `riwayat_${dataKey}_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            this.showLoading(false);
+            this.showNotification("Riwayat transaksi berhasil diekspor ke CSV.");
+        }
+        
+        exportHistoryToExcel(dataKey) {
+            console.log(`Exporting Excel for dataKey: ${dataKey}, data:`, this.data[dataKey]);
+    this.showLoading(true);
+    const transactions = this._getFilteredHistoryData(dataKey);
+    console.log('Filtered transactions:', transactions);
+    if (transactions.length === 0) {
+        this.showNotification("Tidak ada data untuk diekspor.", false);
+        this.showLoading(false);
+        return;
+    }
+
+            const flattenedData = [];
+            transactions.forEach(t => {
+                const partner = t.customer || t.pemasok || t.penerima || '';
+                (t.items.length > 0 ? t.items : [{}]).forEach(item => {
+                    flattenedData.push({
+                        'No Transaksi': t.id, 'Tanggal': t.tanggal, 'Partner': partner, 'Tipe Transaksi': t.transType || dataKey,
+                        'Subtotal': t.subtotal, 'Diskon': t.discount, 'PPN': t.ppn, 'Ongkir': t.shippingCost, 'DP': t.dp, 'Grand Total': t.grandTotal,
+                        'Kode Barang': item.code, 'Nama Barang': item.name, 'Jumlah': item.qty, 'Satuan': item.unit,
+                        'Harga Satuan': item.price, 'Total Barang': item.total
+                    });
+                });
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+            worksheet['!cols'] = [
+                { wch: 18 }, { wch: 12 }, { wch: 25 }, { wch: 15 }, 
+                { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
+                { wch: 15 }, { wch: 30 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
+            ];
+            
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Laporan');
+            XLSX.writeFile(workbook, `Laporan_${dataKey}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            this.showLoading(false);
+            this.showNotification("Riwayat transaksi berhasil diekspor ke Excel.");
+        }
+
+        exportHistoryToPdf(dataKey) {
+            console.log(`Exporting PDF for dataKey: ${dataKey}, data:`, this.data[dataKey]);
+    this.showLoading(true);
+    const transactions = this._getFilteredHistoryData(dataKey);
+    console.log('Filtered transactions:', transactions);
+    if (transactions.length === 0) {
+        this.showNotification("Tidak ada data untuk diekspor.", false);
+        this.showLoading(false);
+        return;
+    }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            
+            const head = [['ID', 'Tanggal', 'Partner', 'Tipe', 'Kode Brg', 'Nama Brg', 'Jml', 'Satuan', 'Harga', 'Total']];
+            const body = [];
+            transactions.forEach(t => {
+                t.items.forEach(item => {
+                    body.push([
+                        t.id, t.tanggal, t.customer || t.pemasok || '', t.transType || dataKey,
+                        item.code || '-', item.name || '-', this.formatNumber(item.qty || 0), item.unit || '-',
+                        this.formatCurrency(item.price || 0, false), this.formatCurrency(item.total || 0, false)
+                    ]);
+                });
+            });
+
+            doc.autoTable({
+                head: head,
+                body: body,
+                startY: 25,
+                headStyles: { fillColor: [0, 48, 135] },
+                didDrawPage: (data) => {
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`Laporan ${dataKey.charAt(0).toUpperCase() + dataKey.slice(1)}`, data.settings.margin.left, 15);
+                    const today = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+                    doc.setFontSize(10);
+                    doc.text(`Dicetak pada: ${today}`, doc.internal.pageSize.getWidth() - data.settings.margin.right, 15, { align: 'right' });
+                },
+            });
+
+            doc.save(`Laporan_${dataKey}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            this.showLoading(false);
+            this.showNotification("Riwayat transaksi berhasil diekspor ke PDF.");
+        }
+        
+        generateDashboardHTML() {
+            return `<div class="form-section">
+                        <h3 class="form-section-title">Statistik</h3>
+                        <div class="history-filters" id="dashboard-filters">
+                            <div class="form-group"><label for="dashboard-start-date">Dari Tanggal</label><input type="date" class="start-date" id="dashboard-start-date"></div>
+                            <div class="form-group"><label for="dashboard-end-date">Sampai Tanggal</label><input type="date" class="end-date" id="dashboard-end-date"></div>
+                        </div>
+                        <div class="stat-cards" id="dashboard-stats"></div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="form-section-title">Ringkasan Transaksi Terbaru (50 Teratas)</h3>
+                        <div class="table-container">
+                            <table class="data-table" id="dashboard-transactions-table">
+                                <thead>
+                                    <tr><th>Jenis</th><th>No. Transaksi</th><th>Tanggal</th><th>Nama</th><th class="text-right">Total</th><th class="action-cell">Aksi</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>`;
+        }
+
+        generateAddItemFormHTML() {
+            return `<form id="add-master-item-form-element">
+                        <div class="form-grid" style="align-items: flex-end;">
+                            <div class="form-group"><label for="newItemCode">Kode Barang</label><input type="text" id="newItemCode" required pattern="[A-Za-z0-9-]{1,20}"></div>
+                            <div class="form-group"><label for="newItemName">Nama Barang</label><input type="text" id="newItemName" required maxlength="100"></div>
+                            <div class="form-group"><label for="newItemUnit">Satuan</label><input type="text" id="newItemUnit" placeholder="e.g., kg, unit, m"></div>
+                            <div class="form-group"><label for="newItemPrice">Harga Jual Default</label><input type="text" id="newItemPrice" class="rupiah-input" value="0"></div>
+                            <div class="form-group"><button type="submit" class="btn btn-primary">Tambah ke Master</button></div>
+                        </div>
+                    </form>`;
+        }
+        
+        generatePrintHTML(transaction, template) {
+    let printId = transaction.id || 'N/A';
+    if (template === "surat_jalan") {
+        printId = transaction.id.replace(/SGM\.(PJ|PB|PJF|PBV)/, "SGM.SJ");
+    }
+    
+    const config = this.data.config;
+    const isTransaction = transaction.grandTotal !== undefined;
+    const partyName = transaction.customer || transaction.pemasok || transaction.penerima || 'N/A';
+    const grandTotalInteger = Math.floor(transaction.grandTotal || 0);
+
+    let title = "SURAT JALAN";
+    if (template === "faktur") title = `FAKTUR ${transaction.customer ? "PENJUALAN" : "PEMBELIAN"}`;
+    else if (template === "invoice") title = `INVOICE ${transaction.transType === "sale" ? "PENJUALAN" : "PEMBELIAN"}`;
+    else if (template === "kwitansi") title = "KWITANSI PEMBAYARAN";
+    
+    let noLabel = "No. Surat Jalan";
+    if (template === "faktur") noLabel = "No. Faktur";
+    else if (template === "invoice") noLabel = "No. Invoice";
+    else if (template === "kwitansi") noLabel = "No. Kwitansi";
+
+    let metaContent = `<div class="meta-tables">
+        <table class="meta-table">
+            <tr><td>Kepada Yth.</td><td>: ${this.sanitizeInput(partyName)}</td></tr>
+            <tr><td>Alamat</td><td>: ${this.sanitizeInput(transaction.alamat || "-")}</td></tr>
+            ${transaction.telepon ? `<tr><td>Telepon</td><td>: ${this.sanitizeInput(transaction.telepon)}</td></tr>` : ""}
+        </table>
+        <table class="meta-table">
+            <tr><td>${noLabel}</td><td>: ${printId}</td></tr>
+            <tr><td>Tanggal</td><td>: ${this.formatDate(transaction.tanggal)}</td></tr>
+            ${isTransaction && transaction.ref && template !== "surat_jalan" ? `<tr><td>Ref</td><td>: ${this.sanitizeInput(transaction.ref)}</td></tr>` : ""}
+            ${transaction.noKendaraan ? `<tr><td>No. Kendaraan</td><td>: ${this.sanitizeInput(transaction.noKendaraan)}</td></tr>` : ""}
+            ${isTransaction && transaction.metodePembayaran && template !== "surat_jalan" ? `<tr><td>Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+        </table>
+    </div>`;
+
+    if (template === "kwitansi") {
+        metaContent = `<div class="kwitansi-box">
+            <table class="meta-table" style="width: 100%; table-layout: fixed;">
+                <tr><td style="width: 40mm; font-weight: bold;">Sudah terima dari</td><td style="width: calc(100% - 40mm);">: ${this.sanitizeInput(partyName)}</td></tr>
+                <tr><td style="font-weight: bold;">Uang Sejumlah</td><td>: <b>${this.formatCurrency(transaction.grandTotal || 0)}</b></td></tr>
+                <tr><td style="font-weight: bold; vertical-align: top;">Terbilang</td><td style="vertical-align: top;" class="terbilang">: ${this.terbilang(grandTotalInteger)} rupiah</td></tr>
+                <tr><td style="font-weight: bold; vertical-align: top;">Untuk Pembayaran</td><td style="vertical-align: top;">: Pelunasan ${transaction.ppn ? 'Invoice' : 'Faktur'} No. ${transaction.id || "N/A"}</td></tr>
+                ${transaction.metodePembayaran ? `<tr><td style="font-weight: bold;">Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+            </table>
+        </div>`;
+    }
+
+    // Batasi jumlah item maksimal untuk muat dalam satu halaman
+    const maxItems = 20;
+    const limitedItems = (transaction.items || []).slice(0, maxItems);
+
+    const itemsContent = template !== "kwitansi" ? `<table class="items-table">
+        <thead>
+            <tr>
+                <th style="width:5%;">No</th>
+                <th style="width:${template === 'surat_jalan' ? '70%' : '35%'};">Nama Barang</th>
+                <th style="width:10%; text-align:right;">Qty</th>
+                <th style="width:10%; text-align:center;">Satuan</th>
+                ${template !== "surat_jalan" && isTransaction ? `
+                    <th style="width:15%; text-align:right;">Harga Satuan</th>
+                    <th style="width:20%; text-align:right;">Jumlah</th>
+                ` : ""}
+            </tr>
+        </thead>
+        <tbody>
+            ${limitedItems.map((item, i) => `<tr>
+                <td style="text-align:center;">${i + 1}</td>
+                <td>${this.sanitizeInput(item.name)} ${item.code ? `<small>(${this.sanitizeInput(item.code)})</small>` : ""}</td>
+                <td style="text-align:right;">${this.formatNumber(item.qty)}</td>
+                <td style="text-align:center;">${this.sanitizeInput(item.unit || "-")}</td>
+                ${template !== "surat_jalan" && isTransaction ? `
+                    <td style="text-align:right;">${this.formatNumber(item.price || 0)}</td>
+                    <td style="text-align:right;">${this.formatNumber(item.total || 0)}</td>
+                ` : ""}
+            </tr>`).join("")}
+        </tbody>
+    </table>` : "";
+
+    const summaryContent = isTransaction && template !== "surat_jalan" && template !== "kwitansi" ? `<table class="summary-table">
+        <tr><td>Subtotal</td><td style="text-align:right;">${this.formatNumber(transaction.subtotal || 0)}</td></tr>
+        ${(transaction.discount || 0) > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatNumber(transaction.discount)}</td></tr>` : ""}
+        ${(transaction.ppn || 0) > 0 ? `<tr><td>PPN 11%</td><td style="text-align:right;">${this.formatNumber(transaction.ppn)}</td></tr>` : ""}
+        ${(transaction.shippingCost || 0) > 0 ? `<tr><td>Ongkos Kirim</td><td style="text-align:right;">${this.formatNumber(transaction.shippingCost)}</td></tr>` : ""}
+        ${(transaction.dp || 0) > 0 ? `<tr><td>Uang Muka (DP)</td><td style="text-align:right;">-${this.formatNumber(transaction.dp)}</td></tr>` : ""}
+        <tr style="border-top: 1px solid black; font-weight:bold;"><td>Total Tagihan</td><td style="text-align:right;">${this.formatNumber(transaction.grandTotal || 0)}</td></tr>
+    </table>
+    <div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>` : "";
+
+    const signatures = template === "surat_jalan" ? `<div class="print-signatures">
+        <div><p>Pengirim,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+        <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+    </div>` :
+    `<div class="print-signatures">
+        <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+        <div><p>Hormat Kami,</p><div class="signature-space"></div><p>(${this.sanitizeInput(config.namaPerusahaan)})</p></div>
+    </div>`;
+
+    const rekening = (transaction.ppn && transaction.ppn > 0)
+        ? config.rekeningPpn 
+        : config.rekening;
+
+    const pageContent = `<div class="page printable-content">
+        <style>
+            .page { width: 210mm; min-height: 297mm; max-height: 297mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.2; page-break-inside: avoid; }
+            @media print { .page { page-break-after: always; } }
+            .print-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5mm; }
+            .company-info p { margin: 0; font-size: 8pt; }
+            .logo { max-width: 40mm; max-height: 15mm; }
+            .meta-tables { display: flex; justify-content: space-between; margin-bottom: 5mm; }
+            .meta-table { width: 48%; border-collapse: collapse; }
+            .meta-table td { padding: 1mm; word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; table-layout: fixed; }
+            .items-table th, .items-table td { border: 1px solid black; padding: 1mm; word-wrap: break-word; font-size: 8pt; }
+            .items-table td:nth-child(2) { max-width: 90mm; overflow: hidden; text-overflow: ellipsis; }
+            .summary-table { width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 5mm; }
+            .summary-table td { padding: 1mm; font-size: 8pt; }
+            .print-section { margin-bottom: 5mm; }
+            .rekening-info { font-size: 7pt; text-align: center; margin: 3mm 0; }
+            .print-footer { margin-top: 5mm; }
+            .print-signatures { display: flex; justify-content: space-between; margin-top: 5mm; }
+            .signature-space { height: 15mm; }
+            .kwitansi-box { margin-bottom: 5mm; }
+            .terbilang { word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
+            [style*="keterangan"] { word-wrap: break-word; max-width: 190mm; font-size: 8pt; }
+        </style>
+        <div class="print-header">
+            <div class="company-info">
+                <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
+                <p>${this.sanitizeInput(config.tagline)}</p>
+                <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
+                <p>${this.sanitizeInput(config.kontak)}</p>
+            </div>
+            <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
+        </div>
+        <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
+            <h4 style="font-size: 11pt; margin-bottom: 3mm;">${title}</h4>
+            ${metaContent}
+            ${itemsContent}
+            ${summaryContent}
+            ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
+        </div>
+        ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
+        <div class="print-footer">
+            ${signatures}
+        </div>
+    </div>`;
+
+    const copyPageContent = `<div class="page printable-content">
+        <style>
+            .page { width: 210mm; min-height: 297mm; max-height: 297mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.2; page-break-inside: avoid; page-break-before: always; }
+            @media print { .page { page-break-after: always; } }
+            .print-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5mm; }
+            .company-info p { margin: 0; font-size: 8pt; }
+            .logo { max-width: 40mm; max-height: 15mm; }
+            .meta-tables { display: flex; justify-content: space-between; margin-bottom: 5mm; }
+            .meta-table { width: 48%; border-collapse: collapse; }
+            .meta-table td { padding: 1mm; word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; table-layout: fixed; }
+            .items-table th, .items-table td { border: 1px solid black; padding: 1mm; word-wrap: break-word; font-size: 8pt; }
+            .items-table td:nth-child(2) { max-width: 90mm; overflow: hidden; text-overflow: ellipsis; }
+            .summary-table { width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 5mm; }
+            .summary-table td { padding: 1mm; font-size: 8pt; }
+            .print-section { margin-bottom: 5mm; }
+            .rekening-info { font-size: 7pt; text-align: center; margin: 3mm 0; }
+            .print-footer { margin-top: 5mm; }
+            .print-signatures { display: flex; justify-content: space-between; margin-top: 5mm; }
+            .signature-space { height: 15mm; }
+            .kwitansi-box { margin-bottom: 5mm; }
+            .terbilang { word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
+            [style*="keterangan"] { word-wrap: break-word; max-width: 190mm; font-size: 8pt; }
+        </style>
+        <h4 style="text-align: center; font-size: 11pt; margin-bottom: 3mm;">COPY</h4>
+        <div class="print-header">
+            <div class="company-info">
+                <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
+                <p>${this.sanitizeInput(config.tagline)}</p>
+                <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
+                <p>${this.sanitizeInput(config.kontak)}</p>
+            </div>
+            <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
+        </div>
+        <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
+            <h4 style="font-size: 11pt; margin-bottom: 3mm;">${title}</h4>
+            ${metaContent}
+            ${itemsContent}
+            ${summaryContent}
+            ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
+        </div>
+        ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
+        <div class="print-footer">
+            ${signatures}
+        </div>
+    </div>`;
+
+    return `${pageContent}${copyPageContent}`;
+}
+        
+        async renderDashboard() {
+            console.log('Invoices data:', this.data.invoices); // Debugging
+    const statsContainer = document.getElementById("dashboard-stats");
+    const tableBody = document.querySelector("#dashboard-transactions-table tbody");
+    if (!statsContainer || !tableBody) return;
+    const filters = document.getElementById("dashboard-filters");
+    const startDate = filters.querySelector(".start-date")?.value;
+    const endDate = filters.querySelector(".end-date")?.value;
+    const filterPredicate = t => (!startDate || t.tanggal >= startDate) && (!endDate || t.tanggal <= endDate);
+    const allSales = [...this.data.penjualan, ...this.data.invoices.filter(inv => inv.transType === 'sale')];
+    const allPurchases = [...this.data.pembelian, ...this.data.invoices.filter(inv => inv.transType === 'purchase')];
+    console.log('All Sales:', allSales); // Debugging
+    console.log('All Purchases:', allPurchases); // Debugging
+
+            const filteredSales = allSales.filter(filterPredicate);
+            const filteredPurchases = allPurchases.filter(filterPredicate);
+            
+            const totalSales = filteredSales.reduce((sum, t) => sum + (t.subtotal || 0) - (t.discount || 0), 0);
+            const totalPurchases = filteredPurchases.reduce((sum, t) => sum + (t.subtotal || 0) - (t.discount || 0), 0);
+            const profit = totalSales - totalPurchases;
+            
+            const allTransactions = [
+                ...this.data.penjualan.map((t) => ({ ...t, type: "Penjualan", dataKey: "penjualan", typeClass: "btn-success" })),
+                ...this.data.pembelian.map((t) => ({ ...t, type: "Pembelian", dataKey: "pembelian", typeClass: "btn-danger" })),
+                ...this.data.invoices.map((t) => ({ ...t, type: "Invoice", dataKey: "invoices", typeClass: "btn-info" })),
+                ...this.data.suratJalan.map((t) => ({ ...t, type: "Surat Jalan", dataKey: "suratJalan", typeClass: "btn-warning" })),
+            ].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            statsContainer.innerHTML = `<div class="stat-card">
+                <div class="stat-card-title">Total Penjualan (Filtered)</div><div class="stat-card-value profit">${this.formatCurrency(totalSales)}</div>
+            </div><div class="stat-card">
+                <div class="stat-card-title">Total Pembelian (Filtered)</div><div class="stat-card-value loss">${this.formatCurrency(totalPurchases)}</div>
+            </div><div class="stat-card">
+                <div class="stat-card-title">Laba Kotor (Filtered)</div><div class="stat-card-value ${profit >= 0 ? "profit" : "loss"}">${this.formatCurrency(profit)}</div>
+            </div><div class="stat-card">
+                <div class="stat-card-title">Jumlah Transaksi (Total)</div><div class="stat-card-value">${this.formatNumber(allTransactions.length)}</div>
+            </div>`;
+
+            tableBody.innerHTML = allTransactions.slice(0, 50).map(t => {
+                const party = t.customer || t.pemasok || t.penerima || "N/A";
+                let printTemplate = 'faktur';
+                if(t.dataKey === 'invoices') printTemplate = 'invoice';
+                if(t.dataKey === 'suratJalan') printTemplate = 'surat_jalan';
+                
+                return `<tr>
+                    <td><span class="btn btn-sm ${t.typeClass}">${t.type}</span></td>
+                    <td>${t.id}</td><td>${this.formatDate(t.tanggal)}</td><td>${party}</td>
+                    <td class="text-right">${t.grandTotal !== undefined ? this.formatCurrency(t.grandTotal) : "-"}</td>
+                    <td class="action-cell">
+                        <button class="btn btn-sm btn-info" onclick="app.printTransaction('${t.dataKey}', '${t.id}', '${printTemplate}')">Cetak</button>
+                        <button class="btn btn-sm btn-danger" onclick="app.deleteTransaction('${t.dataKey}', '${t.id}')">Hapus</button>
+                    </td></tr>`;
+            }).join('');
+        }
+        
+        terbilang(nilai) {
+            nilai = Math.floor(Math.abs(nilai));
+            const bilangan = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
+            const satuan = ["", "ribu", "juta", "miliar", "triliun"];
+            
+            function konversi(n) {
+                if (n === 0) return "";
+                if (n < 12) return bilangan[n];
+                if (n < 20) return konversi(n - 10) + " belas";
+                if (n < 100) return konversi(Math.floor(n / 10)) + " puluh" + (n % 10 ? " " + konversi(n % 10) : "");
+                if (n < 200) return "seratus" + (n % 100 ? " " + konversi(n - 100) : "");
+                if (n < 1000) return konversi(Math.floor(n / 100)) + " ratus" + (n % 100 ? " " + konversi(n % 100) : "");
+                return "";
+            }
+
+            if (nilai === 0) return "nol";
+            let hasil = "";
+            let satuanIndex = 0;
+
+            while (nilai > 0 && satuanIndex < satuan.length) {
+                const bagian = nilai % 1000;
+                if (bagian > 0) {
+                    let teksBagian = (satuanIndex === 1 && bagian === 1) ? "se" : konversi(bagian);
+                    teksBagian += satuan[satuanIndex] ? " " + satuan[satuanIndex] : "";
+                    hasil = teksBagian + (hasil ? " " + hasil : "");
+                }
+                nilai = Math.floor(nilai / 1000);
+                satuanIndex++;
+            }
+            return hasil.trim();
+        }
+
+        formatDate(dateString) {
+            try {
+                if (!dateString) return "-";
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    const parts = dateString.split(/[-T]/);
+                    return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+                }
+                return date.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        deleteItemFromTempList(id, type) {
+            this.tempItems[type] = this.tempItems[type].filter((item) => item.id !== id);
+            this.renderTempItemsTable(type);
+        }
+
+        async renderMasterItemsTextarea() {
+            const textarea = document.getElementById("masterItemJson");
+            if (textarea) textarea.value = JSON.stringify(this.data.masterItems, null, 2);
+        }
+
+        updateMasterItemCountDisplay() {
+            const countSpan = document.getElementById("master-item-count");
+            if (countSpan) countSpan.textContent = this.data.masterItems.length;
+        }
+
+        loadConfigToForm() {
+            const config = this.data.config;
+            Object.keys(config).forEach(key => {
+                const input = document.getElementById(`config-${key}`);
+                if (input) input.value = config[key];
+            });
+            document.getElementById("header-title").textContent = config.namaPerusahaan || "Sistem Akuntansi SGM";
+            document.getElementById("header-tagline").textContent = config.tagline || "Pencatatan Penjualan dan Pembelian";
+            document.getElementById("header-logo").src = config.logoUrl || "https://via.placeholder.com/150x50.png?text=Logo";
+        }
+
+        saveConfig() {
+            Object.keys(this.data.config).forEach(key => {
+                const input = document.getElementById(`config-${key}`);
+                if (input) this.data.config[key] = input.value;
+            });
+            this.saveData();
+            this.loadConfigToForm();
+            this.showNotification("Informasi perusahaan berhasil disimpan.");
+        }
+
+        saveMasterItemsFromTextarea() {
+            const textarea = document.getElementById("masterItemJson");
+            try {
+                const items = JSON.parse(textarea.value);
+                if (!Array.isArray(items)) throw new Error("Format JSON harus berupa array.");
+                if (!items.every(item => item.hasOwnProperty("code") && item.hasOwnProperty("name"))) throw new Error('Setiap item harus memiliki properti "code" dan "name".');
+                this.data.masterItems = items;
+                this.buildItemIndex();
+                this.saveData();
+                this.updateMasterItemCountDisplay();
+                this.showNotification("Data master barang berhasil disimpan dari JSON.");
+            } catch (error) {
+                Utils.logError("Failed to save master items from JSON", error);
+                this.showNotification(`Gagal menyimpan: ${error.message}`, false);
+            }
+        }
+
+        clearMasterItems() {
+            if (confirm("Yakin ingin menghapus SEMUA data master barang?")) {
+                this.data.masterItems = [];
+                this.buildItemIndex();
+                this.saveData();
+                this.updateAllUI();
+                this.showNotification("Semua data master barang telah dihapus.");
+            }
+        }
+
+        backupData() {
+            const dataStr = JSON.stringify(this.data, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `backup_akuntansi_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            this.showNotification("Backup data berhasil diunduh.");
+        }
+
+        restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const restoredData = JSON.parse(e.target.result);
+                    if (restoredData.config && restoredData.penjualan && restoredData.pembelian) {
+                        if (confirm("Yakin ingin memulihkan data? Data saat ini akan ditimpa.")) {
+                            this.data = restoredData;
+                            this.saveData();
+                            await this.init(); // Re-initialize the app
+                            this.showNotification("Data berhasil dipulihkan. Halaman akan dimuat ulang.");
+                            setTimeout(() => window.location.reload(), 1500);
+                        }
+                    } else {
+                        throw new Error("File backup tidak valid.");
+                    }
+                } catch (err) {
+                    Utils.logError("Restore failed", err);
+                    this.showNotification(`Gagal memulihkan: ${err.message}`, false);
+                } finally {
+                    event.target.value = "";
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        exportMasterItemsToCsv() {
+            if (this.data.masterItems.length === 0) {
+                this.showNotification("Tidak ada data barang untuk diekspor.", false);
+                return;
+            }
+            const headers = ["code", "name", "unit", "price"];
+            const csvRows = [headers.join(","), ...this.data.masterItems.map((item) => headers.map((header) => `"${(item[header] || "").toString().replace(/"/g, '""')}"`).join(","))];
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([`\uFEFF${csvString}`], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "master_barang.csv";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        importMasterItemsFromCsv(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const lines = e.target.result.split(/\r\n|\n/).filter(line => line.trim());
+                    if (lines.length <= 1) throw new Error("File CSV kosong atau tidak valid.");
+                    const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+                    const headers = lines[0].split(splitRegex).map(h => h.trim().replace(/"/g, ""));
+                    if (!headers.includes("code") || !headers.includes("name")) throw new Error('CSV harus memiliki kolom "code" dan "name".');
+                    
+                    const newItems = lines.slice(1).map(line => {
+                        const values = line.split(splitRegex).map(v => v.trim().replace(/"/g, ""));
+                        const item = {};
+                        headers.forEach((header, index) => { item[header] = header === "price" ? (parseInt(values[index]) || 0) : (values[index] || ""); });
+                        return item;
+                    }).filter(item => item.code && item.name);
+
+                    if (newItems.length === 0) throw new Error("Tidak ada data valid untuk diimpor.");
+                    if (confirm(`Ditemukan ${newItems.length} barang dari CSV. Timpa data yang ada?`)) {
+                        this.data.masterItems = newItems;
+                        this.buildItemIndex();
+                        this.saveData();
+                        this.updateAllUI();
+                        this.showNotification("Data barang berhasil diimpor.");
+                    }
+                } catch (err) {
+                    Utils.logError("CSV Import failed", err);
+                    this.showNotification(`Gagal mengimpor: ${err.message}`, false);
+                } finally {
+                    event.target.value = "";
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        addNewMasterItem() {
+            const code = document.getElementById("newItemCode").value.trim();
+            const name = document.getElementById("newItemName").value.trim();
+            const unit = document.getElementById("newItemUnit").value.trim();
+            const price = parseInt(document.getElementById("newItemPrice").value.replace(/[^0-9]/g, ""), 10) || 0;
+
+            if (!code || !name) { this.showNotification("Kode dan Nama Barang harus diisi.", false); return; }
+            if (!/^[A-Za-z0-9-]{1,20}$/.test(code)) { this.showNotification("Kode hanya boleh berisi huruf, angka, dan hubung (-), maks 20 karakter.", false); return; }
+            if (this.data.masterItems.some((item) => item.code.toUpperCase() === code.toUpperCase())) { this.showNotification(`Kode barang '${code}' sudah ada.`, false); return; }
+
+            this.data.masterItems.unshift({ code, name, unit, price: price || 0 });
+            this.buildItemIndex();
+            this.saveData();
+            this.renderMasterItemsTextarea();
+            this.updateMasterItemCountDisplay();
+            this.showNotification(`Barang '${name}' berhasil ditambahkan.`);
+            document.getElementById("add-master-item-form-element").reset();
+        }
+
+        printTransaction(dataKey, id, template) {
+    const transaction = this.data[dataKey]?.find((t) => t.id === id);
+    if (!transaction) { 
+        this.showNotification("Transaksi tidak ditemukan.", false); 
+        return; 
+    }
+    
+    const printArea = document.getElementById("print-area");
+    printArea.innerHTML = this.generatePrintHTML(transaction, template);
+    
+    // Tambahkan class ke body
+    document.body.classList.add('printing');
+
+    setTimeout(() => {
+        window.print();
+        
+        // Hapus class setelah mencetak
+        document.body.classList.remove('printing');
+        printArea.innerHTML = "";
+    }, 500); // Tetap gunakan timeout yang lebih lama
+}
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        window.app = new SistemAkuntansi();
+        window.app.init();
+        
+        const tabs = document.querySelectorAll(".nav-tab");
+        const tabContents = document.querySelectorAll(".tab-content");
+        
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            tabs.forEach((t) => t.classList.remove("active"));
+            tabContents.forEach((c) => c.classList.remove("active"));
+            
+            tab.classList.add("active");
+            const activeContent = document.getElementById(tab.dataset.tab);
+            if (activeContent) activeContent.classList.add("active");
+            
+            if (tab.dataset.tab === "dashboard") window.app.renderDashboard();
+            if (tab.dataset.tab === "pengaturan") window.app.renderTrashTable();
+          });
+        });
+      });
+    </script>
+</body>
+</html>
