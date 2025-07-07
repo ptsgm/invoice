@@ -412,6 +412,16 @@
         transform: scale(1.2);
       }
 
+      .dpp-info-display {
+        font-size: 0.85rem;
+        color: #d97706; /* Menggunakan warna oranye (warning) */
+        text-align: right;
+        margin-top: -8px;
+        padding-right: 5px;
+        display: block; /* Memastikan elemen ini ditampilkan */
+        height: 15px; /* Memberi ruang agar tidak hilang */
+      }
+
       .filterable-dropdown {
         position: relative;
       }
@@ -548,6 +558,65 @@
           display: none;
       }
 
+      .btn svg {
+        width: 1.2em;
+        height: 1.2em;
+        fill: currentColor;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .quick-actions .btn {
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        flex-grow: 1;
+      }
+
+      .form-section-title svg {
+        fill: currentColor;
+      }
+
+      .form-group-cluster {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 15px;
+        background-color: #ffffff;
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+      }
+      .form-group-cluster-title {
+        grid-column: 1 / -1;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-top: -5px;
+        margin-bottom: 5px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
+      }
+      
+      .history-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        background-color: #f3f4f6;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        /* UX: Membuat filter menempel di atas */
+        position: sticky;
+        top: -20px; 
+        z-index: 900;
+        border-bottom: 1px solid var(--border);
+      }
+
 
       @media print {
         * {
@@ -678,7 +747,11 @@
         }
 
         .meta-table td:nth-child(2) {
-          width: calc(100% - 30mm);
+          width: 2mm;
+        }
+
+        .meta-table td:nth-child(3) {
+          width: calc(100% - 32mm); /* Sisa ruang untuk isi data */
         }
 
         .items-table {
@@ -1036,50 +1109,53 @@
           </div>
         </div>
         <div class="form-section">
-          <h3 class="form-section-title">Manajemen Data Barang</h3>
-          <div id="add-master-item-form"></div>
-          <hr style="margin: 20px 0" />
-          <p style="margin-bottom: 15px; font-weight: bold">
-            Status: <span id="master-item-count">0</span> barang termuat.
-          </p>
-          <div class="form-group">
-            <label for="masterItemJson"
-              >Edit Massal Data Master (Format JSON)</label
-            >
-            <textarea
-              id="masterItemJson"
-              rows="10"
-              placeholder="Tempel (paste) data JSON di sini..."
-            ></textarea>
-          </div>
-          <div class="actions-group">
-            <button
-              type="button"
-              id="saveMasterItemsBtn"
-              class="btn btn-primary"
-            >
-              Simpan dari JSON
-            </button>
-            <button type="button" id="exportCsvBtn" class="btn btn-success">
-              Export CSV
-            </button>
-            <button type="button" id="importCsvBtn" class="btn btn-warning">
-              Import CSV
-            </button>
-            <input
-              type="file"
-              id="csvFileInput"
-              style="display: none"
-              accept=".csv"
-            />
-            <button
-              type="button"
-              id="clearMasterItemsBtn"
-              class="btn btn-danger"
-            >
-              Hapus Semua Barang
-            </button>
-          </div>
+    <h3 class="form-section-title">Manajemen Data Barang</h3>
+
+    <div id="item-editor-modal" style="display:none; /* Atur style untuk modal/pop-up */">
+        <form id="item-editor-form">
+            <input type="hidden" id="edit-item-original-code">
+            <div class="form-grid">
+                <div class="form-group"><label>Kode Barang</label><input type="text" id="edit-item-code" required></div>
+                <div class="form-group"><label>Nama Barang</label><input type="text" id="edit-item-name" required></div>
+                <div class="form-group"><label>Satuan</label><input type="text" id="edit-item-unit"></div>
+                <div class="form-group"><label>Harga</label><input type="text" id="edit-item-price" class="rupiah-input"></div>
+            </div>
+            <div class="actions-group">
+                <button type="submit" class="btn btn-primary">Simpan Barang</button>
+                <button type="button" id="cancel-edit-btn" class="btn btn-warning">Batal</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="actions-group" style="justify-content: space-between;">
+        <button id="show-add-item-form" class="btn btn-success">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+            Tambah Barang Baru
+        </button>
+        <div class="form-group" style="min-width: 300px;">
+            <input type="text" id="search-master-items" placeholder="Cari barang...">
+        </div>
+    </div>
+
+    <div class="table-container" style="margin-top: 20px;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Satuan</th>
+                    <th class="text-right">Harga Jual</th>
+                    <th class="action-cell">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="master-items-table-body">
+                </tbody>
+        </table>
+    </div>
+    <p style="margin-top: 15px; font-weight: bold;">
+        Total Barang: <span id="master-item-count">0</span>
+    </p>
+</div>
         </div>
         <div id="npwp-management-section"></div>
         <div class="form-section">
@@ -1269,7 +1345,6 @@
             const partyLabel = type === "sale" ? "Customer" : "Pemasok";
             const partyType = type === "sale" ? "customer" : "pemasok";
             
-            // PENAMBAHAN FITUR: PPN Checkbox moved to top
             const ppnCheckboxHTML = `
             <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -1278,54 +1353,65 @@
                 </div>
             </div>`;
 
-            let formFields = `
+            const formFields = `
                 ${ppnCheckboxHTML}
-                <div class="form-group">
-                <label for="transNo-${type}">No. Transaksi</label>
-                <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
+                <div class="form-group-cluster">
+                    <h4 class="form-group-cluster-title">Informasi ${partyLabel}</h4>
+                    <div class="form-group filterable-dropdown">
+                        <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
+                        <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
+                        <div class="dropdown-options" id="party-dropdown-${type}"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
+                        <input type="text" id="${partyType}Address-${type}">
+                    </div>
+                    <div class="form-group">
+                        <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
+                        <input type="tel" id="${partyType}Phone-${type}" placeholder="Contoh: 0812...">
+                    </div>
+                    <div class="form-group npwp-group hidden" id="npwp-group-${type}">
+                        <label for="${partyType}Npwp-${type}">NPWP/NIK</label>
+                        <input type="text" id="${partyType}Npwp-${type}" placeholder="Contoh: 01.234.567.8-901.000">
+                    </div>
                 </div>
-                <div class="form-group">
-                <label for="invoiceDate-${type}">Tanggal</label>
-                <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
+
+                <div class="form-group-cluster">
+                    <h4 class="form-group-cluster-title">Informasi Transaksi</h4>
+                    <div class="form-group">
+                        <label for="transNo-${type}">No. Transaksi</label>
+                        <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceDate-${type}">Tanggal</label>
+                        <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentMethod-${type}">Metode Pembayaran</label>
+                        <select id="paymentMethod-${type}">
+                            <option value="Transfer">Transfer</option>
+                            <option value="Tunai">Tunai</option>
+                            <option value="Kredit">Kredit</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleNo-${type}">No. Kendaraan</label>
+                        <input type="text" id="vehicleNo-${type}">
+                    </div>
+                     ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
                 </div>
-                <div class="form-group filterable-dropdown">
-                <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
-                <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
-                <div class="dropdown-options" id="party-dropdown-${type}"></div>
-                </div>
-                <div class="form-group">
-                <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
-                <input type="text" id="${partyType}Address-${type}">
-                </div>
-                <div class="form-group">
-                <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
-                <input type="tel" id="${partyType}Phone-${type}">
-                </div>
-                <div class="form-group npwp-group hidden" id="npwp-group-${type}">
-                    <label for="${partyType}Npwp-${type}">NPWP/NIK</label>
-                    <input type="text" id="${partyType}Npwp-${type}">
-                </div>
-                <div class="form-group">
-                <label for="vehicleNo-${type}">No. Kendaraan</label>
-                <input type="text" id="vehicleNo-${type}">
-                </div>
-                ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
-                <div class="form-group">
-                    <label for="paymentMethod-${type}">Metode Pembayaran</label>
-                    <select id="paymentMethod-${type}">
-                        <option value="Transfer">Transfer</option>
-                        <option value="Tunai">Tunai</option>
-                        <option value="Kredit">Kredit</option>
-                    </select>
-                </div>`;
+                `;
 
             const itemFields = `
                 <div class="form-section">
-                <h3 class="form-section-title">Tambah Barang</h3>
+                <h3 class="form-section-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+                    Tambah Barang
+                </h3>
                 <div class="form-grid">
                     <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;">
                     <label for="item-selector-${type}">Cari Barang (Nama/Kode)</label>
-                    <input type="text" id="item-selector-${type}" autocomplete="off">
+                    <input type="text" id="item-selector-${type}" autocomplete="off" placeholder="Ketik nama atau kode barang...">
                     <div class="dropdown-options" id="dropdown-options-${type}"></div>
                     </div>
                     <div class="form-group">
@@ -1345,38 +1431,46 @@
                     <input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required>
                     </div>
                     <div class="form-group" style="align-self: flex-end;">
-                    <button type="button" id="addItemBtn-${type}" class="btn btn-primary">Tambah Barang</button>
+                    <button type="button" id="addItemBtn-${type}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+                        Tambah
+                    </button>
                     </div>
                 </div>
                 </div>`;
 
             const tableHeaders = `<th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th>`;
 
-            // PENAMBAHAN FITUR: PPN display only in summary, checkbox moved up
             const summarySection = `<div class="summary-section">
                 <div class="summary-grid">
                     <label>Subtotal:</label>
-                    <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
+                    <div>
+                        <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
+                        <div class="dpp-info-display" id="dpp-info-${type}"></div>
+                    </div>
 
                     <label for="discount-${type}">Diskon (Rp):</label>
                     <input type="text" id="discount-${type}" class="rupiah-input" value="0">
 
                     <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label>
                     <input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
-
-                    <label>PPN 11%:</label>
-                    <div class="total-amount-display" id="ppn-${type}">Rp 0</div>
-
+                    
                     <label for="dp-${type}">Uang Muka / DP (Rp):</label>
                     <input type="text" id="dp-${type}" class="rupiah-input" value="0">
+                    
+                    <label>PPN 11%:</label>
+                    <div class="total-amount-display" id="ppn-${type}">Rp 0</div>
 
                     <label>Grand Total:</label>
                     <div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
                 </div>
-                </div>`;
+            </div>`;
 
             return `<div class="form-section">
-                <h3 class="form-section-title">Form ${title}</h3>
+                <h3 class="form-section-title">
+                     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h360l200 200v520q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/></svg>
+                     Form ${title}
+                </h3>
                 <form id="${type}Form">
                     <div class="form-grid">${formFields}</div>
                     ${itemFields}
@@ -1389,11 +1483,17 @@
                     ${summarySection}
                     <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
                         <label for="notes-${type}">Catatan</label>
-                        <textarea id="notes-${type}" rows="3"></textarea>
+                        <textarea id="notes-${type}" rows="3" placeholder="Tambahkan catatan untuk transaksi ini..."></textarea>
                     </div>
                     <div class="actions-group">
-                        <button type="submit" class="btn btn-success">Simpan Transaksi</button>
-                        <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">Reset Form</button>
+                        <button type="submit" class="btn btn-success">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M840-680v480q0 33-23.5 56.5T760-120H200q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h480l160 160Zm-80 34L646-760H200v560h560v-446ZM480-240q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35ZM240-560h360v-160H240v160Z"/></svg>
+                            Simpan Transaksi
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 128.5 27.5T720-690v-110h80v280H520v-80h168q-32-54-87-87t-121-33q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
+                            Reset Form
+                        </button>
                     </div>
                 </form>
                 </div>`;
@@ -1637,15 +1737,29 @@
             if (!textarea) return;
 
             const combinedList = [];
+            
+            // Mengambil data customer
             this.partyDetails.customer.forEach((details, name) => {
-                if (details.npwp) {
-                    combinedList.push({ name, npwp: details.npwp, type: 'customer' });
-                }
+                // Perbaikan: Menyertakan semua detail (alamat, phone, npwp)
+                combinedList.push({ 
+                    name, 
+                    type: 'customer', 
+                    npwp: details.npwp || '',
+                    alamat: details.address || details.alamat || '',
+                    phone: details.phone || details.telepon || ''
+                });
             });
+
+            // Mengambil data pemasok
             this.partyDetails.pemasok.forEach((details, name) => {
-                if (details.npwp) {
-                    combinedList.push({ name, npwp: details.npwp, type: 'pemasok' });
-                }
+                // Perbaikan: Menyertakan semua detail (alamat, phone, npwp)
+                combinedList.push({ 
+                    name, 
+                    type: 'pemasok',
+                    npwp: details.npwp || '',
+                    alamat: details.address || details.alamat || '',
+                    phone: details.phone || details.telepon || ''
+                });
             });
 
             combinedList.sort((a, b) => a.name.localeCompare(b.name));
@@ -2232,7 +2346,8 @@
     {"code": "BRG-497", "name": "TIANG TLP 9 M", "unit": "BATANG", "price": 0},
     {"code": "BRG-498", "name": "BETON 16 URIL FULL", "unit": "PCS", "price": 0},
     {"code": "BRG-499", "name": "BETON 8 POLOS FULL", "unit": "PCS", "price": 0},
-    {"code": "BRG-450", "name": "TALANG", "unit": "Kg", "price": 0}],
+    {"code": "BRG-450", "name": "TALANG", "unit": "Kg", "price": 0}
+    ],
                 config: {
                     noPenjualan: 1, noPembelian: 1, noInvoice: 1, noSuratJalan: 1,
                     namaPerusahaan: "PT. SUMBER GANDA MEKAR", alamatPerusahaan: "Jl. Raya Gedebage No. 95 Bandung",
@@ -2412,8 +2527,12 @@
             const partyType = type === 'sale' ? 'customer' : 'pemasok';
             const details = this.partyDetails[partyType].get(name);
             if (details) {
-                document.getElementById(`${partyType}Address-${type}`).value = details.address || '';
-                document.getElementById(`${partyType}Phone-${type}`).value = details.phone || '';
+                // Perbaikan: Cek properti 'address' atau 'alamat'
+                document.getElementById(`${partyType}Address-${type}`).value = details.address || details.alamat || '';
+                
+                // Perbaikan: Cek properti 'phone' atau 'telepon'
+                document.getElementById(`${partyType}Phone-${type}`).value = details.phone || details.telepon || '';
+                
                 const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
                 if (npwpInput) {
                     npwpInput.value = details.npwp || '';
@@ -2786,20 +2905,25 @@
             const totalAfterDiscount = subtotal - discount;
 
             if (includePpn) {
-                // Kalkulasi PPN Inklusif (Harga dianggap sudah termasuk PPN)
-                // DPP = Total / 1.11
                 dpp = Math.round(totalAfterDiscount / 1.11);
-                // PPN = Total - DPP (lebih akurat karena pembulatan)
                 ppn = totalAfterDiscount - dpp;
             }
 
-            // Jika PPN inklusif, PPN sudah ada di dalam `totalAfterDiscount`
-            // Jika tidak, ppn bernilai 0, sehingga tidak menambah grand total
             const grandTotal = totalAfterDiscount + shippingCost - dp;
 
             form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
             form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
             form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
+
+            // Perbaikan: Menampilkan atau menyembunyikan keterangan DPP
+            const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
+            if (dppInfoEl) {
+                if (includePpn && dpp > 0) {
+                    dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
+                } else {
+                    dppInfoEl.textContent = ''; // Kosongkan jika PPN tidak aktif
+                }
+            }
 
             return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
         }
@@ -3111,6 +3235,22 @@
         
         generateDashboardHTML() {
             return `<div class="form-section">
+                        <h3 class="form-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                            Dashboard
+                        </h3>
+                        <div class="quick-actions">
+                             <button class="btn btn-success" onclick="app.switchToTab('penjualan')">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+                                Buat Penjualan Baru
+                             </button>
+                             <button class="btn btn-info" onclick="app.switchToTab('pembelian')">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+                                Buat Pembelian Baru
+                             </button>
+                        </div>
+                    </div>
+                    <div class="form-section">
                         <h3 class="form-section-title">Statistik</h3>
                         <div class="history-filters" id="dashboard-filters">
                             <div class="form-group"><label for="dashboard-start-date">Dari Tanggal</label><input type="date" class="start-date" id="dashboard-start-date"></div>
@@ -3164,37 +3304,39 @@
             else if (template === "invoice") noLabel = "No. Invoice";
             else if (template === "kwitansi") noLabel = "No. Kwitansi";
 
+            // --- PERBAIKAN TATA LETAK: Titik dua (:) dipisah ke kolom sendiri ---
             let metaContent = `<div class="meta-tables">
                 <table class="meta-table">
-                    <tr><td>Kepada Yth.</td><td>: ${this.sanitizeInput(partyName)}</td></tr>
-                    <tr><td>Alamat</td><td>: ${this.sanitizeInput(transaction.alamat || "-")}</td></tr>
-                    ${transaction.telepon ? `<tr><td>Telepon</td><td>: ${this.sanitizeInput(transaction.telepon)}</td></tr>` : ""}
-                    ${transaction.npwp && template === 'invoice' ? `<tr><td>NPWP/NIK</td><td>: ${this.sanitizeInput(transaction.npwp)}</td></tr>` : ""}
+                    <tr><td>Kepada Yth.</td><td>:</td><td>${this.sanitizeInput(partyName)}</td></tr>
+                    <tr><td>Alamat</td><td>:</td><td>${this.sanitizeInput(transaction.alamat || "-")}</td></tr>
+                    ${transaction.telepon ? `<tr><td>Telepon</td><td>:</td><td>${this.sanitizeInput(transaction.telepon)}</td></tr>` : ""}
+                    ${transaction.npwp && template === 'invoice' ? `<tr><td>NPWP/NIK</td><td>:</td><td>${this.sanitizeInput(transaction.npwp)}</td></tr>` : ""}
                 </table>
                 <table class="meta-table">
-                    <tr><td>${noLabel}</td><td>: ${printId}</td></tr>
-                    <tr><td>Tanggal</td><td>: ${this.formatDate(transaction.tanggal)}</td></tr>
-                    ${isTransaction && transaction.ref && template !== "surat_jalan" ? `<tr><td>Ref</td><td>: ${this.sanitizeInput(transaction.ref)}</td></tr>` : ""}
-                    ${transaction.noKendaraan ? `<tr><td>No. Kendaraan</td><td>: ${this.sanitizeInput(transaction.noKendaraan)}</td></tr>` : ""}
-                    ${isTransaction && transaction.metodePembayaran && template !== "surat_jalan" ? `<tr><td>Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+                    <tr><td>${noLabel}</td><td>:</td><td>${printId}</td></tr>
+                    <tr><td>Tanggal</td><td>:</td><td>${this.formatDate(transaction.tanggal)}</td></tr>
+                    ${isTransaction && transaction.ref && template !== "surat_jalan" ? `<tr><td>Ref</td><td>:</td><td>${this.sanitizeInput(transaction.ref)}</td></tr>` : ""}
+                    ${transaction.noKendaraan ? `<tr><td>No. Kendaraan</td><td>:</td><td>${this.sanitizeInput(transaction.noKendaraan)}</td></tr>` : ""}
+                    ${isTransaction && transaction.metodePembayaran && template !== "surat_jalan" ? `<tr><td>Metode Pembayaran</td><td>:</td><td>${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
                 </table>
             </div>`;
 
             if (template === "kwitansi") {
                 metaContent = `<div class="kwitansi-box">
                     <table class="meta-table" style="width: 100%; table-layout: fixed;">
-                        <tr><td style="width: 40mm; font-weight: bold;">Sudah terima dari</td><td style="width: calc(100% - 40mm);">: ${this.sanitizeInput(partyName)}</td></tr>
-                        <tr><td style="font-weight: bold;">Uang Sejumlah</td><td>: <b>${this.formatCurrency(transaction.grandTotal || 0)}</b></td></tr>
-                        <tr><td style="font-weight: bold; vertical-align: top;">Terbilang</td><td style="vertical-align: top;" class="terbilang">: ${this.terbilang(grandTotalInteger)} rupiah</td></tr>
-                        <tr><td style="font-weight: bold; vertical-align: top;">Untuk Pembayaran</td><td style="vertical-align: top;">: Pelunasan ${transaction.ppn ? 'Invoice' : 'Faktur'} No. ${transaction.id || "N/A"}</td></tr>
-                        ${transaction.metodePembayaran ? `<tr><td style="font-weight: bold;">Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+                        <tr><td style="width: 40mm; font-weight: bold;">Sudah terima dari</td><td>:</td><td>${this.sanitizeInput(partyName)}</td></tr>
+                        <tr><td style="font-weight: bold;">Uang Sejumlah</td><td>:</td><td><b>${this.formatCurrency(transaction.grandTotal || 0)}</b></td></tr>
+                        <tr><td style="font-weight: bold; vertical-align: top;">Terbilang</td><td style="vertical-align: top;">:</td><td style="vertical-align: top;" class="terbilang">${this.terbilang(grandTotalInteger)} rupiah</td></tr>
+                        <tr><td style="font-weight: bold; vertical-align: top;">Untuk Pembayaran</td><td style="vertical-align: top;">:</td><td style="vertical-align: top;">Pelunasan ${transaction.ppn ? 'Invoice' : 'Faktur'} No. ${transaction.id || "N/A"}</td></tr>
+                        ${transaction.metodePembayaran ? `<tr><td style="font-weight: bold;">Metode Pembayaran</td><td>:</td><td>${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
                     </table>
                 </div>`;
             }
 
             const maxItems = 20;
             const limitedItems = (transaction.items || []).slice(0, maxItems);
-
+            
+            // --- PERBAIKAN SIMBOL RP: Mengganti formatNumber dengan formatCurrency ---
             const itemsContent = template !== "kwitansi" ? `<table class="items-table">
                 <thead>
                     <tr>
@@ -3215,25 +3357,28 @@
                         <td style="text-align:right;">${this.formatNumber(item.qty)}</td>
                         <td style="text-align:center;">${this.sanitizeInput(item.unit || "-")}</td>
                         ${template !== "surat_jalan" && isTransaction ? `
-                            <td style="text-align:right;">${this.formatNumber(item.price || 0)}</td>
-                            <td style="text-align:right;">${this.formatNumber(item.total || 0)}</td>
+                            <td style="text-align:right;">${this.formatCurrency(item.price || 0)}</td>
+                            <td style="text-align:right;">${this.formatCurrency(item.total || 0)}</td>
                         ` : ""}
                     </tr>`).join("")}
                 </tbody>
             </table>` : "";
 
             const summaryContent = isTransaction && template !== "surat_jalan" && template !== "kwitansi" ? `<table class="summary-table">
-                <tr><td>Subtotal</td><td style="text-align:right;">${this.formatNumber(transaction.subtotal || 0)}</td></tr>
-                ${(transaction.discount || 0) > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatNumber(transaction.discount)}</td></tr>` : ""}
+                <tr>
+                    <td style="vertical-align: top;">Subtotal</td>
+                    <td style="text-align:right; line-height: 1.4; vertical-align: top;">
+                        ${this.formatCurrency(transaction.subtotal || 0)}
+                        ${(transaction.ppn || 0) > 0 ? `<br><small style="font-weight:normal; color: #4a5568;">(dpp: ${this.formatCurrency(transaction.dpp || 0)})</small>` : ""}
+                    </td>
+                </tr>
+                ${(transaction.discount || 0) > 0 ? `<tr><td style="vertical-align: top;">Diskon</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.discount)}</td></tr>` : ""}
                 
-                ${(transaction.ppn || 0) > 0 ? `
-                    <tr><td>DPP</td><td style="text-align:right;">${this.formatNumber(transaction.dpp || 0)}</td></tr>
-                    <tr><td>PPN 11%</td><td style="text-align:right;">${this.formatNumber(transaction.ppn)}</td></tr>
-                ` : ""}
+                ${(transaction.ppn || 0) > 0 ? `<tr><td style="vertical-align: top;">PPN 11%</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.ppn)}</td></tr>` : ""}
 
-                ${(transaction.shippingCost || 0) > 0 ? `<tr><td>Ongkos Kirim</td><td style="text-align:right;">${this.formatNumber(transaction.shippingCost)}</td></tr>` : ""}
-                ${(transaction.dp || 0) > 0 ? `<tr><td>Uang Muka (DP)</td><td style="text-align:right;">-${this.formatNumber(transaction.dp)}</td></tr>` : ""}
-                <tr style="border-top: 1px solid black; font-weight:bold;"><td>Total Tagihan</td><td style="text-align:right;">${this.formatNumber(transaction.grandTotal || 0)}</td></tr>
+                ${(transaction.shippingCost || 0) > 0 ? `<tr><td style="vertical-align: top;">Ongkos Kirim</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.shippingCost)}</td></tr>` : ""}
+                ${(transaction.dp || 0) > 0 ? `<tr><td style="vertical-align: top;">Uang Muka (DP)</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.dp)}</td></tr>` : ""}
+                <tr style="border-top: 1px solid black; font-weight:bold;"><td style="vertical-align: top;">Total Tagihan</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.grandTotal || 0)}</td></tr>
             </table>
             <div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>
             ${(transaction.ppn || 0) > 0 ? `<div style="font-size: 7pt; margin-top: 5px;"><i>(Harga sudah termasuk PPN 11%)</i></div>` : ""}` : "";
