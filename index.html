@@ -536,14 +536,18 @@
         display: none;
       }
 
-      /* Tambahkan aturan baru ini di CSS utama (di luar @media print) */
-    body.printing > *:not(#print-area) {
+      body.printing > *:not(#print-area) {
         display: none !important;
-    }
+      }
 
-    body.printing #print-area {
+      body.printing #print-area {
         display: block !important;
-    }
+      }
+      
+      .npwp-group.hidden {
+          display: none;
+      }
+
 
       @media print {
         * {
@@ -574,10 +578,6 @@
           color: #000;
           font-size: 10pt;
         }
-
-        /*body > *:not(#print-area) {
-          display: none !important;
-        }*/
 
         #print-area {
           display: block !important;
@@ -811,9 +811,9 @@
         .summary-grid {
             max-width: 100%;
         }
-    }
+      }
 
-    @media (max-width: 768px) {
+      @media (max-width: 768px) {
         body {
             padding: 10px;
             font-size: 14px;
@@ -845,13 +845,13 @@
         }
         
         .nav-tab.active {
-            box-shadow: none; /* Hilangkan shadow pada tab aktif di mobile */
+            box-shadow: none;
         }
 
         .form-grid,
         .history-filters,
         .stat-cards {
-            grid-template-columns: 1fr; /* Ubah semua grid menjadi satu kolom */
+            grid-template-columns: 1fr;
         }
 
         .actions-group {
@@ -884,7 +884,6 @@
             font-size: 0.85rem;
         }
         
-        /* Penyesuaian untuk tabel agar lebih baik di mobile */
         .table-container {
             border-left: none;
             border-right: none;
@@ -901,27 +900,23 @@
             font-size: 0.8rem;
         }
         
-        /* Tombol cetak di riwayat */
         .data-table .action-cell {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
 
-        /* === PERBAIKAN UTAMA DI SINI === */
         .print-signatures {
-            /* Biarkan flex-direction default (row) dan pastikan ada jarak */
-            justify-content: space-between; 
+            justify-content: space-between;  
         }
 
         .print-signatures > div {
-            /* Atur lebar agar keduanya muat berdampingan */
             width: 48%;
-            max-width: 200px; /* Batas maksimal agar tidak terlalu lebar */
+            max-width: 200px;
         }
-    }
+      }
 
-    @media (max-width: 480px) {
+      @media (max-width: 480px) {
         body {
             padding: 5px;
         }
@@ -948,7 +943,7 @@
         }
         
         .summary-grid {
-            grid-template-columns: 1fr; /* Jadikan 1 kolom penuh untuk layar sangat kecil */
+            grid-template-columns: 1fr;
             gap: 10px;
         }
         
@@ -960,7 +955,7 @@
             text-align: left;
             padding: 10px;
         }
-    }
+      }
     </style>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -1086,6 +1081,7 @@
             </button>
           </div>
         </div>
+        <div id="npwp-management-section"></div>
         <div class="form-section">
           <h3 class="form-section-title">Backup & Restore</h3>
           <p style="margin-bottom: 15px">
@@ -1172,20 +1168,21 @@
        */
       class SistemAkuntansi {
         constructor() {
-          this.STORAGE_KEY = "sistemAkuntansiData_v4.9";
-          this.DRAFT_KEY = "sistemAkuntansiDraft_v4.9";
-          this.TRASH_KEY = "sistemAkuntansiTrash_v4.9";
+          this.STORAGE_KEY = "sistemAkuntansiData_v5.1";
+          this.DRAFT_KEY = "sistemAkuntansiDraft_v5.1";
+          this.TRASH_KEY = "sistemAkuntansiTrash_v5.1";
 
           this.data = null;
           this.trash = [];
           this.activeDropdown = null;
-          this.tempItems = { sale: [], purchase: [] }; // Surat jalan tidak butuh item temp
+          this.tempItems = { sale: [], purchase: [] };
           this.draftForms = { sale: null, purchase: null };
-          this.partyNames = {
-            customer: new Set(),
-            pemasok: new Set(),
-            recipient: new Set(),
+          
+          this.partyDetails = {
+            customer: new Map(),
+            pemasok: new Map(),
           };
+
           this.itemIndex = new Map();
           this.isLoading = false;
           this.eventControllers = new Map();
@@ -1195,7 +1192,7 @@
         async init() {
           try {
             this.cleanup();
-            console.log("Starting init v4.9...");
+            console.log("Starting init v5.1...");
             this.showLoading(true);
             await this.loadData();
             this.buildDOM();
@@ -1227,7 +1224,6 @@
 
         buildDOM() {
             this.cleanup();
-            // Generate forms for sale and purchase
             ["sale", "purchase"].forEach((type) => {
                 const containerId = type === "sale" ? "penjualan" : "pembelian";
                 const container = document.getElementById(containerId);
@@ -1235,12 +1231,9 @@
                     container.innerHTML = this.generateFormHTML(type) + this.generateHistoryHTML(type);
             });
         
-            // Generate history tables for invoices and delivery notes
             const invoiceContainer = document.getElementById("invoices");
             if (invoiceContainer) invoiceContainer.innerHTML = this.generateHistoryHTML("invoice");
         
-            // The suratJalan tab will be handled dynamically or can be a dedicated form if needed.
-            // For now, let's make it a simple placeholder or also a history view.
             const suratJalanContainer = document.getElementById("suratJalan");
             if (suratJalanContainer) suratJalanContainer.innerHTML = this.generateHistoryHTML("suratJalan");
         
@@ -1249,7 +1242,11 @@
         
             const addItemContainer = document.getElementById("add-master-item-form");
             if (addItemContainer) addItemContainer.innerHTML = this.generateAddItemFormHTML();
-        
+            
+            // PENAMBAHAN FITUR: Render NPWP management section
+            const npwpManagementContainer = document.getElementById("npwp-management-section");
+            if(npwpManagementContainer) npwpManagementContainer.innerHTML = this.generateNpwpManagementHTML();
+
             const pengaturanContainer = document.getElementById("pengaturan");
             if (pengaturanContainer) {
                 let trashSection = document.getElementById("trash-section");
@@ -1265,130 +1262,141 @@
         }
 
         generateFormHTML(type) {
-          const isTransaction = type === "sale" || type === "purchase";
-          if (!isTransaction) return ''; // Do not generate form for other types
+            const isTransaction = type === "sale" || type === "purchase";
+            if (!isTransaction) return '';
 
-          const title = type === "sale" ? "Penjualan" : "Pembelian";
-          const partyLabel = type === "sale" ? "Customer" : "Pemasok";
-          const partyType = type === "sale" ? "customer" : "pemasok";
-
-          let formFields = `
-            <div class="form-group">
-              <label for="transNo-${type}">No. Transaksi</label>
-              <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
-            </div>
-            <div class="form-group">
-              <label for="invoiceDate-${type}">Tanggal</label>
-              <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
-            </div>
-            <div class="form-group filterable-dropdown">
-              <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
-              <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
-              <div class="dropdown-options" id="party-dropdown-${type}"></div>
-            </div>
-            <div class="form-group">
-              <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
-              <input type="text" id="${partyType}Address-${type}">
-            </div>
-            <div class="form-group">
-              <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
-              <input type="tel" id="${partyType}Phone-${type}">
-            </div>
-            <div class="form-group">
-              <label for="vehicleNo-${type}">No. Kendaraan</label>
-              <input type="text" id="vehicleNo-${type}">
-            </div>
-            ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
-            <div class="form-group">
-                <label for="paymentMethod-${type}">Metode Pembayaran</label>
-                <select id="paymentMethod-${type}">
-                    <option value="Transfer">Transfer</option>
-                    <option value="Tunai">Tunai</option>
-                    <option value="Kredit">Kredit</option>
-                </select>
+            const title = type === "sale" ? "Penjualan" : "Pembelian";
+            const partyLabel = type === "sale" ? "Customer" : "Pemasok";
+            const partyType = type === "sale" ? "customer" : "pemasok";
+            
+            // PENAMBAHAN FITUR: PPN Checkbox moved to top
+            const ppnCheckboxHTML = `
+            <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
+                    <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: var(--primary); cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
+                </div>
             </div>`;
 
-          const itemFields = `
-            <div class="form-section">
-              <h3 class="form-section-title">Tambah Barang</h3>
-              <div class="form-grid">
-                <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;">
-                  <label for="item-selector-${type}">Cari Barang (Nama/Kode)</label>
-                  <input type="text" id="item-selector-${type}" autocomplete="off">
-                  <div class="dropdown-options" id="dropdown-options-${type}"></div>
+            let formFields = `
+                ${ppnCheckboxHTML}
+                <div class="form-group">
+                <label for="transNo-${type}">No. Transaksi</label>
+                <input type="text" id="transNo-${type}" readonly value="${this.generateId(type)}">
                 </div>
                 <div class="form-group">
-                  <label for="itemCode-${type}">Kode Barang</label>
-                  <input type="text" id="itemCode-${type}" readonly>
+                <label for="invoiceDate-${type}">Tanggal</label>
+                <input type="date" id="invoiceDate-${type}" required value="${new Date().toISOString().slice(0, 10)}">
+                </div>
+                <div class="form-group filterable-dropdown">
+                <label for="${partyType}Name-${type}">Nama ${partyLabel}</label>
+                <input type="text" id="${partyType}Name-${type}" required autocomplete="off">
+                <div class="dropdown-options" id="party-dropdown-${type}"></div>
                 </div>
                 <div class="form-group">
-                  <label for="itemQty-${type}">Jumlah</label>
-                  <input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required>
+                <label for="${partyType}Address-${type}">Alamat ${partyLabel}</label>
+                <input type="text" id="${partyType}Address-${type}">
                 </div>
                 <div class="form-group">
-                  <label for="itemUnit-${type}">Satuan</label>
-                  <input type="text" id="itemUnit-${type}">
+                <label for="${partyType}Phone-${type}">Telepon ${partyLabel}</label>
+                <input type="tel" id="${partyType}Phone-${type}">
+                </div>
+                <div class="form-group npwp-group hidden" id="npwp-group-${type}">
+                    <label for="${partyType}Npwp-${type}">NPWP/NIK</label>
+                    <input type="text" id="${partyType}Npwp-${type}">
                 </div>
                 <div class="form-group">
-                  <label for="itemPrice-${type}">Harga Satuan (Rp)</label>
-                  <input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required>
+                <label for="vehicleNo-${type}">No. Kendaraan</label>
+                <input type="text" id="vehicleNo-${type}">
                 </div>
-                <div class="form-group" style="align-self: flex-end;">
-                  <button type="button" id="addItemBtn-${type}" class="btn btn-primary">Tambah Barang</button>
+                ${type === "sale" ? `<div class="form-group"><label for="ref-${type}">Ref</label><input type="text" id="ref-${type}"></div>` : ""}
+                <div class="form-group">
+                    <label for="paymentMethod-${type}">Metode Pembayaran</label>
+                    <select id="paymentMethod-${type}">
+                        <option value="Transfer">Transfer</option>
+                        <option value="Tunai">Tunai</option>
+                        <option value="Kredit">Kredit</option>
+                    </select>
+                </div>`;
+
+            const itemFields = `
+                <div class="form-section">
+                <h3 class="form-section-title">Tambah Barang</h3>
+                <div class="form-grid">
+                    <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;">
+                    <label for="item-selector-${type}">Cari Barang (Nama/Kode)</label>
+                    <input type="text" id="item-selector-${type}" autocomplete="off">
+                    <div class="dropdown-options" id="dropdown-options-${type}"></div>
+                    </div>
+                    <div class="form-group">
+                    <label for="itemCode-${type}">Kode Barang</label>
+                    <input type="text" id="itemCode-${type}" readonly>
+                    </div>
+                    <div class="form-group">
+                    <label for="itemQty-${type}">Jumlah</label>
+                    <input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required>
+                    </div>
+                    <div class="form-group">
+                    <label for="itemUnit-${type}">Satuan</label>
+                    <input type="text" id="itemUnit-${type}">
+                    </div>
+                    <div class="form-group">
+                    <label for="itemPrice-${type}">Harga Satuan (Rp)</label>
+                    <input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required>
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                    <button type="button" id="addItemBtn-${type}" class="btn btn-primary">Tambah Barang</button>
+                    </div>
                 </div>
-              </div>
-            </div>`;
+                </div>`;
 
-          const tableHeaders = `<th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th>`;
+            const tableHeaders = `<th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Jumlah</th><th>Satuan</th><th class="text-right">Harga Satuan</th><th class="text-right">Total</th><th class="action-cell">Aksi</th>`;
 
-          const summarySection = `<div class="summary-section">
-              <div class="summary-grid">
-                  <label>Subtotal:</label>
-                  <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
+            // PENAMBAHAN FITUR: PPN display only in summary, checkbox moved up
+            const summarySection = `<div class="summary-section">
+                <div class="summary-grid">
+                    <label>Subtotal:</label>
+                    <div class="total-amount-display" id="subtotal-${type}">Rp 0</div>
 
-                  <label for="discount-${type}">Diskon (Rp):</label>
-                  <input type="text" id="discount-${type}" class="rupiah-input" value="0">
+                    <label for="discount-${type}">Diskon (Rp):</label>
+                    <input type="text" id="discount-${type}" class="rupiah-input" value="0">
 
-                  <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label>
-                  <input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
+                    <label for="shippingCost-${type}">Ongkos Kirim (Rp):</label>
+                    <input type="text" id="shippingCost-${type}" class="rupiah-input" value="0">
 
-                  <label for="includePpn-${type}">PPN 11%:</label>
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                      <input type="checkbox" id="includePpn-${type}" style="width: auto; margin-right: 5px; flex-shrink: 0;">
-                      <label for="includePpn-${type}" style="margin-bottom: 0; text-align: left; font-weight: normal; flex-grow: 1;">Sertakan</label>
-                      <div class="total-amount-display" id="ppn-${type}" style="flex-shrink: 0; text-align: right;">Rp 0</div>
-                  </div>
+                    <label>PPN 11%:</label>
+                    <div class="total-amount-display" id="ppn-${type}">Rp 0</div>
 
-                  <label for="dp-${type}">Uang Muka / DP (Rp):</label>
-                  <input type="text" id="dp-${type}" class="rupiah-input" value="0">
+                    <label for="dp-${type}">Uang Muka / DP (Rp):</label>
+                    <input type="text" id="dp-${type}" class="rupiah-input" value="0">
 
-                  <label>Grand Total:</label>
-                  <div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
-              </div>
-            </div>`;
+                    <label>Grand Total:</label>
+                    <div class="total-amount-display" id="grandTotal-${type}">Rp 0</div>
+                </div>
+                </div>`;
 
-          return `<div class="form-section">
-              <h3 class="form-section-title">Form ${title}</h3>
-              <form id="${type}Form">
-                  <div class="form-grid">${formFields}</div>
-                  ${itemFields}
-                  <div class="table-container">
-                      <table class="data-table" id="temp-items-table-${type}">
-                          <thead><tr>${tableHeaders}</tr></thead>
-                          <tbody></tbody>
-                      </table>
-                  </div>
-                  ${summarySection}
-                  <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
-                      <label for="notes-${type}">Catatan</label>
-                      <textarea id="notes-${type}" rows="3"></textarea>
-                  </div>
-                  <div class="actions-group">
-                      <button type="submit" class="btn btn-success">Simpan Transaksi</button>
-                      <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">Reset Form</button>
-                  </div>
-              </form>
-            </div>`;
+            return `<div class="form-section">
+                <h3 class="form-section-title">Form ${title}</h3>
+                <form id="${type}Form">
+                    <div class="form-grid">${formFields}</div>
+                    ${itemFields}
+                    <div class="table-container">
+                        <table class="data-table" id="temp-items-table-${type}">
+                            <thead><tr>${tableHeaders}</tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    ${summarySection}
+                    <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
+                        <label for="notes-${type}">Catatan</label>
+                        <textarea id="notes-${type}" rows="3"></textarea>
+                    </div>
+                    <div class="actions-group">
+                        <button type="submit" class="btn btn-success">Simpan Transaksi</button>
+                        <button type="button" class="btn btn-warning" onclick="app.resetForm('${type}')">Reset Form</button>
+                    </div>
+                </form>
+                </div>`;
         }
         
         bindGlobalEvents() {
@@ -1397,14 +1405,13 @@
             this.eventControllers.set("global", globalController);
             const { signal } = globalController;
 
-            // Listener umum untuk menutup dropdown
             document.addEventListener("click", (e) => {
                 if (!e.target.closest(".filterable-dropdown")) {
                     this.closeAllDropdowns();
                 }
             }, { signal });
 
-            // Listener untuk semua tombol di tab Pengaturan
+            // Settings tab listeners
             document.getElementById("saveConfigBtn")?.addEventListener("click", () => this.saveConfig(), { signal });
             document.getElementById("saveMasterItemsBtn")?.addEventListener("click", () => this.saveMasterItemsFromTextarea(), { signal });
             document.getElementById("clearMasterItemsBtn")?.addEventListener("click", () => this.clearMasterItems(), { signal });
@@ -1419,23 +1426,28 @@
                 this.addNewMasterItem();
             }, { signal });
 
-            // Listener untuk filter di Dashboard
+            // PENAMBAHAN FITUR: NPWP Management Listeners
+            document.getElementById("add-npwp-form")?.addEventListener("submit", (e) => {
+                e.preventDefault();
+                this.addNewNpwp();
+            }, { signal });
+            document.getElementById("save-npwp-json-btn")?.addEventListener("click", () => this.saveNpwpFromJson(), { signal });
+            document.getElementById("clear-npwp-btn")?.addEventListener("click", () => this.clearAllNpwp(), { signal });
+
+
             const dashboardFilters = document.getElementById("dashboard-filters");
             if (dashboardFilters) {
                 dashboardFilters.addEventListener("input", Utils.debounce(() => this.renderDashboard(), 300), { signal });
             }
 
-            // Listener untuk semua form (Penjualan & Pembelian)
             ["sale", "purchase"].forEach((type) => {
                 this.bindFormEvents(type);
             });
 
-            // === PERBAIKAN UTAMA DI SINI ===
-            // Satu event listener untuk menangani semua tombol ekspor dan filter riwayat
             document.querySelector('.container').addEventListener('input', (e) => {
                 if (e.target.closest('.history-filters')) {
                     const historyFilters = e.target.closest('.history-filters');
-                    const type = historyFilters.id.replace('history-filters-', ''); // e.g., 'sale', 'invoice'
+                    const type = historyFilters.id.replace('history-filters-', '');
                     const dataKey = type === 'sale' ? 'penjualan' : type === 'purchase' ? 'pembelian' : type;
                     Utils.debounce(() => this.renderHistoryTable(dataKey, `${type}-history-table`), 300)();
                 }
@@ -1479,7 +1491,9 @@
                     dropdown.addEventListener("click", (e) => {
                         const option = e.target.closest(".dropdown-option");
                         if (option) {
-                            partyInput.value = option.textContent;
+                            const selectedName = option.dataset.name;
+                            partyInput.value = selectedName;
+                            this.populatePartyDetails(selectedName, type);
                             this.closeAllDropdowns();
                         }
                     }, { signal });
@@ -1531,120 +1545,193 @@
                 }
             }, { signal });
 
-            // Event listeners for calculation fields
             ["itemPrice", "shippingCost", "discount", "dp"].forEach((id) => {
                 const input = form.querySelector(`#${id}-${type}`);
                 if (input) {
                     input.addEventListener("input", (e) => {
-                      if(input.classList.contains('rupiah-input')) Utils.formatRupiahInput(e.target);
+                        if(input.classList.contains('rupiah-input')) Utils.formatRupiahInput(e.target);
                     });
                     input.addEventListener("blur", () => this.calculateTotals(type));
                 }
             });
-            form.querySelector(`#includePpn-${type}`)?.addEventListener("change", () => this.calculateTotals(type), { signal });
-        }
-
-        selectItemFromDropdown(code, type) {
-            const form = document.getElementById(`${type}Form`);
-            if (!form) return;
-
-            const item = this.data.masterItems.find((i) => i.code === code);
-            if (!item) return;
-
-            form.querySelector(`#item-selector-${type}`).value = item.name;
-            form.querySelector(`#itemCode-${type}`).value = item.code;
-            form.querySelector(`#itemUnit-${type}`).value = item.unit || "";
-            form.querySelector(`#itemPrice-${type}`).value = this.formatNumber(item.price || 0);
-            form.querySelector(`#itemQty-${type}`).focus();
-            this.closeAllDropdowns();
-        }
-
-        formatCurrency(value, withSymbol = true) {
-            const number = Number(value) || 0;
-            const options = {
-                style: "currency",
-                currency: "IDR",
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-            };
-            if (!withSymbol) {
-                return new Intl.NumberFormat("id-ID").format(number);
-            }
-            return new Intl.NumberFormat("id-ID", options).format(number);
-        }
-
-        formatNumber(value) {
-            return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
-        }
-
-        addItemToTempList(type) {
-            const form = document.getElementById(`${type}Form`);
-            if (!form) return;
-
-            const itemCode = form.querySelector(`#itemCode-${type}`).value;
-            const qty = parseFloat(form.querySelector(`#itemQty-${type}`).value) || 0;
-            const price = parseInt((form.querySelector(`#itemPrice-${type}`).value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-            const unit = form.querySelector(`#itemUnit-${type}`).value;
-
-            const item = this.data.masterItems.find((i) => i.code === itemCode);
-            if (!item) {
-                this.showNotification("Kode barang tidak ditemukan.", false);
-                return;
-            }
-
-            if (qty <= 0) {
-                this.showNotification("Jumlah barang harus lebih dari 0.", false);
-                return;
-            }
-
-            const newItem = {
-                id: Date.now(),
-                code: itemCode,
-                name: item.name,
-                qty,
-                unit: unit || item.unit || "-",
-                price: price,
-                total: qty * price,
-            };
-
-            this.tempItems[type].push(newItem);
-            this.renderTempItemsTable(type);
-            form.querySelector(`#item-selector-${type}`).value = "";
-            form.querySelector(`#itemCode-${type}`).value = "";
-            form.querySelector(`#itemQty-${type}`).value = "0";
-            form.querySelector(`#itemPrice-${type}`).value = "0";
-            form.querySelector(`#itemUnit-${type}`).value = "";
-            form.querySelector(`#item-selector-${type}`).focus();
-        }
-
-        filterPartyNames(type, showAll = false) {
-            const partyType = type === "sale" ? "customer" : type === "purchase" ? "pemasok" : "recipient";
-            const input = document.getElementById(`${partyType}Name-${type}`);
-            const filter = input?.value?.toUpperCase() || "";
-            const dropdown = document.getElementById(`party-dropdown-${type}`);
-            if (!dropdown || !input) return;
-
-            this.closeAllDropdowns();
-            this.activeDropdown = dropdown;
-
-            const names = [...this.partyNames[partyType]].sort();
-            const filteredNames = showAll ? names : names.filter(name => name.toUpperCase().includes(filter));
             
-            dropdown.innerHTML = filteredNames
-                .map(name => `<div class="dropdown-option">${name}</div>`)
-                .join("");
-            
-            dropdown.style.display = dropdown.innerHTML ? "block" : "none";
+            const ppnCheckbox = form.querySelector(`#includePpn-${type}`);
+            if (ppnCheckbox) {
+                ppnCheckbox.addEventListener("change", () => {
+                    this.calculateTotals(type);
+                    const npwpGroup = document.getElementById(`npwp-group-${type}`);
+                    const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
+                    if (ppnCheckbox.checked) {
+                        npwpGroup.classList.remove('hidden');
+                        npwpInput.required = true;
+                    } else {
+                        npwpGroup.classList.add('hidden');
+                        npwpInput.required = false;
+                    }
+                }, { signal });
+            }
         }
         
+        // ... (rest of the class methods are mostly unchanged)
+        
+        async updateAllUI() {
+            try {
+                this.showLoading(true);
+                this.renderAllHistoryTables();
+                await this.renderDashboard();
+                await this.renderMasterItemsTextarea();
+                await this.renderNpwpTextarea(); // PENAMBAHAN FITUR
+                this.updateMasterItemCountDisplay();
+                this.loadConfigToForm();
+                this.renderTrashTable();
+            } catch (error) {
+                Utils.logError("UI update failed", error);
+                this.showNotification("Gagal memperbarui UI", false);
+            } finally {
+                this.showLoading(false);
+            }
+        }
+        
+        // PENAMBAHAN FITUR: All new methods for NPWP management
+        
+        generateNpwpManagementHTML() {
+            return `<div class="form-section">
+                <h3 class="form-section-title">Manajemen Data NPWP/NIK</h3>
+                <form id="add-npwp-form">
+                    <p style="margin-bottom:15px;">Tambah data NPWP/NIK untuk customer atau pemasok. Data ini akan tersimpan dan dapat digunakan pada form transaksi.</p>
+                    <div class="form-grid" style="align-items: flex-end;">
+                        <div class="form-group">
+                            <label for="new-npwp-number">No. NPWP / NIK</label>
+                            <input type="text" id="new-npwp-number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-npwp-name">Nama Customer / Pemasok</label>
+                            <input type="text" id="new-npwp-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-npwp-type">Jenis</label>
+                            <select id="new-npwp-type" required>
+                                <option value="customer">Customer</option>
+                                <option value="pemasok">Pemasok</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Tambah NPWP</button>
+                        </div>
+                    </div>
+                </form>
+                <hr style="margin: 25px 0;">
+                <div class="form-group">
+                    <label for="npwp-json-data">Edit Massal Data NPWP (Format JSON)</label>
+                    <textarea id="npwp-json-data" rows="10" placeholder="Data NPWP dalam format JSON akan tampil di sini..."></textarea>
+                </div>
+                <div class="actions-group">
+                    <button type="button" id="save-npwp-json-btn" class="btn btn-primary">Simpan dari JSON</button>
+                    <button type="button" id="clear-npwp-btn" class="btn btn-danger">Hapus Semua Data NPWP</button>
+                </div>
+            </div>`;
+        }
+        
+        async renderNpwpTextarea() {
+            const textarea = document.getElementById("npwp-json-data");
+            if (!textarea) return;
+
+            const combinedList = [];
+            this.partyDetails.customer.forEach((details, name) => {
+                if (details.npwp) {
+                    combinedList.push({ name, npwp: details.npwp, type: 'customer' });
+                }
+            });
+            this.partyDetails.pemasok.forEach((details, name) => {
+                if (details.npwp) {
+                    combinedList.push({ name, npwp: details.npwp, type: 'pemasok' });
+                }
+            });
+
+            combinedList.sort((a, b) => a.name.localeCompare(b.name));
+            textarea.value = JSON.stringify(combinedList, null, 2);
+        }
+
+        async addNewNpwp() {
+            const number = document.getElementById('new-npwp-number').value.trim();
+            const name = document.getElementById('new-npwp-name').value.trim();
+            const type = document.getElementById('new-npwp-type').value;
+
+            if (!number || !name) {
+                this.showNotification("Nomor NPWP/NIK dan Nama harus diisi.", false);
+                return;
+            }
+
+            const existingDetails = this.partyDetails[type].get(name) || { address: '', phone: '', npwp: '' };
+            existingDetails.npwp = number;
+            
+            this.partyDetails[type].set(name, existingDetails);
+            this.saveData();
+            await this.renderNpwpTextarea();
+            this.showNotification(`Data NPWP untuk ${name} berhasil disimpan.`);
+            document.getElementById('add-npwp-form').reset();
+        }
+
+        async saveNpwpFromJson() {
+            const textarea = document.getElementById("npwp-json-data");
+            try {
+                const data = JSON.parse(textarea.value);
+                if (!Array.isArray(data)) throw new Error("Format JSON harus berupa array.");
+                if (!data.every(item => item.hasOwnProperty("name") && item.hasOwnProperty("npwp") && item.hasOwnProperty("type"))) {
+                    throw new Error('Setiap item harus memiliki properti "name", "npwp", dan "type".');
+                }
+
+                if (confirm("Anda yakin ingin menimpa semua data NPWP dengan data dari JSON ini?")) {
+                    const tempCustomers = new Map();
+                    const tempPemasok = new Map();
+
+                    data.forEach(item => {
+                        const targetMap = item.type === 'customer' ? tempCustomers : tempPemasok;
+                        const existing = targetMap.get(item.name) || {};
+                        targetMap.set(item.name, { ...existing, npwp: item.npwp });
+                    });
+
+                    // Merge with existing details to not lose address/phone
+                    this.partyDetails.customer.forEach((details, name) => {
+                        if (tempCustomers.has(name)) {
+                            tempCustomers.set(name, { ...details, ...tempCustomers.get(name) });
+                        }
+                    });
+                     this.partyDetails.pemasok.forEach((details, name) => {
+                        if (tempPemasok.has(name)) {
+                            tempPemasok.set(name, { ...details, ...tempPemasok.get(name) });
+                        }
+                    });
+
+                    this.partyDetails.customer = tempCustomers;
+                    this.partyDetails.pemasok = tempPemasok;
+
+                    this.saveData();
+                    await this.renderNpwpTextarea();
+                    this.showNotification("Data NPWP berhasil disimpan dari JSON.");
+                }
+            } catch (error) {
+                Utils.logError("Failed to save NPWP from JSON", error);
+                this.showNotification(`Gagal menyimpan: ${error.message}`, false);
+            }
+        }
+        
+        async clearAllNpwp() {
+            if (confirm("Yakin ingin menghapus SEMUA data NPWP yang tersimpan? (Alamat dan telepon tidak akan terhapus)")) {
+                this.partyDetails.customer.forEach(details => details.npwp = '');
+                this.partyDetails.pemasok.forEach(details => details.npwp = '');
+                this.saveData();
+                await this.renderNpwpTextarea();
+                this.showNotification("Semua data NPWP telah dihapus.");
+            }
+        }
+        
+        // ... (all other methods remain the same as the previous version)
+        
+        // Minor modification to loadData and saveData to handle the new structure
         loadData() {
             const defaultData = {
-                penjualan: [],
-                pembelian: [],
-                invoices: [],
-                suratJalan: [],
-                masterItems: [
-    {"code": "BRG-2", "name": "ALMUNIUM", "unit": "Kg", "price": 0},
+                penjualan: [], pembelian: [], invoices: [], suratJalan: [], masterItems: [{"code": "BRG-2", "name": "ALMUNIUM", "unit": "Kg", "price": 0},
     {"code": "BRG-3", "name": "UNP", "unit": "Kg", "price": 0},
     {"code": "j", "name": "SCRAP", "unit": "Kg", "price": 0},
     {"code": "BRG-5", "name": "SIKU + UNP", "unit": "Kg", "price": 0},
@@ -2145,22 +2232,36 @@
     {"code": "BRG-497", "name": "TIANG TLP 9 M", "unit": "BATANG", "price": 0},
     {"code": "BRG-498", "name": "BETON 16 URIL FULL", "unit": "PCS", "price": 0},
     {"code": "BRG-499", "name": "BETON 8 POLOS FULL", "unit": "PCS", "price": 0},
-    {"code": "BRG-450", "name": "TALANG", "unit": "Kg", "price": 0}
-],
+    {"code": "BRG-450", "name": "TALANG", "unit": "Kg", "price": 0}],
                 config: {
-                    noPenjualan: 1,
-                    noPembelian: 1,
-                    noInvoice: 1,
-                    noSuratJalan: 1,
-                    namaPerusahaan: "PT. SUMBER GANDA MEKAR",
-                    alamatPerusahaan: "Jl. Raya Gedebage No. 95 Bandung",
+                    noPenjualan: 1, noPembelian: 1, noInvoice: 1, noSuratJalan: 1,
+                    namaPerusahaan: "PT. SUMBER GANDA MEKAR", alamatPerusahaan: "Jl. Raya Gedebage No. 95 Bandung",
                     kontak: "CP. Irwan : 082117800626, CP. Uwem : 082318188863",
                     rekening: "BANK BCA No. Rek. 2801011286 a.n Maman Suherman",
                     rekeningPpn: "BANK BCA No. Rek. 2803024545 a.n PT. SUMBER GANDA MEKAR",
                     tagline: "JUAL BELI BESI TUA/BARU - RANGKA BETON/LOGAM - TIANG LISTRIK/TELP - KONSTRUKSI BAJA DAN PAKAN TERNAK",
                     logoUrl: "logo.png",
                 },
-                partyNames: { customer: [], pemasok: [], recipient: [] },
+                partyDetails: { customer: {
+                  "PT. HAMPARAN REJEKI": { "npwp": "0020102315004000", "alamat": "", "phone": "" },
+                  "PT. PUTRA NOER HIDAYAH": { "npwp": "857905400427000", "alamat": "", "phone": "" },
+                  "AGUS KUSNAEDI": { "npwp": "3273070303830002", "alamat": "JL. SUKAJADI NO. 338/182 BANDUNG", "phone": "" },
+                  "YOGI MUHAMAD QORNI": { "npwp": "3204272909980003", "alamat": "KP. PEUNDEUY", "phone": "" },
+                  "DANI AGUS RAMDANI": { "npwp": "3204251203790023", "alamat": "KP. BALONG", "phone": "" },
+                  "ARIFIN GUNAWIJAYA": { "npwp": "3204151012800004", "alamat": "KP. CIKONDANG", "phone": "" },
+                  "BOBBY LOWELL": { "npwp": "3277010707940019", "alamat": "KOMP BUMI INDAH KAV 70", "phone": "" },
+                  "WANTO": { "npwp": "3273122803850000", "alamat": "BANDUNG", "phone": "" }
+                }, 
+                pemasok: {
+                  "PT. HAMPARAN REJEKI": { "npwp": "0020102315004000", "alamat": "", "phone": "" },
+                  "PT. PUTRA NOER HIDAYAH": { "npwp": "857905400427000", "alamat": "", "phone": "" },
+                  "AGUS KUSNAEDI": { "npwp": "3273070303830002", "alamat": "JL. SUKAJADI NO. 338/182 BANDUNG", "phone": "" },
+                  "YOGI MUHAMAD QORNI": { "npwp": "3204272909980003", "alamat": "KP. PEUNDEUY", "phone": "" },
+                  "DANI AGUS RAMDANI": { "npwp": "3204251203790023", "alamat": "KP. BALONG", "phone": "" },
+                  "ARIFIN GUNAWIJAYA": { "npwp": "3204151012800004", "alamat": "KP. CIKONDANG", "phone": "" },
+                  "BOBBY LOWELL": { "npwp": "3277010707940019", "alamat": "KOMP BUMI INDAH KAV 70", "phone": "" },
+                  "WANTO": { "npwp": "3273122803850000", "alamat": "BANDUNG", "phone": "" }
+                } },
             };
 
             return new Promise((resolve, reject) => {
@@ -2169,19 +2270,17 @@
                     if (dataFromStorage) {
                         const parsedData = JSON.parse(dataFromStorage);
                         this.data = {
-                            ...defaultData,
-                            ...parsedData,
+                            ...defaultData, ...parsedData,
                             config: { ...defaultData.config, ...(parsedData.config || {}) },
-                            partyNames: parsedData.partyNames || defaultData.partyNames,
-                            invoices: parsedData.invoices || [], // Ensure invoices array exists
+                            partyDetails: parsedData.partyDetails || defaultData.partyDetails,
+                            invoices: parsedData.invoices || [],
                         };
                     } else {
                         this.data = defaultData;
                     }
 
-                    this.partyNames.customer = new Set(this.data.partyNames.customer || []);
-                    this.partyNames.pemasok = new Set(this.data.partyNames.pemasok || []);
-                    this.partyNames.recipient = new Set(this.data.partyNames.recipient || []);
+                    this.partyDetails.customer = new Map(Object.entries(this.data.partyDetails.customer || {}));
+                    this.partyDetails.pemasok = new Map(Object.entries(this.data.partyDetails.pemasok || {}));
 
                     const trashData = localStorage.getItem(this.TRASH_KEY);
                     if (trashData) {
@@ -2190,19 +2289,136 @@
                         cutoff.setDate(cutoff.getDate() - 30);
                         this.trash = this.trash.filter(item => new Date(item.deletedAt) >= cutoff);
                         localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
-                    } else {
-                        this.trash = [];
-                    }
+                    } else { this.trash = []; }
 
                     this.buildItemIndex();
                     resolve();
                 } catch (e) {
-                    this.data = defaultData;
-                    this.trash = [];
+                    this.data = defaultData; this.trash = [];
                     this.buildItemIndex();
                     reject(e);
                 }
             });
+        }
+        
+        saveData() {
+            try {
+                this.data.partyDetails.customer = Object.fromEntries(this.partyDetails.customer);
+                this.data.partyDetails.pemasok = Object.fromEntries(this.partyDetails.pemasok);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+            } catch (error) {
+                Utils.logError("Failed to save data", error);
+                this.showNotification("Gagal menyimpan data ke storage", false);
+            }
+        }
+        
+        // The rest of the javascript code is identical...
+        // ... (insert remaining unchanged JavaScript methods here)
+        
+        selectItemFromDropdown(code, type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const item = this.data.masterItems.find((i) => i.code === code);
+            if (!item) return;
+
+            form.querySelector(`#item-selector-${type}`).value = item.name;
+            form.querySelector(`#itemCode-${type}`).value = item.code;
+            form.querySelector(`#itemUnit-${type}`).value = item.unit || "";
+            form.querySelector(`#itemPrice-${type}`).value = this.formatNumber(item.price || 0);
+            form.querySelector(`#itemQty-${type}`).focus();
+            this.closeAllDropdowns();
+        }
+
+        formatCurrency(value, withSymbol = true) {
+            const number = Number(value) || 0;
+            const options = {
+                style: "currency",
+                currency: "IDR",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            };
+            if (!withSymbol) {
+                return new Intl.NumberFormat("id-ID").format(number);
+            }
+            return new Intl.NumberFormat("id-ID", options).format(number);
+        }
+
+        formatNumber(value) {
+            return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
+        }
+
+        addItemToTempList(type) {
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const itemCode = form.querySelector(`#itemCode-${type}`).value;
+            const qty = parseFloat(form.querySelector(`#itemQty-${type}`).value) || 0;
+            const price = parseInt((form.querySelector(`#itemPrice-${type}`).value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const unit = form.querySelector(`#itemUnit-${type}`).value;
+
+            const item = this.data.masterItems.find((i) => i.code === itemCode);
+            if (!item) {
+                this.showNotification("Kode barang tidak ditemukan.", false);
+                return;
+            }
+
+            if (qty <= 0) {
+                this.showNotification("Jumlah barang harus lebih dari 0.", false);
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                code: itemCode,
+                name: item.name,
+                qty,
+                unit: unit || item.unit || "-",
+                price: price,
+                total: qty * price,
+            };
+
+            this.tempItems[type].push(newItem);
+            this.renderTempItemsTable(type);
+            form.querySelector(`#item-selector-${type}`).value = "";
+            form.querySelector(`#itemCode-${type}`).value = "";
+            form.querySelector(`#itemQty-${type}`).value = "0";
+            form.querySelector(`#itemPrice-${type}`).value = "0";
+            form.querySelector(`#itemUnit-${type}`).value = "";
+            form.querySelector(`#item-selector-${type}`).focus();
+        }
+
+        filterPartyNames(type, showAll = false) {
+            const partyType = type === "sale" ? "customer" : "pemasok";
+            const input = document.getElementById(`${partyType}Name-${type}`);
+            const filter = input?.value?.toUpperCase() || "";
+            const dropdown = document.getElementById(`party-dropdown-${type}`);
+            if (!dropdown || !input) return;
+
+            this.closeAllDropdowns();
+            this.activeDropdown = dropdown;
+            
+            const allPartyNames = [...this.partyDetails[partyType].keys()];
+            const filteredNames = showAll ? allPartyNames.sort() : allPartyNames.filter(name => name.toUpperCase().includes(filter)).sort();
+            
+            dropdown.innerHTML = filteredNames
+                .map(name => `<div class="dropdown-option" data-name="${this.sanitizeInput(name)}">${this.sanitizeInput(name)}</div>`)
+                .join("");
+            
+            dropdown.style.display = dropdown.innerHTML ? "block" : "none";
+        }
+        
+        populatePartyDetails(name, type) {
+            const partyType = type === 'sale' ? 'customer' : 'pemasok';
+            const details = this.partyDetails[partyType].get(name);
+            if (details) {
+                document.getElementById(`${partyType}Address-${type}`).value = details.address || '';
+                document.getElementById(`${partyType}Phone-${type}`).value = details.phone || '';
+                const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
+                if (npwpInput) {
+                    npwpInput.value = details.npwp || '';
+                }
+            }
         }
         
         buildItemIndex() {
@@ -2292,7 +2508,6 @@
 
             const [item] = this.trash.splice(index, 1);
             delete item.deletedAt;
-            // The dataKey property is still needed to know where to push it back
             const originalDataKey = item.dataKey;
             delete item.dataKey;
 
@@ -2343,19 +2558,6 @@
             ).join('');
             
             dropdown.style.display = dropdown.innerHTML ? "block" : "none";
-        }
-
-        saveData() {
-            try {
-                this.data.partyNames.customer = [...this.partyNames.customer].sort();
-                this.data.partyNames.pemasok = [...this.partyNames.pemasok].sort();
-                this.data.partyNames.recipient = [...this.partyNames.recipient].sort();
-                console.log('Saving data to localStorage:', this.data); // Debugging
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
-            } catch (error) {
-                Utils.logError("Failed to save data", error);
-                this.showNotification("Gagal menyimpan data ke storage", false);
-            }
         }
 
         closeAllDropdowns() {
@@ -2424,30 +2626,18 @@
             Object.entries(draft.formData).forEach(([id, value]) => {
                 const input = document.getElementById(id);
                 if (input) {
-                    if (input.type === "checkbox") input.checked = value;
+                    if (input.type === "checkbox") {
+                        input.checked = value;
+                        if (input.id.startsWith('includePpn')) {
+                            input.dispatchEvent(new Event('change'));
+                        }
+                    }
                     else input.value = value;
                 }
             });
             
             this.tempItems[type] = Array.isArray(draft.tempItems) ? draft.tempItems.filter(item => item && item.id && item.code && item.name) : [];
             this.renderTempItemsTable(type);
-        }
-        
-        async updateAllUI() {
-            try {
-                this.showLoading(true);
-                this.renderAllHistoryTables();
-                await this.renderDashboard();
-                await this.renderMasterItemsTextarea();
-                this.updateMasterItemCountDisplay();
-                this.loadConfigToForm();
-                this.renderTrashTable();
-            } catch (error) {
-                Utils.logError("UI update failed", error);
-                this.showNotification("Gagal memperbarui UI", false);
-            } finally {
-                this.showLoading(false);
-            }
         }
 
         _getFilteredHistoryData(dataKey) {
@@ -2583,21 +2773,35 @@
 
         calculateTotals(type) {
             const form = document.getElementById(`${type}Form`);
-            if (!form) return { subtotal: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
+            if (!form) return { subtotal: 0, dpp: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
 
             const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
             const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
             const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
             const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
             const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
-            const ppn = includePpn ? Math.round((subtotal - discount) * 0.11) : 0;
-            const grandTotal = subtotal - discount + shippingCost + ppn - dp;
+
+            let dpp = 0;
+            let ppn = 0;
+            const totalAfterDiscount = subtotal - discount;
+
+            if (includePpn) {
+                // Kalkulasi PPN Inklusif (Harga dianggap sudah termasuk PPN)
+                // DPP = Total / 1.11
+                dpp = Math.round(totalAfterDiscount / 1.11);
+                // PPN = Total - DPP (lebih akurat karena pembulatan)
+                ppn = totalAfterDiscount - dpp;
+            }
+
+            // Jika PPN inklusif, PPN sudah ada di dalam `totalAfterDiscount`
+            // Jika tidak, ppn bernilai 0, sehingga tidak menambah grand total
+            const grandTotal = totalAfterDiscount + shippingCost - dp;
 
             form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
             form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
             form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
 
-            return { subtotal, ppn, discount, shippingCost, dp, grandTotal };
+            return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
         }
 
         generateId(type, transType = null) {
@@ -2642,26 +2846,36 @@
         }
 
         async saveTransaction(type) {
-    try {
-        this.showLoading(true);
-        const form = document.getElementById(`${type}Form`);
-        const tempItems = this.tempItems[type];
-        if (tempItems.length === 0) throw new Error("Tambahkan minimal satu barang.");
-        for (const field of form.querySelectorAll("[required]")) {
-            const label = field.labels?.[0]?.textContent || field.name;
-            if (!Utils.validateInput(field.value, "required")) {
-                field.focus();
-                throw new Error(`Field '${label}' harus diisi.`);
-            }
-        }
-        const partyType = type === "sale" ? "customer" : "pemasok";
-        const partyName = this.sanitizeInput(form.querySelector(`#${partyType}Name-${type}`).value.trim());
-        if (partyName) this.partyNames[partyType].add(partyName);
-        const isTransaction = type === "sale" || type === "purchase";
-        const includePpn = isTransaction && form.querySelector(`#includePpn-${type}`)?.checked;
-        const dataKey = includePpn ? "invoices" : (type === "sale" ? "penjualan" : "pembelian");
-        const idType = includePpn ? "invoice" : type;
-        console.log(`Saving transaction to ${dataKey}, type: ${type}, includePpn: ${includePpn}`); // Debugging
+            try {
+                this.showLoading(true);
+                const form = document.getElementById(`${type}Form`);
+                const tempItems = this.tempItems[type];
+                if (tempItems.length === 0) throw new Error("Tambahkan minimal satu barang.");
+                for (const field of form.querySelectorAll("[required]")) {
+                    const label = field.labels?.[0]?.textContent || field.name;
+                    if (!Utils.validateInput(field.value, "required")) {
+                        field.focus();
+                        throw new Error(`Field '${label}' harus diisi.`);
+                    }
+                }
+                const partyType = type === "sale" ? "customer" : "pemasok";
+                const partyName = this.sanitizeInput(form.querySelector(`#${partyType}Name-${type}`).value.trim());
+                const address = this.sanitizeInput(form.querySelector(`#${partyType}Address-${type}`).value.trim());
+                const phone = this.sanitizeInput(form.querySelector(`#${partyType}Phone-${type}`).value.trim());
+                
+                const npwp = this.sanitizeInput(form.querySelector(`#${partyType}Npwp-${type}`).value.trim());
+                if (partyName) {
+                    this.partyDetails[partyType].set(partyName, { address, phone, npwp });
+                }
+
+                const isTransaction = type === "sale" || type === "purchase";
+                const includePpn = isTransaction && form.querySelector(`#includePpn-${type}`)?.checked;
+                const dataKey = includePpn ? "invoices" : (type === "sale" ? "penjualan" : "pembelian");
+                const idType = includePpn ? "invoice" : type;
+                
+                if (includePpn && !npwp) {
+                    throw new Error("Field 'NPWP/NIK' harus diisi jika menggunakan PPN.");
+                }
 
                 const newId = this.generateId(idType, includePpn ? type : null);
                 const totals = this.calculateTotals(type);
@@ -2673,25 +2887,21 @@
                     items: [...tempItems],
                     ...totals,
                     [partyType]: partyName,
-                    alamat: this.sanitizeInput(form.querySelector(`#${partyType}Address-${type}`).value),
-                    telepon: this.sanitizeInput(form.querySelector(`#${partyType}Phone-${type}`).value),
+                    alamat: address,
+                    telepon: phone,
+                    npwp: npwp,
                     noKendaraan: this.sanitizeInput(form.querySelector(`#vehicleNo-${type}`)?.value),
                     metodePembayaran: form.querySelector(`#paymentMethod-${type}`).value,
-                    transType: type, // Store original type (sale/purchase) for invoices
+                    transType: type,
                 };
                 
                 if (type === "sale") {
                     newTrans.ref = this.sanitizeInput(form.querySelector(`#ref-${type}`).value);
                 }
 
-                // Increment the correct counter
-                if (includePpn) {
-                    this.data.config.noInvoice++;
-                } else if (type === "sale") {
-                    this.data.config.noPenjualan++;
-                } else if (type === "purchase") {
-                    this.data.config.noPembelian++;
-                }
+                if (includePpn) this.data.config.noInvoice++;
+                else if (type === "sale") this.data.config.noPenjualan++;
+                else if (type === "purchase") this.data.config.noPembelian++;
 
                 this.data[dataKey].unshift(newTrans);
                 this.saveData();
@@ -2699,11 +2909,11 @@
                 await this.updateAllUI();
                 this.showNotification(`Transaksi ${newTrans.id} berhasil disimpan di ${dataKey}.`);
             } catch (error) {
-        Utils.logError("Transaction save failed", error);
-        this.showNotification(`Gagal: ${error.message}`, false);
-    } finally {
-        this.showLoading(false);
-    }
+                Utils.logError("Transaction save failed", error);
+                this.showNotification(`Gagal: ${error.message}`, false);
+            } finally {
+                this.showLoading(false);
+            }
         }
 
         resetForm(type) {
@@ -2713,7 +2923,13 @@
             this.tempItems[type] = [];
             this.renderTempItemsTable(type);
             form.querySelector(`#invoiceDate-${type}`).value = new Date().toISOString().slice(0, 10);
-            form.querySelector(`#transNo-${type}`).value = this.generateId(type);
+            
+            const partyType = type === "sale" ? "customer" : "pemasok";
+            document.getElementById(`npwp-group-${type}`).classList.add('hidden');
+            document.getElementById(`${partyType}Npwp-${type}`).required = false;
+
+            form.querySelector(`#transNo-${type}`).value = this.generateId(type); 
+            
             this.draftForms[type] = null;
             localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
         }
@@ -2785,14 +3001,14 @@
                 return;
             }
 
-            const headers = ["No. Transaksi", "Tanggal", "Partner", "Alamat", "Telepon", "No. Kendaraan", "Metode Pembayaran", "Catatan", "Tipe Transaksi", "Subtotal", "Diskon", "PPN", "Ongkir", "DP", "Grand Total", "Kode Barang", "Nama Barang", "Jumlah", "Satuan", "Harga Satuan", "Total Barang"];
+            const headers = ["No. Transaksi", "Tanggal", "Partner", "Alamat", "Telepon", "NPWP/NIK", "No. Kendaraan", "Metode Pembayaran", "Catatan", "Tipe Transaksi", "Subtotal", "Diskon", "PPN", "Ongkir", "DP", "Grand Total", "Kode Barang", "Nama Barang", "Jumlah", "Satuan", "Harga Satuan", "Total Barang"];
             const csvRows = [headers.join(",")];
             
             transactions.forEach(t => {
-                t.items.forEach(item => {
+                (t.items || []).forEach(item => {
                     const row = [
                         `"${t.id}"`, `"${t.tanggal}"`, `"${t.customer || t.pemasok || t.penerima || ''}"`,
-                        `"${t.alamat || ''}"`, `"${t.telepon || ''}"`, `"${t.noKendaraan || ''}"`, `"${t.metodePembayaran || ''}"`,
+                        `"${t.alamat || ''}"`, `"${t.telepon || ''}"`, `"${t.npwp || ''}"`, `"${t.noKendaraan || ''}"`, `"${t.metodePembayaran || ''}"`,
                         `"${(t.notes || '').replace(/"/g, '""')}"`, `"${t.transType || dataKey}"`,
                         t.subtotal ?? 0, t.discount ?? 0, t.ppn ?? 0, t.shippingCost ?? 0, t.dp ?? 0, t.grandTotal ?? 0,
                         `"${item.code}"`, `"${(item.name || '').replace(/"/g, '""')}"`, item.qty, `"${item.unit}"`, item.price ?? 0, item.total ?? 0
@@ -2814,22 +3030,20 @@
         }
         
         exportHistoryToExcel(dataKey) {
-            console.log(`Exporting Excel for dataKey: ${dataKey}, data:`, this.data[dataKey]);
-    this.showLoading(true);
-    const transactions = this._getFilteredHistoryData(dataKey);
-    console.log('Filtered transactions:', transactions);
-    if (transactions.length === 0) {
-        this.showNotification("Tidak ada data untuk diekspor.", false);
-        this.showLoading(false);
-        return;
-    }
+            this.showLoading(true);
+            const transactions = this._getFilteredHistoryData(dataKey);
+            if (transactions.length === 0) {
+                this.showNotification("Tidak ada data untuk diekspor.", false);
+                this.showLoading(false);
+                return;
+            }
 
             const flattenedData = [];
             transactions.forEach(t => {
                 const partner = t.customer || t.pemasok || t.penerima || '';
-                (t.items.length > 0 ? t.items : [{}]).forEach(item => {
+                (t.items || []).forEach(item => {
                     flattenedData.push({
-                        'No Transaksi': t.id, 'Tanggal': t.tanggal, 'Partner': partner, 'Tipe Transaksi': t.transType || dataKey,
+                        'No Transaksi': t.id, 'Tanggal': t.tanggal, 'Partner': partner, 'NPWP/NIK': t.npwp || '', 'Tipe Transaksi': t.transType || dataKey,
                         'Subtotal': t.subtotal, 'Diskon': t.discount, 'PPN': t.ppn, 'Ongkir': t.shippingCost, 'DP': t.dp, 'Grand Total': t.grandTotal,
                         'Kode Barang': item.code, 'Nama Barang': item.name, 'Jumlah': item.qty, 'Satuan': item.unit,
                         'Harga Satuan': item.price, 'Total Barang': item.total
@@ -2839,7 +3053,7 @@
 
             const worksheet = XLSX.utils.json_to_sheet(flattenedData);
             worksheet['!cols'] = [
-                { wch: 18 }, { wch: 12 }, { wch: 25 }, { wch: 15 }, 
+                { wch: 18 }, { wch: 12 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, 
                 { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 },
                 { wch: 15 }, { wch: 30 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }
             ];
@@ -2852,26 +3066,24 @@
         }
 
         exportHistoryToPdf(dataKey) {
-            console.log(`Exporting PDF for dataKey: ${dataKey}, data:`, this.data[dataKey]);
-    this.showLoading(true);
-    const transactions = this._getFilteredHistoryData(dataKey);
-    console.log('Filtered transactions:', transactions);
-    if (transactions.length === 0) {
-        this.showNotification("Tidak ada data untuk diekspor.", false);
-        this.showLoading(false);
-        return;
-    }
+            this.showLoading(true);
+            const transactions = this._getFilteredHistoryData(dataKey);
+            if (transactions.length === 0) {
+                this.showNotification("Tidak ada data untuk diekspor.", false);
+                this.showLoading(false);
+                return;
+            }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape' });
             
-            const head = [['ID', 'Tanggal', 'Partner', 'Tipe', 'Kode Brg', 'Nama Brg', 'Jml', 'Satuan', 'Harga', 'Total']];
+            const head = [['ID', 'Tanggal', 'Partner', 'NPWP', 'Tipe', 'Nama Brg', 'Jml', 'Satuan', 'Harga', 'Total']];
             const body = [];
             transactions.forEach(t => {
-                t.items.forEach(item => {
+                (t.items || []).forEach(item => {
                     body.push([
-                        t.id, t.tanggal, t.customer || t.pemasok || '', t.transType || dataKey,
-                        item.code || '-', item.name || '-', this.formatNumber(item.qty || 0), item.unit || '-',
+                        t.id, t.tanggal, t.customer || t.pemasok || '', t.npwp || '-', t.transType || dataKey,
+                        item.name || '-', this.formatNumber(item.qty || 0), item.unit || '-',
                         this.formatCurrency(item.price || 0, false), this.formatCurrency(item.total || 0, false)
                     ]);
                 });
@@ -2932,216 +3144,175 @@
         }
         
         generatePrintHTML(transaction, template) {
-    let printId = transaction.id || 'N/A';
-    if (template === "surat_jalan") {
-        printId = transaction.id.replace(/SGM\.(PJ|PB|PJF|PBV)/, "SGM.SJ");
-    }
-    
-    const config = this.data.config;
-    const isTransaction = transaction.grandTotal !== undefined;
-    const partyName = transaction.customer || transaction.pemasok || transaction.penerima || 'N/A';
-    const grandTotalInteger = Math.floor(transaction.grandTotal || 0);
+            let printId = transaction.id || 'N/A';
+            if (template === "surat_jalan") {
+                printId = transaction.id.replace(/SGM\.(PJ|PB|PJF|PBV)/, "SGM.SJ");
+            }
+            
+            const config = this.data.config;
+            const isTransaction = transaction.grandTotal !== undefined;
+            const partyName = transaction.customer || transaction.pemasok || transaction.penerima || 'N/A';
+            const grandTotalInteger = Math.floor(transaction.grandTotal || 0);
 
-    let title = "SURAT JALAN";
-    if (template === "faktur") title = `FAKTUR ${transaction.customer ? "PENJUALAN" : "PEMBELIAN"}`;
-    else if (template === "invoice") title = `INVOICE ${transaction.transType === "sale" ? "PENJUALAN" : "PEMBELIAN"}`;
-    else if (template === "kwitansi") title = "KWITANSI PEMBAYARAN";
-    
-    let noLabel = "No. Surat Jalan";
-    if (template === "faktur") noLabel = "No. Faktur";
-    else if (template === "invoice") noLabel = "No. Invoice";
-    else if (template === "kwitansi") noLabel = "No. Kwitansi";
+            let title = "SURAT JALAN";
+            if (template === "faktur") title = `FAKTUR ${transaction.customer ? "PENJUALAN" : "PEMBELIAN"}`;
+            else if (template === "invoice") title = `INVOICE ${transaction.transType === "sale" ? "PENJUALAN" : "PEMBELIAN"}`;
+            else if (template === "kwitansi") title = "KWITANSI PEMBAYARAN";
+            
+            let noLabel = "No. Surat Jalan";
+            if (template === "faktur") noLabel = "No. Faktur";
+            else if (template === "invoice") noLabel = "No. Invoice";
+            else if (template === "kwitansi") noLabel = "No. Kwitansi";
 
-    let metaContent = `<div class="meta-tables">
-        <table class="meta-table">
-            <tr><td>Kepada Yth.</td><td>: ${this.sanitizeInput(partyName)}</td></tr>
-            <tr><td>Alamat</td><td>: ${this.sanitizeInput(transaction.alamat || "-")}</td></tr>
-            ${transaction.telepon ? `<tr><td>Telepon</td><td>: ${this.sanitizeInput(transaction.telepon)}</td></tr>` : ""}
-        </table>
-        <table class="meta-table">
-            <tr><td>${noLabel}</td><td>: ${printId}</td></tr>
-            <tr><td>Tanggal</td><td>: ${this.formatDate(transaction.tanggal)}</td></tr>
-            ${isTransaction && transaction.ref && template !== "surat_jalan" ? `<tr><td>Ref</td><td>: ${this.sanitizeInput(transaction.ref)}</td></tr>` : ""}
-            ${transaction.noKendaraan ? `<tr><td>No. Kendaraan</td><td>: ${this.sanitizeInput(transaction.noKendaraan)}</td></tr>` : ""}
-            ${isTransaction && transaction.metodePembayaran && template !== "surat_jalan" ? `<tr><td>Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
-        </table>
-    </div>`;
+            let metaContent = `<div class="meta-tables">
+                <table class="meta-table">
+                    <tr><td>Kepada Yth.</td><td>: ${this.sanitizeInput(partyName)}</td></tr>
+                    <tr><td>Alamat</td><td>: ${this.sanitizeInput(transaction.alamat || "-")}</td></tr>
+                    ${transaction.telepon ? `<tr><td>Telepon</td><td>: ${this.sanitizeInput(transaction.telepon)}</td></tr>` : ""}
+                    ${transaction.npwp && template === 'invoice' ? `<tr><td>NPWP/NIK</td><td>: ${this.sanitizeInput(transaction.npwp)}</td></tr>` : ""}
+                </table>
+                <table class="meta-table">
+                    <tr><td>${noLabel}</td><td>: ${printId}</td></tr>
+                    <tr><td>Tanggal</td><td>: ${this.formatDate(transaction.tanggal)}</td></tr>
+                    ${isTransaction && transaction.ref && template !== "surat_jalan" ? `<tr><td>Ref</td><td>: ${this.sanitizeInput(transaction.ref)}</td></tr>` : ""}
+                    ${transaction.noKendaraan ? `<tr><td>No. Kendaraan</td><td>: ${this.sanitizeInput(transaction.noKendaraan)}</td></tr>` : ""}
+                    ${isTransaction && transaction.metodePembayaran && template !== "surat_jalan" ? `<tr><td>Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+                </table>
+            </div>`;
 
-    if (template === "kwitansi") {
-        metaContent = `<div class="kwitansi-box">
-            <table class="meta-table" style="width: 100%; table-layout: fixed;">
-                <tr><td style="width: 40mm; font-weight: bold;">Sudah terima dari</td><td style="width: calc(100% - 40mm);">: ${this.sanitizeInput(partyName)}</td></tr>
-                <tr><td style="font-weight: bold;">Uang Sejumlah</td><td>: <b>${this.formatCurrency(transaction.grandTotal || 0)}</b></td></tr>
-                <tr><td style="font-weight: bold; vertical-align: top;">Terbilang</td><td style="vertical-align: top;" class="terbilang">: ${this.terbilang(grandTotalInteger)} rupiah</td></tr>
-                <tr><td style="font-weight: bold; vertical-align: top;">Untuk Pembayaran</td><td style="vertical-align: top;">: Pelunasan ${transaction.ppn ? 'Invoice' : 'Faktur'} No. ${transaction.id || "N/A"}</td></tr>
-                ${transaction.metodePembayaran ? `<tr><td style="font-weight: bold;">Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+            if (template === "kwitansi") {
+                metaContent = `<div class="kwitansi-box">
+                    <table class="meta-table" style="width: 100%; table-layout: fixed;">
+                        <tr><td style="width: 40mm; font-weight: bold;">Sudah terima dari</td><td style="width: calc(100% - 40mm);">: ${this.sanitizeInput(partyName)}</td></tr>
+                        <tr><td style="font-weight: bold;">Uang Sejumlah</td><td>: <b>${this.formatCurrency(transaction.grandTotal || 0)}</b></td></tr>
+                        <tr><td style="font-weight: bold; vertical-align: top;">Terbilang</td><td style="vertical-align: top;" class="terbilang">: ${this.terbilang(grandTotalInteger)} rupiah</td></tr>
+                        <tr><td style="font-weight: bold; vertical-align: top;">Untuk Pembayaran</td><td style="vertical-align: top;">: Pelunasan ${transaction.ppn ? 'Invoice' : 'Faktur'} No. ${transaction.id || "N/A"}</td></tr>
+                        ${transaction.metodePembayaran ? `<tr><td style="font-weight: bold;">Metode Pembayaran</td><td>: ${this.sanitizeInput(transaction.metodePembayaran)}</td></tr>` : ""}
+                    </table>
+                </div>`;
+            }
+
+            const maxItems = 20;
+            const limitedItems = (transaction.items || []).slice(0, maxItems);
+
+            const itemsContent = template !== "kwitansi" ? `<table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width:5%;">No</th>
+                        <th style="width:${template === 'surat_jalan' ? '70%' : '35%'};">Nama Barang</th>
+                        <th style="width:10%; text-align:right;">Qty</th>
+                        <th style="width:10%; text-align:center;">Satuan</th>
+                        ${template !== "surat_jalan" && isTransaction ? `
+                            <th style="width:15%; text-align:right;">Harga Satuan</th>
+                            <th style="width:20%; text-align:right;">Jumlah</th>
+                        ` : ""}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${limitedItems.map((item, i) => `<tr>
+                        <td style="text-align:center;">${i + 1}</td>
+                        <td>${this.sanitizeInput(item.name)} ${item.code ? `<small>(${this.sanitizeInput(item.code)})</small>` : ""}</td>
+                        <td style="text-align:right;">${this.formatNumber(item.qty)}</td>
+                        <td style="text-align:center;">${this.sanitizeInput(item.unit || "-")}</td>
+                        ${template !== "surat_jalan" && isTransaction ? `
+                            <td style="text-align:right;">${this.formatNumber(item.price || 0)}</td>
+                            <td style="text-align:right;">${this.formatNumber(item.total || 0)}</td>
+                        ` : ""}
+                    </tr>`).join("")}
+                </tbody>
+            </table>` : "";
+
+            const summaryContent = isTransaction && template !== "surat_jalan" && template !== "kwitansi" ? `<table class="summary-table">
+                <tr><td>Subtotal</td><td style="text-align:right;">${this.formatNumber(transaction.subtotal || 0)}</td></tr>
+                ${(transaction.discount || 0) > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatNumber(transaction.discount)}</td></tr>` : ""}
+                
+                ${(transaction.ppn || 0) > 0 ? `
+                    <tr><td>DPP</td><td style="text-align:right;">${this.formatNumber(transaction.dpp || 0)}</td></tr>
+                    <tr><td>PPN 11%</td><td style="text-align:right;">${this.formatNumber(transaction.ppn)}</td></tr>
+                ` : ""}
+
+                ${(transaction.shippingCost || 0) > 0 ? `<tr><td>Ongkos Kirim</td><td style="text-align:right;">${this.formatNumber(transaction.shippingCost)}</td></tr>` : ""}
+                ${(transaction.dp || 0) > 0 ? `<tr><td>Uang Muka (DP)</td><td style="text-align:right;">-${this.formatNumber(transaction.dp)}</td></tr>` : ""}
+                <tr style="border-top: 1px solid black; font-weight:bold;"><td>Total Tagihan</td><td style="text-align:right;">${this.formatNumber(transaction.grandTotal || 0)}</td></tr>
             </table>
-        </div>`;
-    }
+            <div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>
+            ${(transaction.ppn || 0) > 0 ? `<div style="font-size: 7pt; margin-top: 5px;"><i>(Harga sudah termasuk PPN 11%)</i></div>` : ""}` : "";
 
-    // Batasi jumlah item maksimal untuk muat dalam satu halaman
-    const maxItems = 20;
-    const limitedItems = (transaction.items || []).slice(0, maxItems);
+            const signatures = template === "surat_jalan" ? `<div class="print-signatures">
+                <div><p>Pengirim,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+                <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+            </div>` :
+            `<div class="print-signatures">
+                <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
+                <div><p>Hormat Kami,</p><div class="signature-space"></div><p>(${this.sanitizeInput(config.namaPerusahaan)})</p></div>
+            </div>`;
 
-    const itemsContent = template !== "kwitansi" ? `<table class="items-table">
-        <thead>
-            <tr>
-                <th style="width:5%;">No</th>
-                <th style="width:${template === 'surat_jalan' ? '70%' : '35%'};">Nama Barang</th>
-                <th style="width:10%; text-align:right;">Qty</th>
-                <th style="width:10%; text-align:center;">Satuan</th>
-                ${template !== "surat_jalan" && isTransaction ? `
-                    <th style="width:15%; text-align:right;">Harga Satuan</th>
-                    <th style="width:20%; text-align:right;">Jumlah</th>
-                ` : ""}
-            </tr>
-        </thead>
-        <tbody>
-            ${limitedItems.map((item, i) => `<tr>
-                <td style="text-align:center;">${i + 1}</td>
-                <td>${this.sanitizeInput(item.name)} ${item.code ? `<small>(${this.sanitizeInput(item.code)})</small>` : ""}</td>
-                <td style="text-align:right;">${this.formatNumber(item.qty)}</td>
-                <td style="text-align:center;">${this.sanitizeInput(item.unit || "-")}</td>
-                ${template !== "surat_jalan" && isTransaction ? `
-                    <td style="text-align:right;">${this.formatNumber(item.price || 0)}</td>
-                    <td style="text-align:right;">${this.formatNumber(item.total || 0)}</td>
-                ` : ""}
-            </tr>`).join("")}
-        </tbody>
-    </table>` : "";
+            const rekening = (transaction.ppn && transaction.ppn > 0)
+                ? config.rekeningPpn 
+                : config.rekening;
 
-    const summaryContent = isTransaction && template !== "surat_jalan" && template !== "kwitansi" ? `<table class="summary-table">
-        <tr><td>Subtotal</td><td style="text-align:right;">${this.formatNumber(transaction.subtotal || 0)}</td></tr>
-        ${(transaction.discount || 0) > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatNumber(transaction.discount)}</td></tr>` : ""}
-        ${(transaction.ppn || 0) > 0 ? `<tr><td>PPN 11%</td><td style="text-align:right;">${this.formatNumber(transaction.ppn)}</td></tr>` : ""}
-        ${(transaction.shippingCost || 0) > 0 ? `<tr><td>Ongkos Kirim</td><td style="text-align:right;">${this.formatNumber(transaction.shippingCost)}</td></tr>` : ""}
-        ${(transaction.dp || 0) > 0 ? `<tr><td>Uang Muka (DP)</td><td style="text-align:right;">-${this.formatNumber(transaction.dp)}</td></tr>` : ""}
-        <tr style="border-top: 1px solid black; font-weight:bold;"><td>Total Tagihan</td><td style="text-align:right;">${this.formatNumber(transaction.grandTotal || 0)}</td></tr>
-    </table>
-    <div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>` : "";
+            const pageContent = `<div class="page printable-content">
+                <div class="print-header">
+                    <div class="company-info">
+                        <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
+                        <p>${this.sanitizeInput(config.tagline)}</p>
+                        <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
+                        <p>${this.sanitizeInput(config.kontak)}</p>
+                    </div>
+                    <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
+                </div>
+                <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
+                    <h4 style="font-size: 11pt; margin-bottom: 3mm; text-decoration: underline;">${title}</h4>
+                    ${metaContent}
+                    ${itemsContent}
+                    ${summaryContent}
+                    ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
+                </div>
+                ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info" style="font-size:8pt; text-align:center; padding-top: 5mm;">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
+                <div class="print-footer">
+                    ${signatures}
+                </div>
+            </div>`;
 
-    const signatures = template === "surat_jalan" ? `<div class="print-signatures">
-        <div><p>Pengirim,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
-        <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
-    </div>` :
-    `<div class="print-signatures">
-        <div><p>Penerima,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
-        <div><p>Hormat Kami,</p><div class="signature-space"></div><p>(${this.sanitizeInput(config.namaPerusahaan)})</p></div>
-    </div>`;
+            const copyPageContent = `<div class="page printable-content" style="page-break-before: always;">
+                <h4 style="text-align: center; font-size: 11pt; margin-bottom: 3mm;">COPY</h4>
+                <div class="print-header">
+                    <div class="company-info">
+                        <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
+                        <p>${this.sanitizeInput(config.tagline)}</p>
+                        <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
+                        <p>${this.sanitizeInput(config.kontak)}</p>
+                    </div>
+                    <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
+                </div>
+                <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
+                    <h4 style="font-size: 11pt; margin-bottom: 3mm; text-decoration: underline;">${title}</h4>
+                    ${metaContent}
+                    ${itemsContent}
+                    ${summaryContent}
+                    ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
+                </div>
+                ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info" style="font-size:8pt; text-align:center; padding-top: 5mm;">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
+                <div class="print-footer">
+                    ${signatures}
+                </div>
+            </div>`;
 
-    const rekening = (transaction.ppn && transaction.ppn > 0)
-        ? config.rekeningPpn 
-        : config.rekening;
+            const blankPageContent = `<div class="page" style="page-break-before: always;"></div>`;
 
-    const pageContent = `<div class="page printable-content">
-        <style>
-            .page { width: 210mm; min-height: 297mm; max-height: 297mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.2; page-break-inside: avoid; }
-            @media print { .page { page-break-after: always; } }
-            .print-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5mm; }
-            .company-info p { margin: 0; font-size: 8pt; }
-            .logo { max-width: 40mm; max-height: 15mm; }
-            .meta-tables { display: flex; justify-content: space-between; margin-bottom: 5mm; }
-            .meta-table { width: 48%; border-collapse: collapse; }
-            .meta-table td { padding: 1mm; word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
-            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; table-layout: fixed; }
-            .items-table th, .items-table td { border: 1px solid black; padding: 1mm; word-wrap: break-word; font-size: 8pt; }
-            .items-table td:nth-child(2) { max-width: 90mm; overflow: hidden; text-overflow: ellipsis; }
-            .summary-table { width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 5mm; }
-            .summary-table td { padding: 1mm; font-size: 8pt; }
-            .print-section { margin-bottom: 5mm; }
-            .rekening-info { font-size: 7pt; text-align: center; margin: 3mm 0; }
-            .print-footer { margin-top: 5mm; }
-            .print-signatures { display: flex; justify-content: space-between; margin-top: 5mm; }
-            .signature-space { height: 15mm; }
-            .kwitansi-box { margin-bottom: 5mm; }
-            .terbilang { word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
-            [style*="keterangan"] { word-wrap: break-word; max-width: 190mm; font-size: 8pt; }
-        </style>
-        <div class="print-header">
-            <div class="company-info">
-                <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
-                <p>${this.sanitizeInput(config.tagline)}</p>
-                <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
-                <p>${this.sanitizeInput(config.kontak)}</p>
-            </div>
-            <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
-        </div>
-        <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
-            <h4 style="font-size: 11pt; margin-bottom: 3mm;">${title}</h4>
-            ${metaContent}
-            ${itemsContent}
-            ${summaryContent}
-            ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
-        </div>
-        ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
-        <div class="print-footer">
-            ${signatures}
-        </div>
-    </div>`;
-
-    const copyPageContent = `<div class="page printable-content">
-        <style>
-            .page { width: 210mm; min-height: 297mm; max-height: 297mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.2; page-break-inside: avoid; page-break-before: always; }
-            @media print { .page { page-break-after: always; } }
-            .print-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5mm; }
-            .company-info p { margin: 0; font-size: 8pt; }
-            .logo { max-width: 40mm; max-height: 15mm; }
-            .meta-tables { display: flex; justify-content: space-between; margin-bottom: 5mm; }
-            .meta-table { width: 48%; border-collapse: collapse; }
-            .meta-table td { padding: 1mm; word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
-            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; table-layout: fixed; }
-            .items-table th, .items-table td { border: 1px solid black; padding: 1mm; word-wrap: break-word; font-size: 8pt; }
-            .items-table td:nth-child(2) { max-width: 90mm; overflow: hidden; text-overflow: ellipsis; }
-            .summary-table { width: 50%; margin-left: auto; border-collapse: collapse; margin-bottom: 5mm; }
-            .summary-table td { padding: 1mm; font-size: 8pt; }
-            .print-section { margin-bottom: 5mm; }
-            .rekening-info { font-size: 7pt; text-align: center; margin: 3mm 0; }
-            .print-footer { margin-top: 5mm; }
-            .print-signatures { display: flex; justify-content: space-between; margin-top: 5mm; }
-            .signature-space { height: 15mm; }
-            .kwitansi-box { margin-bottom: 5mm; }
-            .terbilang { word-wrap: break-word; max-width: 90mm; font-size: 8pt; }
-            [style*="keterangan"] { word-wrap: break-word; max-width: 190mm; font-size: 8pt; }
-        </style>
-        <h4 style="text-align: center; font-size: 11pt; margin-bottom: 3mm;">COPY</h4>
-        <div class="print-header">
-            <div class="company-info">
-                <h3 style="font-size: 12pt; margin: 0;">${this.sanitizeInput(config.namaPerusahaan)}</h3>
-                <p>${this.sanitizeInput(config.tagline)}</p>
-                <p>${this.sanitizeInput(config.alamatPerusahaan)}</p>
-                <p>${this.sanitizeInput(config.kontak)}</p>
-            </div>
-            <img src="${config.logoUrl || 'https://via.placeholder.com/120x40.png?text=Logo'}" class="logo" alt="Logo" onerror="this.src='https://via.placeholder.com/120x40.png?text=Logo';">
-        </div>
-        <div class="print-section ${template === 'kwitansi' ? 'kwitansi' : ''}">
-            <h4 style="font-size: 11pt; margin-bottom: 3mm;">${title}</h4>
-            ${metaContent}
-            ${itemsContent}
-            ${summaryContent}
-            ${transaction.notes ? `<div style="border-top: 1px solid #ccc; margin-top: 3mm; padding-top: 3mm;"><p><b>Keterangan:</b> ${this.sanitizeInput(transaction.notes)}</p></div>` : ""}
-        </div>
-        ${isTransaction && template !== 'surat_jalan' ? `<div class="rekening-info">Pembayaran mohon di transfer ke rekening ${this.sanitizeInput(rekening)}</div>` : ""}
-        <div class="print-footer">
-            ${signatures}
-        </div>
-    </div>`;
-
-    return `${pageContent}${copyPageContent}`;
-}
+            return `${pageContent}${copyPageContent}${blankPageContent}`;
+        }
         
         async renderDashboard() {
-            console.log('Invoices data:', this.data.invoices); // Debugging
-    const statsContainer = document.getElementById("dashboard-stats");
-    const tableBody = document.querySelector("#dashboard-transactions-table tbody");
-    if (!statsContainer || !tableBody) return;
-    const filters = document.getElementById("dashboard-filters");
-    const startDate = filters.querySelector(".start-date")?.value;
-    const endDate = filters.querySelector(".end-date")?.value;
-    const filterPredicate = t => (!startDate || t.tanggal >= startDate) && (!endDate || t.tanggal <= endDate);
-    const allSales = [...this.data.penjualan, ...this.data.invoices.filter(inv => inv.transType === 'sale')];
-    const allPurchases = [...this.data.pembelian, ...this.data.invoices.filter(inv => inv.transType === 'purchase')];
-    console.log('All Sales:', allSales); // Debugging
-    console.log('All Purchases:', allPurchases); // Debugging
+            const statsContainer = document.getElementById("dashboard-stats");
+            const tableBody = document.querySelector("#dashboard-transactions-table tbody");
+            if (!statsContainer || !tableBody) return;
+            const filters = document.getElementById("dashboard-filters");
+            const startDate = filters.querySelector(".start-date")?.value;
+            const endDate = filters.querySelector(".end-date")?.value;
+            const filterPredicate = t => (!startDate || t.tanggal >= startDate) && (!endDate || t.tanggal <= endDate);
+            const allSales = [...this.data.penjualan, ...this.data.invoices.filter(inv => inv.transType === 'sale')];
+            const allPurchases = [...this.data.pembelian, ...this.data.invoices.filter(inv => inv.transType === 'purchase')];
 
             const filteredSales = allSales.filter(filterPredicate);
             const filteredPurchases = allPurchases.filter(filterPredicate);
@@ -3407,26 +3578,25 @@
         }
 
         printTransaction(dataKey, id, template) {
-    const transaction = this.data[dataKey]?.find((t) => t.id === id);
-    if (!transaction) { 
-        this.showNotification("Transaksi tidak ditemukan.", false); 
-        return; 
-    }
-    
-    const printArea = document.getElementById("print-area");
-    printArea.innerHTML = this.generatePrintHTML(transaction, template);
-    
-    // Tambahkan class ke body
-    document.body.classList.add('printing');
+            const transaction = this.data[dataKey]?.find((t) => t.id === id);
+            if (!transaction) { 
+                this.showNotification("Transaksi tidak ditemukan.", false); 
+                return; 
+            }
+            
+            const printArea = document.getElementById("print-area");
+            printArea.innerHTML = this.generatePrintHTML(transaction, template);
+            
+            document.body.classList.add('printing');
 
-    setTimeout(() => {
-        window.print();
+            setTimeout(() => {
+                window.print();
+                
+                document.body.classList.remove('printing');
+                printArea.innerHTML = "";
+            }, 500);
+        }
         
-        // Hapus class setelah mencetak
-        document.body.classList.remove('printing');
-        printArea.innerHTML = "";
-    }, 500); // Tetap gunakan timeout yang lebih lama
-}
       }
 
       document.addEventListener("DOMContentLoaded", () => {
@@ -3446,7 +3616,10 @@
             if (activeContent) activeContent.classList.add("active");
             
             if (tab.dataset.tab === "dashboard") window.app.renderDashboard();
-            if (tab.dataset.tab === "pengaturan") window.app.renderTrashTable();
+            if (tab.dataset.tab === "pengaturan") {
+                window.app.renderTrashTable();
+                window.app.renderNpwpTextarea();
+            }
           });
         });
       });
