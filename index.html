@@ -145,6 +145,145 @@
         }
       }
 
+  /* === UI/UX IMPROVEMENT: Modern Floating Action Buttons (FAB) === */
+.floating-action-group {
+  position: fixed;
+  /* PERBAIKAN: Beri jarak lebih dari tepi layar */
+  bottom: 35px;
+  right: 40px; 
+  z-index: 998;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 15px;
+}
+
+/* 1. Atur posisi relatif untuk item FAB agar bisa menampung petunjuk */
+.fab-item {
+  position: relative;
+  /* Tambahkan sedikit ruang di atas untuk animasi */
+  margin-top: 40px; 
+}
+
+/* 2. Styling untuk kontainer petunjuk (teks + panah) */
+.fab-hint {
+  position: absolute;
+  bottom: 65px; /* Posisikan tepat di atas tombol FAB (56px) + sedikit jarak */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none; /* Agar tidak bisa diklik */
+  animation: bounce 1.5s infinite; /* Terapkan animasi naik-turun */
+}
+
+/* 3. Styling untuk teks petunjuk */
+.fab-hint-text {
+  background-color: red;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 4. Styling untuk panah (dibuat dengan CSS) */
+.fab-hint-arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid red; /* Panah menunjuk ke bawah */
+}
+
+/* 5. Definisikan animasi naik-turun (bounce) */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+.floating-action-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%; /* Membuat tombol menjadi lingkaran */
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-action-btn:hover {
+  background-color: rgb(177, 0, 0);
+  transform: scale(1.05); /* Sedikit membesar saat di-hover */
+}
+
+/* Sembunyikan tooltip lama agar tidak tumpang tindih */
+.fab-label {
+  display: none;
+}
+
+/* Tampilkan tooltip saat item FAB di-hover */
+.fab-item:hover .fab-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+/* CSS untuk Overlay (Tidak Berubah, tapi tetap disertakan untuk kelengkapan) */
+.history-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.history-overlay-content {
+  background: var(--light);
+  padding: 25px;
+  border-radius: 12px;
+  width: 95%;
+  height: 90%;
+  max-width: 1200px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.history-overlay-content .table-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.close-overlay-btn {
+  font-size: 1.5rem !important;
+  padding: 0 12px !important;
+  line-height: 1;
+}
+
       .form-section {
         background: var(--background);
         border-radius: 10px;
@@ -219,6 +358,81 @@
         border-color: var(--danger);
         box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
       }
+
+      /* === UI/UX IMPROVEMENT: Stepper for Multi-Step Forms === */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align items to the top */
+  margin-bottom: 30px;
+  padding: 0 15px;
+}
+.step {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  text-align: center;
+  flex-grow: 1;
+}
+/* The line connecting the steps */
+.step:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  top: 18px; /* Vertically center with the circle */
+  right: 50%;
+  height: 2px;
+  width: 100%;
+  background-color: var(--border);
+  z-index: 0;
+}
+.step-number {
+  background-color: var(--light);
+  border: 2px solid var(--border);
+  color: #6b7280; /* Neutral text color */
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  z-index: 1; /* Make sure the circle is above the line */
+  transition: all 0.3s ease;
+}
+.step-title {
+  margin-top: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+/* --- STATES --- */
+/* Active Step */
+.step.active .step-number {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+.step.active .step-title {
+  color: var(--primary);
+  font-weight: 700;
+}
+/* Completed Step */
+.step.completed .step-number {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+/* Color the line for completed steps */
+.step.completed:not(:first-child)::before {
+    background-color: var(--success);
+}
+.step.completed .step-title {
+  color: var(--dark);
+}
 
       .btn {
         padding: 12px 24px;
@@ -1227,6 +1441,20 @@
        * Main accounting system class
        */
       class SistemAkuntansi {
+        showHistoryOverlay(type) {
+    const overlay = document.getElementById(`history-overlay-${type}`);
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+hideHistoryOverlay(type) {
+    const overlay = document.getElementById(`history-overlay-${type}`);
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
         constructor() {
           this.STORAGE_KEY = "sistemAkuntansiData_v5.1";
           this.DRAFT_KEY = "sistemAkuntansiDraft_v5.1";
@@ -1289,45 +1517,91 @@
         }
 
         buildDOM() {
-            this.cleanup();
-            ["sale", "purchase"].forEach((type) => {
-                const containerId = type === "sale" ? "penjualan" : "pembelian";
-                const container = document.getElementById(containerId);
-                if (container)
-                    container.innerHTML = this.generateFormHTML(type) + this.generateHistoryHTML(type);
-            });
-        
-            const invoiceContainer = document.getElementById("invoices");
-            if (invoiceContainer) invoiceContainer.innerHTML = this.generateHistoryHTML("invoice");
-        
-            const suratJalanContainer = document.getElementById("suratJalan");
-            if (suratJalanContainer) suratJalanContainer.innerHTML = this.generateHistoryHTML("suratJalan");
-        
-            const dashboardContainer = document.getElementById("dashboard");
-            if (dashboardContainer) dashboardContainer.innerHTML = this.generateDashboardHTML();
-        
-            const addItemContainer = document.getElementById("add-master-item-form");
-            if (addItemContainer) addItemContainer.innerHTML = this.generateAddItemFormHTML();
-            
-            // PENAMBAHAN FITUR: Render NPWP management section
-            const npwpManagementContainer = document.getElementById("npwp-management-section");
-            if(npwpManagementContainer) npwpManagementContainer.innerHTML = this.generateNpwpManagementHTML();
+    this.cleanup();
 
-            const pengaturanContainer = document.getElementById("pengaturan");
-            if (pengaturanContainer) {
-                let trashSection = document.getElementById("trash-section");
-                if (trashSection) {
-                    trashSection.remove();
-                }
-                trashSection = document.createElement("div");
-                trashSection.id = "trash-section";
-                pengaturanContainer.appendChild(trashSection);
-                trashSection.innerHTML = this.generateTrashHTML();
-                this.renderTrashTable();
-            }
-        }
+    // Create a container for floating buttons
+    let fabGroup = document.getElementById('fab-group');
+    if (fabGroup) fabGroup.remove();
+    fabGroup = document.createElement('div');
+    fabGroup.id = 'fab-group';
+    fabGroup.className = 'floating-action-group';
+    document.body.appendChild(fabGroup);
+
+    const historyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/></svg>`;
+
+    ["sale", "purchase"].forEach((type) => {
+        const containerId = type === "sale" ? "penjualan" : "pembelian";
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = this.generateFormHTML(type);
+
+        const historyHTML = this.generateHistoryHTML(type);
+        const overlay = document.createElement('div');
+        overlay.id = `history-overlay-${type}`;
+        overlay.className = 'history-overlay';
+        overlay.innerHTML = `<div class="history-overlay-content">${historyHTML}</div>`;
+        document.body.appendChild(overlay);
+
+        // Create the new FAB item with animated hint and icon button
+const fabItem = document.createElement('div');
+fabItem.id = `fab-${type}`; // ID for visibility control
+fabItem.className = 'fab-item';
+fabItem.style.display = 'none'; // Sembunyikan secara default
+const fabTitle = type === 'sale' ? 'Riwayat Penjualan' : 'Riwayat Pembelian';
+fabItem.innerHTML = `
+    <div class="fab-hint">
+        <div class="fab-hint-text">${fabTitle}</div>
+        <div class="fab-hint-arrow"></div>
+    </div>
+    <button class="floating-action-btn" onclick="app.showHistoryOverlay('${type}')" aria-label="${fabTitle}">
+        ${historyIconSVG}
+    </button>
+`;
+fabGroup.appendChild(fabItem);
+    });
+
+    // Keep the rest of the buildDOM logic
+    const invoiceContainer = document.getElementById("invoices");
+    if (invoiceContainer) invoiceContainer.innerHTML = this.generateHistoryHTML("invoice");
+
+    const dashboardContainer = document.getElementById("dashboard");
+    if (dashboardContainer) dashboardContainer.innerHTML = this.generateDashboardHTML();
+
+    const npwpManagementContainer = document.getElementById("npwp-management-section");
+    if(npwpManagementContainer) npwpManagementContainer.innerHTML = this.generateNpwpManagementHTML();
+
+    const pengaturanContainer = document.getElementById("pengaturan");
+    if (pengaturanContainer) {
+        let trashSection = document.getElementById("trash-section");
+        if (trashSection) trashSection.remove();
+        trashSection = document.createElement("div");
+        trashSection.id = "trash-section";
+        pengaturanContainer.appendChild(trashSection);
+        trashSection.innerHTML = this.generateTrashHTML();
+        this.renderTrashTable();
+    }
+}
 
         generateFormHTML(type) {
+        // ADD THIS:
+  const stepperHTML = `
+    <div class="stepper" id="stepper-${type}">
+      <div class="step active" data-step="1">
+        <div class="step-number">1</div>
+        <div class="step-title">Informasi Dasar</div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-number">2</div>
+        <div class="step-title">Tambah Barang</div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-number">3</div>
+        <div class="step-title">Ringkasan</div>
+      </div>
+    </div>
+  `;
+
   const isTransaction = type === "sale" || type === "purchase";
   if (!isTransaction) return '';
 
@@ -1337,7 +1611,6 @@
 
   const step1_infoDasar = `
     <div class="form-step active" id="form-step-1-${type}">
-      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 1: Informasi Dasar</h4>
       ${/* PPN Checkbox dipindah ke langkah 1 */ `
       <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -1394,7 +1667,6 @@
 
   const step2_tambahBarang = `
     <div class="form-step" id="form-step-2-${type}">
-      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 2: Tambah Barang</h4>
       <div class="form-section" style="padding:15px; margin-top:0;">
         <div class="form-grid">
           <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;"><label for="item-selector-${type}">Cari Barang (Nama/Kode)</label><input type="text" id="item-selector-${type}" autocomplete="off" placeholder="Ketik nama atau kode barang..."><div class="dropdown-options" id="dropdown-options-${type}"></div></div>
@@ -1419,7 +1691,6 @@
 
   const step3_ringkasan = `
     <div class="form-step" id="form-step-3-${type}">
-      <h4 class="form-section-title" style="font-size: 1.2rem; border: none; padding-bottom: 5px;">Langkah 3: Ringkasan & Simpan</h4>
       <div class="summary-section">
         <div class="summary-grid">
           <label>Subtotal:</label>
@@ -1448,7 +1719,7 @@
   return `<div class="form-section">
             <h3 class="form-section-title">Form ${title}</h3>
             <form id="${type}Form">
-              ${step1_infoDasar}
+              ${stepperHTML}  ${step1_infoDasar}
               ${step2_tambahBarang}
               ${step3_ringkasan}
             </form>
@@ -1479,6 +1750,21 @@ navigateToStep(type, step) {
   const activeStep = form.querySelector(`#form-step-${step}-${type}`);
   if (activeStep) {
     activeStep.classList.add('active');
+  }
+
+  // ADD THIS NEW LOGIC BLOCK:
+  const stepper = document.getElementById(`stepper-${type}`);
+  if (stepper) {
+      const steps = stepper.querySelectorAll('.step');
+      steps.forEach(s => {
+          const stepNumber = parseInt(s.dataset.step, 10);
+          s.classList.remove('active', 'completed');
+          if (stepNumber < step) {
+              s.classList.add('completed');
+          } else if (stepNumber === step) {
+              s.classList.add('active');
+          }
+      });
   }
 }
 // ▲▲▲ TAMBAHKAN FUNGSI BARU INI DI DALAM CLASS ▲▲▲
@@ -3253,7 +3539,11 @@ async addNewNpwp() {
             const headers = `<th>No. Transaksi</th><th>Tanggal</th><th>${partyHeader} & Kontak</th>${!isSuratJalan ? '<th class="text-right">Total</th>' : '<th>No. Kendaraan</th>'}<th class="action-cell">Aksi</th>`;
         
             return `<div class="form-section" style="margin-top: 40px;">
-                <h3 class="form-section-title">Riwayat ${title}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
+    <h3 class="form-section-title" style="margin-bottom:0; border:none; padding-bottom:0;">Riwayat ${title}</h3>
+    ${/* Kondisi untuk menampilkan tombol hanya di overlay penjualan/pembelian */''}
+    ${(type === 'sale' || type === 'purchase') ? `<button class="btn btn-danger close-overlay-btn" onclick="app.hideHistoryOverlay('${type}')">&times;</button>` : ''}
+</div>
                 <div class="history-filters" id="history-filters-${type}">
                     <div class="form-group"><label>Cari (ID, Nama)</label><input type="text" class="search-query" placeholder="Ketik untuk mencari..."></div>
                     <div class="form-group"><label>Dari Tanggal</label><input type="date" class="start-date"></div>
@@ -3518,7 +3808,8 @@ showItemEditor(itemCode = null) {
         document.getElementById('edit-item-original-code').value = '';
     }
     
-    modal.style.display = 'block';
+    // GANTI BARIS INI
+    modal.style.display = 'flex'; // MENJADI SEPERTI INI
     document.getElementById('edit-item-code').focus();
 }
 
@@ -4051,30 +4342,54 @@ deleteMasterItem(itemCode) {
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        window.app = new SistemAkuntansi();
-        window.app.init();
-        
-        const tabs = document.querySelectorAll(".nav-tab");
-        const tabContents = document.querySelectorAll(".tab-content");
-        
-        tabs.forEach((tab) => {
-          tab.addEventListener("click", () => {
-            tabs.forEach((t) => t.classList.remove("active"));
-            tabContents.forEach((c) => c.classList.remove("active"));
-            
-            tab.classList.add("active");
-            const activeContent = document.getElementById(tab.dataset.tab);
-            if (activeContent) activeContent.classList.add("active");
-            
-            if (tab.dataset.tab === "dashboard") window.app.renderDashboard();
-            if (tab.dataset.tab === "pengaturan") {
-                window.app.renderTrashTable();
-                window.app.renderNpwpTable();
-                
-            }
-          });
-        });
+    window.app = new SistemAkuntansi();
+    window.app.init();
+
+    const tabs = document.querySelectorAll(".nav-tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    // Function to control FAB visibility
+    const updateFabVisibility = (activeTabId) => {
+        const fabSale = document.getElementById('fab-sale');
+        const fabPurchase = document.getElementById('fab-purchase');
+
+        if (fabSale) fabSale.style.display = 'none';
+        if (fabPurchase) fabPurchase.style.display = 'none';
+
+        if (activeTabId === 'penjualan' && fabSale) {
+            fabSale.style.display = 'flex';
+        } else if (activeTabId === 'pembelian' && fabPurchase) {
+            fabPurchase.style.display = 'flex';
+        }
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active"));
+        tabContents.forEach((c) => c.classList.remove("active"));
+
+        tab.classList.add("active");
+        const activeContent = document.getElementById(tab.dataset.tab);
+        if (activeContent) activeContent.classList.add("active");
+
+        // Call visibility function on tab change
+        updateFabVisibility(tab.dataset.tab);
+
+        // Refresh specific content if needed
+        if (tab.dataset.tab === "dashboard") window.app.renderDashboard();
+        if (tab.dataset.tab === "pengaturan") {
+            window.app.renderTrashTable();
+            window.app.renderNpwpTable();
+        }
       });
+    });
+
+    // Set initial visibility for the default active tab
+    const initialActiveTab = document.querySelector('.nav-tab.active');
+    if (initialActiveTab) {
+        updateFabVisibility(initialActiveTab.dataset.tab);
+    }
+});
     </script>
 </body>
 </html>
