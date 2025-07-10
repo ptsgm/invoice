@@ -3350,7 +3350,7 @@ async addNewNpwp() {
 
           // 1. Subtotal setelah diskon dianggap sebagai HARGA DASAR (DPP).
           const totalAfterDiscount = subtotal - discount;
-          const dpp = subtotal * (11/12);
+          const dpp = (totalAfterDiscount + shippingCost) * (11/12);
           
           let ppn = 0;
 
