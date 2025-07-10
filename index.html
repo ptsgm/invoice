@@ -3337,49 +3337,47 @@ async addNewNpwp() {
         }
 
         calculateTotals(type) {
-          const form = document.getElementById(`${type}Form`);
-          if (!form) return { subtotal: 0, dpp: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return { subtotal: 0, dpp: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
 
-          const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
-          const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
+            const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
+            const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+            const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
 
-          // --- PERUBAHAN LOGIKA PERHITUNGAN DIMULAI DI SINI ---
+            // --- PERBAIKAN DIMULAI DI SINI ---
 
-          // totalAfterDiscount dianggap sebagai HARGA JUAL AKHIR (sudah termasuk PPN)
-          const totalAfterDiscount = subtotal - discount;
-          let dpp = totalAfterDiscount; // Jika tidak ada PPN, DPP adalah total itu sendiri
-          let ppn = 0;
+            const totalAfterDiscount = subtotal - discount;
+            let dpp = totalAfterDiscount; // Secara default, DPP adalah total setelah diskon
+            let ppn = 0;
 
-          if (includePpn) {
-              // Jika PPN dicentang, harga dianggap SUDAH TERMASUK PPN.
-              // Untuk mencari DPP, bagi harga jual dengan 1.11
-              dpp = Math.round(totalAfterDiscount / 1.11);
-              ppn = totalAfterDiscount - dpp; // PPN adalah selisihnya
-          }
+            if (includePpn) {
+                // Jika PPN dicentang, hitung PPN sebesar 11% dari DPP
+                ppn = Math.round(dpp * 0.11);
+            }
 
-          // Grand Total dihitung dari totalAfterDiscount (karena sudah termasuk PPN)
-          const grandTotal = totalAfterDiscount + shippingCost - dp;
+            // Grand Total adalah total setelah diskon, DITAMBAH PPN, ditambah ongkir, dikurangi DP
+            const grandTotal = totalAfterDiscount + ppn + shippingCost - dp;
 
-          // --- AKHIR PERUBAHAN ---
+            // --- AKHIR DARI PERBAIKAN ---
 
-          form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
-          form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
-          form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
+            form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
+            form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
+            form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
 
-          const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
-          if (dppInfoEl) {
-              if (includePpn && dpp > 0) {
-                  dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
-              } else {
-                  dppInfoEl.textContent = '';
-              }
-          }
+            const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
+            if (dppInfoEl) {
+                if (includePpn && dpp > 0) {
+                    // Tampilkan DPP (Dasar Pengenaan Pajak) sebagai informasi tambahan
+                    dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
+                } else {
+                    dppInfoEl.textContent = '';
+                }
+            }
 
-          return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
-      }
+            return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
+        }
 
         generateId(type, transType = null) {
             let num, prefix, configKey;
