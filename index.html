@@ -3346,33 +3346,38 @@ async addNewNpwp() {
             const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
             const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
 
-            let dpp = 0;
-            let ppn = 0;
+            // --- PERBAIKAN DIMULAI DI SINI ---
+
             const totalAfterDiscount = subtotal - discount;
+            let dpp = totalAfterDiscount; // Secara default, DPP adalah total setelah diskon
+            let ppn = 0;
 
             if (includePpn) {
-                dpp = Math.round(totalAfterDiscount / 1.11);
-                ppn = totalAfterDiscount - dpp;
+                // Jika PPN dicentang, hitung PPN sebesar 11% dari DPP
+                ppn = Math.round(dpp * 0.11);
             }
 
-            const grandTotal = totalAfterDiscount + shippingCost - dp;
+            // Grand Total adalah total setelah diskon, DITAMBAH PPN, ditambah ongkir, dikurangi DP
+            const grandTotal = totalAfterDiscount + ppn + shippingCost - dp;
+
+            // --- AKHIR DARI PERBAIKAN ---
 
             form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
             form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
             form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
 
-            // Perbaikan: Menampilkan atau menyembunyikan keterangan DPP
             const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
             if (dppInfoEl) {
                 if (includePpn && dpp > 0) {
+                    // Tampilkan DPP (Dasar Pengenaan Pajak) sebagai informasi tambahan
                     dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
                 } else {
-                    dppInfoEl.textContent = ''; // Kosongkan jika PPN tidak aktif
+                    dppInfoEl.textContent = '';
                 }
             }
 
             return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
-        }
+        },
 
         generateId(type, transType = null) {
             let num, prefix, configKey;
