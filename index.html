@@ -3356,7 +3356,7 @@ async addNewNpwp() {
 
           if (includePpn) {
               // 2. PPN adalah 11% dari HARGA DASAR.
-              ppn = subtotal * (11/100);
+              ppn = totalAfterDiscount * (11/100);
           }
 
           // 3. Grand Total = HARGA DASAR + PPN + Biaya Lainnya.
