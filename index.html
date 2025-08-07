@@ -125,6 +125,10 @@
         color: var(--primary);
       }
 
+        .bebas-ppn-group.hidden {
+  display: none;
+}
+
       .tab-content {
         display: none;
       }
@@ -1610,13 +1614,20 @@ fabGroup.appendChild(fabItem);
   const partyType = type === "sale" ? "customer" : "pemasok";
 
   const step1_infoDasar = `
-    <div class="form-step active" id="form-step-1-${type}">
-      ${/* PPN Checkbox dipindah ke langkah 1 */ `
-      <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+  <div class="form-step active" id="form-step-1-${type}">
+    ${/* PPN Checkbox */ `
+    <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
+        <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: red; cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
+      </div>
+      
+      <div class="form-group bebas-ppn-group hidden" id="bebas-ppn-group-${type}" style="margin-top: 10px; padding-left: 35px;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
-          <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: red; cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
+            <input type="checkbox" id="bebasPpn-${type}" style="width: auto;">
+            <label for="bebasPpn-${type}" style="margin-bottom: 0; font-weight: 600; color: #d97706; cursor: pointer;">Bebas PPN</label>
         </div>
+      </div>
       </div>`}
       <div class="form-grid">
         <div class="form-group-cluster">
@@ -1951,20 +1962,43 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
             });
             
             const ppnCheckbox = form.querySelector(`#includePpn-${type}`);
-            if (ppnCheckbox) {
-                ppnCheckbox.addEventListener("change", () => {
-                    this.calculateTotals(type);
-                    const npwpGroup = document.getElementById(`npwp-group-${type}`);
-                    const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
-                    if (ppnCheckbox.checked) {
-                        npwpGroup.classList.remove('hidden');
-                        npwpInput.required = true;
-                    } else {
-                        npwpGroup.classList.add('hidden');
-                        npwpInput.required = false;
-                    }
-                }, { signal });
-            }
+if (ppnCheckbox) {
+    ppnCheckbox.addEventListener("change", () => {
+        this.calculateTotals(type);
+        const partyType = type === 'sale' ? 'customer' : 'pemasok';
+        const npwpGroup = document.getElementById(`npwp-group-${type}`);
+        const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
+        
+        // ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
+        const bebasPpnGroup = document.getElementById(`bebas-ppn-group-${type}`);
+        const bebasPpnCheckbox = document.getElementById(`bebasPpn-${type}`);
+        // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
+
+        if (ppnCheckbox.checked) {
+            npwpGroup.classList.remove('hidden');
+            npwpInput.required = true;
+            // ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
+            bebasPpnGroup.classList.remove('hidden'); 
+            // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
+        } else {
+            npwpGroup.classList.add('hidden');
+            npwpInput.required = false;
+            // ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
+            bebasPpnGroup.classList.add('hidden');
+            if (bebasPpnCheckbox) bebasPpnCheckbox.checked = false; // Uncheck 'Bebas PPN' if PPN is disabled
+            // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
+        }
+    }, { signal });
+}
+
+// ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
+// Add a new event listener for the 'Bebas PPN' checkbox
+const bebasPpnCheckbox = form.querySelector(`#bebasPpn-${type}`);
+if (bebasPpnCheckbox) {
+    bebasPpnCheckbox.addEventListener("change", () => {
+        this.calculateTotals(type); // Recalculate totals when this checkbox changes
+    }, { signal });
+}
         }
         
         // ... (rest of the class methods are mostly unchanged)
@@ -3337,48 +3371,57 @@ async addNewNpwp() {
         }
 
         calculateTotals(type) {
-          const form = document.getElementById(`${type}Form`);
-          if (!form) return { subtotal: 0, dpp: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
+    const form = document.getElementById(`${type}Form`);
+    if (!form) return { subtotal: 0, dpp: 0, ppn: 0, discount: 0, shippingCost: 0, dp: 0, grandTotal: 0 };
 
-          const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
-          const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
-          const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
+    const subtotal = this.tempItems[type].reduce((sum, item) => sum + (item.total || 0), 0);
+    const discount = parseInt((form.querySelector(`#discount-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+    const shippingCost = parseInt((form.querySelector(`#shippingCost-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+    const dp = parseInt((form.querySelector(`#dp-${type}`)?.value || "0").replace(/[^0-9]/g, ""), 10) || 0;
+    const includePpn = form.querySelector(`#includePpn-${type}`)?.checked;
+    
+    // ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
+    const isPpnDibebaskan = form.querySelector(`#bebasPpn-${type}`)?.checked;
+    // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
 
-          // --- LOGIKA PERHITUNGAN STANDAR AKUNTANSI (MODEL A) ---
+    const totalAfterDiscount = subtotal - discount;
+    const dpp = (totalAfterDiscount + shippingCost) * (11/12);
+    
+    let ppn = 0;
+    
+    // ▼▼▼ PERUBAHAN PADA BLOK INI ▼▼▼
+    if (includePpn && !isPpnDibebaskan) {
+        ppn = (totalAfterDiscount + shippingCost) * (11/100);
+    }
+    // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
+    
+    const grandTotal = totalAfterDiscount + ppn + shippingCost - dp;
 
-          // 1. Subtotal setelah diskon dianggap sebagai HARGA DASAR (DPP).
-          const totalAfterDiscount = subtotal - discount;
-          const dpp = (totalAfterDiscount + shippingCost) * (11/12);
-          
-          let ppn = 0;
+    form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
 
-          if (includePpn) {
-              // 2. PPN adalah 11% dari HARGA DASAR.
-              ppn = (totalAfterDiscount + shippingCost) * (11/100);
-          }
+    // ▼▼▼ PERUBAHAN PADA BLOK INI ▼▼▼
+    const ppnDisplay = form.querySelector(`#ppn-${type}`);
+    if (includePpn && isPpnDibebaskan) {
+        ppnDisplay.textContent = 'Rp 0 (Dibebaskan)';
+    } else {
+        ppnDisplay.textContent = this.formatCurrency(ppn);
+    }
+    // ▲▲▲ PERUBAHAN SELESAI ▲▲▲
 
-          // 3. Grand Total = HARGA DASAR + PPN + Biaya Lainnya.
-          const grandTotal = totalAfterDiscount + ppn + shippingCost - dp;
+    form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
 
-          // --- AKHIR LOGIKA ---
+    const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
+    if (dppInfoEl) {
+        // ▼▼▼ PERUBAHAN PADA KONDISI INI ▼▼▼
+        if (includePpn && !isPpnDibebaskan && dpp > 0) {
+            dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
+        } else {
+            dppInfoEl.textContent = '';
+        }
+    }
 
-          form.querySelector(`#subtotal-${type}`).textContent = this.formatCurrency(subtotal);
-          form.querySelector(`#ppn-${type}`).textContent = this.formatCurrency(ppn);
-          form.querySelector(`#grandTotal-${type}`).textContent = this.formatCurrency(grandTotal);
-
-          const dppInfoEl = form.querySelector(`#dpp-info-${type}`);
-          if (dppInfoEl) {
-              if (includePpn && dpp > 0) {
-                  dppInfoEl.textContent = `(dpp: ${this.formatCurrency(dpp, false)})`;
-              } else {
-                  dppInfoEl.textContent = '';
-              }
-          }
-
-          return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
-      }
+    return { subtotal, dpp, ppn, discount, shippingCost, dp, grandTotal };
+}
 
         generateId(type, transType = null) {
             let num, prefix, configKey;
@@ -3446,6 +3489,7 @@ async addNewNpwp() {
 
                 const isTransaction = type === "sale" || type === "purchase";
                 const includePpn = isTransaction && form.querySelector(`#includePpn-${type}`)?.checked;
+                const isPpnDibebaskan = form.querySelector(`#bebasPpn-${type}`)?.checked;
                 const dataKey = includePpn ? "invoices" : (type === "sale" ? "penjualan" : "pembelian");
                 const idType = includePpn ? "invoice" : type;
                 
@@ -3466,6 +3510,7 @@ async addNewNpwp() {
                     alamat: address,
                     telepon: phone,
                     npwp: npwp,
+                    isPpnDibebaskan: includePpn && isPpnDibebaskan, // Save status only if PPN was applicable
                     noKendaraan: this.sanitizeInput(form.querySelector(`#vehicleNo-${type}`)?.value),
                     metodePembayaran: form.querySelector(`#paymentMethod-${type}`).value,
                     transType: type,
@@ -3961,23 +4006,30 @@ deleteMasterItem(itemCode) {
             </table>` : "";
 
             const summaryContent = isTransaction && template !== "surat_jalan" && template !== "kwitansi" ? `<table class="summary-table">
-                <tr>
-                    <td style="vertical-align: top;">Subtotal</td>
-                    <td style="text-align:right; line-height: 1.4; vertical-align: top;">
-                        ${this.formatCurrency(transaction.subtotal || 0)}
-                        ${(transaction.ppn || 0) > 0 ? `<br><small style="font-weight:normal; color: #4a5568;">(dpp: ${this.formatCurrency(transaction.dpp || 0)})</small>` : ""}
-                    </td>
-                </tr>
-                ${(transaction.discount || 0) > 0 ? `<tr><td style="vertical-align: top;">Diskon</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.discount)}</td></tr>` : ""}
-                
-                ${(transaction.ppn || 0) > 0 ? `<tr><td style="vertical-align: top;">PPN 11%</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.ppn)}</td></tr>` : ""}
+    <tr>
+        <td style="vertical-align: top;">Subtotal</td>
+        <td style="text-align:right; line-height: 1.4; vertical-align: top;">
+            ${this.formatCurrency(transaction.subtotal || 0)}
+            ${(transaction.ppn || 0) > 0 ? `<br><small style="font-weight:normal; color: #4a5568;">(dpp: ${this.formatCurrency(transaction.dpp || 0)})</small>` : ""}
+        </td>
+    </tr>
+    ${(transaction.discount || 0) > 0 ? `<tr><td style="vertical-align: top;">Diskon</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.discount)}</td></tr>` : ""}
+    
+    ${transaction.isPpnDibebaskan ?
+        `<tr><td style="vertical-align: top;">PPN 11%</td><td style="text-align:right; vertical-align: top; font-weight:bold;">DIBEBASKAN</td></tr>` :
+        ((transaction.ppn || 0) > 0 ? `<tr><td style="vertical-align: top;">PPN 11%</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.ppn)}</td></tr>` : "")
+    }
+    ${(transaction.shippingCost || 0) > 0 ? `<tr><td style="vertical-align: top;">Ongkos Kirim</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.shippingCost)}</td></tr>` : ""}
+    ${(transaction.dp || 0) > 0 ? `<tr><td style="vertical-align: top;">Uang Muka (DP)</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.dp)}</td></tr>` : ""}
+    <tr style="border-top: 1px solid black; font-weight:bold;"><td style="vertical-align: top;">Total Tagihan</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.grandTotal || 0)}</td></tr>
+</table>
+<div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>
 
-                ${(transaction.shippingCost || 0) > 0 ? `<tr><td style="vertical-align: top;">Ongkos Kirim</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.shippingCost)}</td></tr>` : ""}
-                ${(transaction.dp || 0) > 0 ? `<tr><td style="vertical-align: top;">Uang Muka (DP)</td><td style="text-align:right; vertical-align: top;">-${this.formatCurrency(transaction.dp)}</td></tr>` : ""}
-                <tr style="border-top: 1px solid black; font-weight:bold;"><td style="vertical-align: top;">Total Tagihan</td><td style="text-align:right; vertical-align: top;">${this.formatCurrency(transaction.grandTotal || 0)}</td></tr>
-            </table>
-            <div style="margin-top: 5px; font-style:italic; text-transform: capitalize;">Terbilang: ${this.terbilang(grandTotalInteger)} rupiah</div>
-            ${(transaction.ppn || 0) > 0 ? `<div style="font-size: 7pt; margin-top: 5px;"><i>(Harga sudah termasuk PPN 11%)</i></div>` : ""}` : "";
+${transaction.isPpnDibebaskan ? 
+    `<div style="font-size: 8pt; margin-top: 5px; font-weight: bold;"><i>(Transaksi Dibebaskan dari Pengenaan PPN)</i></div>` : 
+    ((transaction.ppn || 0) > 0 ? `<div style="font-size: 7pt; margin-top: 5px;"><i>(Harga sudah termasuk PPN 11%)</i></div>` : "")
+}
+` : "";
 
             const signatures = template === "surat_jalan" ? `<div class="print-signatures">
                 <div><p>Pengirim,</p><div class="signature-space"></div><p>(${"_".repeat(15)})</p></div>
@@ -4399,3 +4451,4 @@ deleteMasterItem(itemCode) {
     </script>
 </body>
 </html>
+
