@@ -250,31 +250,120 @@
 }
 
 /* CSS untuk Overlay (Tidak Berubah, tapi tetap disertakan untuk kelengkapan) */
+/* === PERBAIKAN TAMPILAN OVERLAY RIWAYAT === */
+
+/* 1. Container Utama Overlay */
 .history-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.3s ease;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Background lebih gelap agar fokus */
+    z-index: 2000; /* Z-index tinggi agar di atas elemen lain */
+    align-items: center;
+    justify-content: center;
+    padding: 20px; /* Jarak aman dari tepi layar */
+    animation: fadeIn 0.3s ease;
+    backdrop-filter: blur(3px); /* Efek blur di belakang */
 }
 
+/* 2. Kotak Putih Overlay */
 .history-overlay-content {
-  background: var(--light);
-  padding: 25px;
-  border-radius: 12px;
-  width: 95%;
-  height: 90%;
-  max-width: 1200px;
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  position: relative;
+    background: var(--light);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 1300px; /* Lebar maksimal diperbesar */
+    height: 90vh; /* Tinggi fix 90% dari layar */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Mencegah scroll ganda */
+    position: relative;
+}
+
+/* 3. Reset Style Form Section di dalam Overlay */
+.history-overlay-content .form-section {
+    margin: 0 !important;
+    padding: 20px 25px !important;
+    box-shadow: none !important;
+    border: none !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+}
+
+/* 4. Header Judul & Tombol Close */
+.history-overlay-content .form-section > div:first-child {
+    flex-shrink: 0; /* Header tidak boleh mengecil */
+    margin-bottom: 15px !important;
+}
+
+/* 5. Filter Area */
+.history-overlay-content .history-filters {
+    flex-shrink: 0;
+    position: static !important; /* Reset sticky bawaan halaman utama */
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+/* 6. Tombol Export (Action Group) */
+.history-overlay-content .actions-group {
+    flex-shrink: 0;
+}
+
+/* 7. Container Tabel (AREA SCROLLING UTAMA) */
+.history-overlay-content .table-container {
+    flex-grow: 1; /* Mengambil sisa ruang kosong */
+    overflow: auto; /* Scroll vertikal & horizontal otomatis */
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+}
+
+/* 8. Tabel Data */
+.history-overlay-content .data-table {
+    width: 100%;
+    min-width: 1000px; /* KUNCI: Paksa tabel melebar agar kolom tidak terpotong/penyet */
+    margin-bottom: 0;
+}
+
+/* 9. Sticky Header Tabel */
+.history-overlay-content .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #2e3133; /* Warna header */
+    box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+}
+
+/* 10. Footer Pagination (Selalu di bawah) */
+.history-overlay-content .actions-group[id^="pagination-"] {
+    flex-shrink: 0;
+    margin-top: auto; /* Dorong ke paling bawah */
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    background: var(--light);
+}
+
+/* Responsif untuk Layar Kecil (Mobile) */
+@media (max-width: 768px) {
+    .history-overlay {
+        padding: 10px;
+    }
+    .history-overlay-content {
+        height: 95vh;
+    }
+    .history-overlay-content .form-section {
+        padding: 15px !important;
+    }
+    .history-overlay-content .table-container {
+        border-right: 1px solid var(--border); /* Kembalikan border */
+    }
 }
 
 .history-overlay-content .table-container {
@@ -4451,4 +4540,3 @@ ${transaction.isPpnDibebaskan ?
     </script>
 </body>
 </html>
-
