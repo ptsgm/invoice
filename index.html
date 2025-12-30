@@ -35,7 +35,383 @@
         --border: #e5e7eb; /* Abu-abu muda untuk border */
         --text: var(--dark);
         --background: #f9fafb; /* Latar belakang kontainer */
+        --card-bg: #ffffff;
+        --input-bg: #ffffff;
       }
+
+      /* DARK MODE VARIABLES */
+      .dark-mode {
+        --primary: #60a5fa; /* Biru lebih terang untuk dark mode */
+        --primary-dark: #3b82f6; 
+        --secondary: #fb923c;
+        --success: #4ade80;
+        --warning: #fbbf24;
+        --danger: #f87171;
+        --info: #38bdf8;
+        --dark: #f3f4f6; /* Teks jadi terang */
+        --light: #1f2937; /* Latar belakang jadi gelap */
+        --shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+        --border: #374151; /* Border lebih gelap */
+        --text: #ffffff;
+        --background: #111827; /* Latar belakang container gelap */
+        --card-bg: #1f2937;
+        --input-bg: #374151;
+      }
+
+      /* Dark mode specific overrides */
+      body.dark-mode {
+        /* Three Point Lighting Simulation:
+           1. Key Light (Top Left): Cool Blue tint
+           2. Fill Light (Bottom Right): Warm Purple/Dark tint
+           3. Back Light (Top Right): Accent Blue
+           4. Base: Dark Slate */
+        background-color: #0f172a;
+        background-image: 
+            radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%), /* Key Light */
+            radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),  /* Fill Light */
+            radial-gradient(circle at 80% 10%, rgba(30, 58, 138, 0.3) 0%, transparent 50%);   /* Back/Rim Light */
+        background-attachment: fixed; /* Parallax-like feel */
+        color: var(--text);
+      }
+
+      /* Base Body Light Mode 3-Point Light */
+      body {
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+        /* Light Mode 3-Point:
+           1. Key: Cool Blue (Subtle)
+           2. Fill: Warm Orange (Subtle)
+           3. Rim: Soft Purple/Blue */
+        background-color: #f8fafc;
+        background-image:
+            radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 90% 80%, rgba(249, 115, 22, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 80% 5%, rgba(124, 58, 237, 0.03) 0%, transparent 40%);
+        background-attachment: fixed;
+        color: var(--text);
+        min-height: 100vh;
+        padding: 20px;
+        font-size: 15px;
+        line-height: 1.6;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* Card/Container 3-Point Lighting & Glassmorphism Depth */
+      .container, .form-section, .stat-card, .history-overlay-content, .nav-tab.active {
+          /* Subtle top-left highlight (Key Light reflection) */
+          box-shadow: 
+            -1px -1px 0 rgba(255, 255, 255, 0.4) inset, /* Top-Left Highlight */
+            1px 1px 0 rgba(0, 0, 0, 0.05) inset,       /* Bottom-Right Shadow */
+            0 6px 16px rgba(0, 0, 0, 0.08);            /* Drop Shadow */
+      }
+      
+      .dark-mode .container, 
+      .dark-mode .form-section, 
+      .dark-mode .stat-card, 
+      .dark-mode .history-overlay-content,
+      .dark-mode .nav-tab.active {
+          box-shadow: 
+            -1px -1px 0 rgba(255, 255, 255, 0.08) inset, /* Fainter Highlight */
+            1px 1px 0 rgba(0, 0, 0, 0.3) inset,         /* Deeper Shadow */
+            0 8px 20px rgba(0, 0, 0, 0.4);              /* Heavier Drop Shadow */
+      }
+
+      .dark-mode .container {
+        background: var(--card-bg);
+      }
+      
+      .dark-mode .form-section {
+        background: #111827;
+        border-color: var(--border);
+      }
+
+      .dark-mode .nav-tab {
+        background: var(--card-bg);
+        border-color: var(--border);
+        color: var(--text);
+      }
+      
+      .dark-mode .nav-tab:hover:not(.active) {
+        background: #374151;
+      }
+
+      .dark-mode .form-group input,
+      .dark-mode .form-group select,
+      .dark-mode .form-group textarea {
+        background: var(--input-bg);
+        color: var(--text);
+        border-color: var(--border);
+      }
+
+      .dark-mode .data-table th {
+        background: #111827;
+        color: var(--text);
+      }
+      
+      .dark-mode .data-table td {
+         border-color: var(--border);
+      }
+      
+      .dark-mode .stat-card {
+        background: var(--card-bg);
+        border-color: var(--border);
+      }
+      
+      .dark-mode .history-filters {
+        background: #111827;
+      }
+      
+      .dark-mode .data-table tbody tr:nth-child(even) {
+        background-color: #374151;
+      }
+      
+      .dark-mode .data-table tbody tr:hover {
+        background-color: #4b5563;
+      }
+      
+      .dark-mode .step-number {
+        background-color: var(--card-bg);
+        border-color: var(--border);
+        color: var(--text);
+      }
+      
+      /* Fix Modal & Overlay Backgrounds */
+      .dark-mode .history-overlay-content {
+          background: var(--card-bg);
+          color: var(--text);
+      }
+      .dark-mode #item-editor-form {
+          background: var(--card-bg) !important;
+          color: var(--text);
+          border: 1px solid var(--border);
+      }
+      
+      /* Dark Scrollbar */
+      .dark-mode ::-webkit-scrollbar {
+        width: 12px;
+      }
+      .dark-mode ::-webkit-scrollbar-track {
+        background: #1f2937; 
+      }
+      /* Focus Glows */
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+          outline: none;
+          border-color: var(--primary);
+          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+          transition: all 0.3s ease;
+      }
+      
+      .dark-mode .form-group input:focus,
+      .dark-mode .form-group select:focus,
+      .dark-mode .form-group textarea:focus {
+          box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3);
+      }
+      
+      /* Dark Mode Fixes for Form Clusters & Summary */
+      .dark-mode .form-group-cluster {
+        background-color: var(--card-bg);
+        border-color: var(--border);
+      }
+      
+      .dark-mode .form-group-cluster-title {
+          color: var(--primary);
+          border-color: var(--border);
+      }
+      
+      .dark-mode .total-amount-display {
+        background-color: var(--input-bg);
+        color: var(--text);
+      }
+      
+      .dark-mode .dropdown-options {
+        background-color: var(--card-bg);
+        border-color: var(--border);
+      }
+
+      .dark-mode .dropdown-option {
+          color: var(--text);
+      }
+      
+      .dark-mode .dropdown-option:hover,
+      .dark-mode .dropdown-option.focused {
+        background-color: #374151;
+      }
+      
+      .dark-mode .dropdown-option small {
+        color: #9ca3af;
+      }
+
+      /* Notification Dark Mode */
+      .dark-mode .notification.success {
+        background-color: rgba(22, 163, 74, 0.2);
+        border-color: rgba(22, 163, 74, 0.3);
+        color: #4ade80;
+      }
+      
+      .dark-mode .notification.error {
+        background-color: rgba(220, 38, 38, 0.2);
+        border-color: rgba(220, 38, 38, 0.3);
+        color: #f87171;
+      }
+
+      /* PRO DASHBOARD LAYOUT */
+      .dashboard-grid-pro {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 20px;
+          margin-bottom: 25px;
+      }
+      .chart-card {
+           background: var(--card-bg);
+           padding: clamp(15px, 3vw, 25px); /* RESPONSIVE PADDING */
+           border-radius: 12px;
+           border: 1px solid var(--border);
+           box-shadow: var(--shadow);
+           min-height: 350px; /* MINIMUM DEPTH */
+           height: clamp(350px, 45vh, 450px); /* DYNAMIC HEIGHT */
+           position: relative;
+           display: flex;
+           flex-direction: column;
+      }
+      .chart-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+      }
+      .chart-title {
+          font-weight: 700;
+          font-size: clamp(0.9rem, 2.5vw, 1.2rem); /* AUTO SCALE TITLE */
+          color: var(--text);
+          letter-spacing: -0.01em;
+      }
+      
+      @media (max-width: 992px) {
+          .dashboard-grid-pro {
+              grid-template-columns: 1fr;
+          }
+      }
+
+      /* TEXT TRUNCATION UTILITY */
+      .truncate-text {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 150px;
+          font-size: 0.85em;
+      }
+      .data-table td.truncate-text {
+           max-width: 150px;
+      }
+
+      /* RESPONSIVE DASHBOARD STATS */
+      .stat-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* MORE FLEXIBLE MIN WIDTH */
+          gap: 20px;
+          margin-bottom: 25px;
+      }
+
+      .stat-card {
+          padding: 12px; /* EVEN SMALLER PADDING */
+          box-sizing: border-box; /* PREVENT PADDING OVERFLOW */
+          min-width: 0; /* ALLOW GRID SHRINKAGE */
+          overflow: hidden; /* STRICT CONTAINMENT */
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          background: var(--card-bg);
+          box-shadow: var(--shadow);
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+      }
+
+      .stat-card-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #64748b; /* Gray in light mode */
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+      }
+
+      .stat-card-value {
+          font-size: clamp(0.7rem, 4vw, 1.5rem); /* EXTREMELY AGGRESSIVE SCALING */
+          font-weight: 700;
+          color: var(--text);
+          white-space: nowrap;
+          overflow: hidden; /* SAFETY NET */
+          text-overflow: ellipsis; /* LAST RESORT */
+          display: block;
+          width: 100%;
+      }
+
+      .stat-card-value.profit { color: #10b981; }
+      .stat-card-value.loss { color: #ef4444; }
+
+      /* DARK MODE OVERRIDES FOR STATS */
+      .dark-mode .stat-card-title,
+      .dark-mode .stat-card-value,
+      .dark-mode .stat-card-value.profit,
+      .dark-mode .stat-card-value.loss {
+          color: #ffffff !important; /* Force white as per user request */
+      }
+      
+      .dark-mode .stat-card {
+          background: rgba(30, 41, 59, 0.7);
+          backdrop-filter: blur(8px);
+          border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      @media (max-width: 600px) {
+          .stat-cards {
+              grid-template-columns: 1fr; /* Single column on mobile */
+              gap: 12px;
+          }
+          .stat-card {
+              padding: 12px;
+          }
+          /* CHART MOBILE OPTIMIZATION */
+          .dashboard-grid-pro {
+              grid-template-columns: 1fr !important;
+              gap: 15px;
+          }
+          .chart-card {
+              height: 280px !important; /* Adjusted for smaller screens */
+              min-height: 240px !important;
+              padding: 12px !important;
+          }
+          .chart-title {
+              font-size: 0.95rem !important;
+          }
+      }
+
+
+
+      /* Table Header Contrast */
+      .dark-mode .data-table thead th {
+          background: #374151; /* Lighter than body, distinct from rows */
+          color: #f3f4f6;
+          border-bottom: 2px solid #4b5563;
+      }
+      
+      /* Input Readonly Contrast in Dark Mode */
+      .dark-mode .form-group input[readonly] {
+          background-color: #374151; /* Darker grey */
+          color: #9ca3af;
+      }
+      
+      /* Floating Action Button Theme */
+      .dark-mode .floating-action-btn {
+          background-color: #ef4444; /* Brighter red for visibility on dark */
+          color: white;
+      }
+      .dark-mode .floating-action-btn:hover {
+          background-color: #dc2626;
+      }
+
 
       * {
         margin: 0;
@@ -52,6 +428,7 @@
         padding: 20px;
         font-size: 15px;
         line-height: 1.6;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
       .container {
@@ -1375,12 +1752,15 @@
           alt="Logo Perusahaan"
           onerror="this.onerror=null; this.src='https://via.placeholder.com/150x50.png?text=Logo';"
         />
-        <div>
+        <div style="flex-grow: 1;">
           <h1 id="header-title">Sistem Akuntansi SGM</h1>
           <p class="subtitle" id="header-tagline">
             Pencatatan Penjualan, Pembelian, dan Surat Jalan
           </p>
         </div>
+        <button class="btn btn-sm" id="darkModeToggle" onclick="window.app.toggleDarkMode()" style="background:transparent; border:1px solid var(--border); color:var(--text);" title="Toggle Dark Mode (Ctrl+Shift+D)">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>
+        </button>
       </div>
 
       <div class="nav-tabs" role="tablist">
@@ -1642,6 +2022,7 @@
 
     <div id="print-area"></div>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -1750,12 +2131,27 @@ hideHistoryOverlay(type) {
           try {
             this.cleanup();
             console.log("Starting init v5.1...");
+            
+            // Load Dark Mode Preference
+            this.loadDarkMode();
+
             this.showLoading(true);
             await this.loadData();
             this.buildDOM();
             this.bindGlobalEvents();
             await this.updateAllUI();
+            
+            // NEW: Load Drafts & Render Chart
             this.loadDrafts();
+            setTimeout(() => this.renderDashboardChart(), 500); 
+
+            // RESPONSIVE AUTO-SCALE LISTENER
+            window.addEventListener('resize', Utils.debounce(() => {
+                if(document.getElementById('dashboard-stats')) {
+                    this.autoScaleStatFonts();
+                    this.renderDashboardChart(this.currentDashboardStart, this.currentDashboardEnd);
+                }
+            }, 200));
           } catch (error) {
             Utils.logError("Initialization failed", error);
             this.showNotification(
@@ -1765,6 +2161,19 @@ hideHistoryOverlay(type) {
           } finally {
             this.showLoading(false);
           }
+        }
+
+        toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            
+            this.showNotification(isDark ? 'Mode Gelap Aktif' : 'Mode Terang Aktif');
+        }
+
+        loadDarkMode() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) document.body.classList.add('dark-mode');
         }
 
         // Wrapper methods for edit form navigation (fixing app.nextStep is not a function)
@@ -1825,8 +2234,8 @@ hideHistoryOverlay(type) {
     const dataTransaksiContainer = document.getElementById("data-transaksi");
     if (dataTransaksiContainer) {
         dataTransaksiContainer.innerHTML = `
-            <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; background:white; display:flex; gap:10px; align-items:center;">
-                <label style="font-weight:600; margin-right:10px;">Pilih Data:</label>
+            <div class="sub-tab-container" style="padding: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; background: var(--card-bg); display:flex; gap:10px; align-items:center; border-radius: 8px;">
+                <label style="font-weight:600; margin-right:10px; color: var(--text);">Pilih Data:</label>
                 <button id="btn-subtab-sale" class="btn btn-primary sub-tab-btn" onclick="app.switchSubTab('sale')">Riwayat Penjualan</button>
                 <button id="btn-subtab-purchase" class="btn btn-secondary sub-tab-btn" onclick="app.switchSubTab('purchase')">Riwayat Pembelian</button>
             </div>
@@ -1904,7 +2313,7 @@ hideHistoryOverlay(type) {
   const step1_infoDasar = `
   <div class="form-step active" id="form-step-1-${type}">
     ${/* PPN Checkbox */ `
-    <div class="form-group" style="grid-column: 1 / -1; background-color: #f1f5f9; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+    <div class="form-group" style="grid-column: 1 / -1; background-color: var(--background); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="checkbox" id="includePpn-${type}" style="width: auto; height: 1.3em; transform: scale(1.3);">
         <label for="includePpn-${type}" style="margin-bottom: 0; font-weight: bold; font-size: 1.05rem; color: red; cursor: pointer;">GUNAKAN PPN 11% (Membuat Invoice)</label>
@@ -2171,6 +2580,8 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
             form.addEventListener("submit", (e) => {
                 e.preventDefault();
                 this.saveTransaction(type);
+                // Clear draft on successful submit (handled in saveTransaction usually, or explicit clear here if save is async/verified)
+                localStorage.removeItem(`${this.DRAFT_KEY}_${type}`); 
             }, { signal });
 
             form.addEventListener("input", Utils.debounce(() => this.saveDraft(type), 1000), { signal });
@@ -2204,10 +2615,13 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
                             partyInput.value = selectedName;
                             this.populatePartyDetails(selectedName, type);
                             this.closeAllDropdowns();
+                            this.saveDraft(type); // Save draft on selection
                         }
                     }, { signal });
                 }
             }
+
+
 
             const itemSelector = form.querySelector(`#item-selector-${type}`);
             const dropdownOptions = form.querySelector(`#dropdown-options-${type}`);
@@ -2316,6 +2730,205 @@ if (bebasPpnCheckbox) {
         this.calculateTotals(type); // Recalculate totals when this checkbox changes
     }, { signal });
 }
+        }
+
+        // AUTO-SAVE LOGIC
+        saveDraft(type) {
+            if (type === 'edit') return; // Don't auto-save edit mode
+            const form = document.getElementById(`${type}Form`);
+            if (!form) return;
+
+            const formData = {};
+            // Capture inputs
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.id) formData[input.id] = input.type === 'checkbox' ? input.checked : input.value;
+            });
+            // Capture temp items
+            formData.tempItems = this.tempItems[type];
+
+            localStorage.setItem(`${this.DRAFT_KEY}_${type}`, JSON.stringify(formData));
+        }
+
+        loadDrafts() {
+            ['sale', 'purchase'].forEach(type => {
+                const draft = localStorage.getItem(`${this.DRAFT_KEY}_${type}`);
+                if (draft) {
+                    try {
+                        const data = JSON.parse(draft);
+                        this.tempItems[type] = data.tempItems || [];
+                        
+                        // Restore inputs
+                        Object.keys(data).forEach(key => {
+                            if (key === 'tempItems') return;
+                            const input = document.getElementById(key);
+                            if (input) {
+                                if (input.type === 'checkbox') input.checked = data[key];
+                                else input.value = data[key];
+                            }
+                        });
+                        this.renderTempItems(type);
+                        this.calculateTotals(type);
+                        const ppnCheck = document.getElementById(`includePpn-${type}`);
+                        if(ppnCheck) ppnCheck.dispatchEvent(new Event('change'));
+                    } catch (e) {
+                        console.error("Failed to load draft", e);
+                    }
+                }
+            });
+        }
+
+        // CHART LOGIC
+        async renderDashboard() {
+             const dashboardContainer = document.getElementById("dashboard");
+             if (dashboardContainer) {
+                 dashboardContainer.innerHTML = this.generateDashboardHTML();
+                 this.renderDashboardChart(); // Call chart render
+             }
+        }
+
+        renderDashboardChart(startDate, endDate) {
+            const filterPredicate = t => (!startDate || t.tanggal >= startDate) && (!endDate || t.tanggal <= endDate);
+            
+            // Collect all sales and purchases
+            const allSales = [...this.data.penjualan, ...this.data.invoices.filter(inv => inv.transType === 'sale')].filter(filterPredicate);
+            const allPurchases = [...this.data.pembelian, ...this.data.invoices.filter(inv => inv.transType === 'purchase')].filter(filterPredicate);
+
+            // Destroy existing charts if they exist
+            if (this.salesChartInst) this.salesChartInst.destroy();
+            if (this.productChartInst) this.productChartInst.destroy();
+
+            const isDark = document.body.classList.contains('dark-mode');
+            const textColor = isDark ? '#ffffff' : '#475569';
+
+            // 1. Combination Chart (Sales, Purchase, Profit)
+            const ctxSales = document.getElementById('salesChart');
+            if (ctxSales) {
+                const salesMap = new Map();
+                const purchaseMap = new Map();
+                
+                allSales.forEach(item => {
+                    const date = item.tanggal;
+                    salesMap.set(date, (salesMap.get(date) || 0) + (item.grandTotal || 0));
+                });
+                allPurchases.forEach(item => {
+                    const date = item.tanggal;
+                    purchaseMap.set(date, (purchaseMap.get(date) || 0) + (item.grandTotal || 0));
+                });
+                
+                const allDates = Array.from(new Set([...salesMap.keys(), ...purchaseMap.keys()])).sort();
+                
+                this.salesChartInst = new Chart(ctxSales, {
+                    type: 'bar',
+                    data: {
+                        labels: allDates.map(d => this.formatDate(d)),
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: 'Keuntungan',
+                                data: allDates.map(d => (salesMap.get(d)||0) - (purchaseMap.get(d)||0)),
+                                borderColor: '#10b981',
+                                borderWidth: 3,
+                                fill: false,
+                                tension: 0.4,
+                                order: 1
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Penjualan',
+                                data: allDates.map(d => salesMap.get(d)||0),
+                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                borderRadius: 4,
+                                order: 2
+                            },
+                            {
+                                type: 'bar',
+                                label: 'Pembelian',
+                                data: allDates.map(d => purchaseMap.get(d)||0),
+                                backgroundColor: 'rgba(249, 115, 22, 0.6)',
+                                borderRadius: 4,
+                                order: 3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { 
+                                grid: { display: false }, 
+                                ticks: { 
+                                    color: textColor, 
+                                    maxRotation: 45, 
+                                    minRotation: 45,
+                                    font: { size: window.innerWidth < 600 ? 10 : 12 }
+                                } 
+                            },
+                            y: { 
+                                grid: { color: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+                                ticks: { 
+                                    color: textColor,
+                                    font: { size: window.innerWidth < 600 ? 10 : 12 }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                labels: { 
+                                    usePointStyle: true, 
+                                    color: textColor,
+                                    font: { size: window.innerWidth < 600 ? 11 : 13 }
+                                } 
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Donut Chart (Top Products)
+            const ctxProduct = document.getElementById('productChart');
+            if (ctxProduct) {
+                const productCounts = {};
+                allSales.forEach(tx => {
+                    (tx.items || []).forEach(item => {
+                        productCounts[item.name] = (productCounts[item.name] || 0) + (item.qty || 0);
+                    });
+                });
+                
+                const sortedProducts = Object.entries(productCounts)
+                    .sort((a,b) => b[1] - a[1])
+                    .slice(0, 5);
+                
+                this.productChartInst = new Chart(ctxProduct, {
+                    type: 'doughnut',
+                    data: {
+                        labels: sortedProducts.map(p => p[0]),
+                        datasets: [{
+                            data: sortedProducts.map(p => p[1]),
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                            hoverOffset: 15,
+                            borderWidth: 2,
+                            borderColor: document.body.classList.contains('dark-mode') ? '#1e293b' : '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    color: textColor, 
+                                    padding: window.innerWidth < 600 ? 10 : 20, 
+                                    usePointStyle: true,
+                                    font: { size: window.innerWidth < 600 ? 10 : 12 }
+                                } 
+                            }
+                        }
+                    }
+                });
+            }
         }
         
         // ... (rest of the class methods are mostly unchanged)
@@ -2431,10 +3044,10 @@ renderNpwpTable() {
     // 4. Render baris tabel
     tableBody.innerHTML = paginatedData.map(p => `
         <tr>
-            <td>${this.sanitizeInput(p.name)}</td>
+            <td class="truncate-text">${this.sanitizeInput(p.name)}</td>
             <td><span class="btn btn-sm ${p.type === 'customer' ? 'btn-info' : 'btn-warning'}">${p.type}</span></td>
             <td>${this.sanitizeInput(p.npwp || '-')}</td>
-            <td>${this.sanitizeInput(p.alamat || p.address || '-')}</td>
+            <td class="truncate-text">${this.sanitizeInput(p.alamat || p.address || '-')}</td>
             <td>${this.sanitizeInput(p.telepon || p.phone || '-')}</td>
             <td class="action-cell">
                 <button class="btn btn-sm btn-warning" onclick="app.showNpwpEditor('${this.sanitizeInput(p.name)}', '${p.type}')">Edit</button>
@@ -3756,7 +4369,7 @@ async addNewNpwp() {
                 return `<tr>
                             <td>${item.id}</td>
                             <td>${this.formatDate(item.tanggal)}</td>
-                            <td>${party}<br><small>${item.telepon || ""}</small></td>
+                            <td class="truncate-text">${party}<br><small>${item.telepon || ""}</small></td>
                             ${isTransaction ? `<td class="text-right">${this.formatCurrency(item.grandTotal)}</td>` : `<td>${item.noKendaraan || ""}</td>`}
                             <td class="action-cell">
                                 ${printButtons}
@@ -3787,7 +4400,7 @@ async addNewNpwp() {
                 return `<tr>
                             <td>${index + 1}</td>
                             <td>${item.code}</td>
-                            <td>${item.name}</td>
+                            <td class="truncate-text">${item.name}</td>
                             <td class="text-right">${this.formatNumber(item.qty)}</td>
                             <td>${item.unit}</td>
                             <td class="text-right">${this.formatCurrency(item.price)}</td>
@@ -4247,7 +4860,7 @@ async addNewNpwp() {
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
                             Dashboard
                         </h3>
-                        <div class="quick-actions">
+                        <div class="quick-actions" style="margin-bottom: 20px;">
                              <button class="btn btn-success" onclick="app.switchToTab('penjualan')">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
                                 Buat Penjualan Baru
@@ -4257,15 +4870,40 @@ async addNewNpwp() {
                                 Buat Pembelian Baru
                              </button>
                         </div>
-                    </div>
-                    <div class="form-section">
-                        <h3 class="form-section-title">Statistik</h3>
-                        <div class="history-filters" id="dashboard-filters">
-                            <div class="form-group"><label for="dashboard-start-date">Dari Tanggal</label><input type="date" class="start-date" id="dashboard-start-date"></div>
-                            <div class="form-group"><label for="dashboard-end-date">Sampai Tanggal</label><input type="date" class="end-date" id="dashboard-end-date"></div>
+
+                        <!-- PERIOD FILTERS -->
+                        <div class="actions-group" style="margin-bottom: 20px; justify-content: flex-start; gap: 10px;">
+                            <span style="font-weight: 600; color: var(--text);">Filter Periode:</span>
+                            <button class="btn btn-sm btn-secondary" onclick="app.filterDashboardRange('today')">Hari Ini</button>
+                            <button class="btn btn-sm btn-secondary" onclick="app.filterDashboardRange('week')">Minggu Ini</button>
+                            <button class="btn btn-sm btn-secondary" onclick="app.filterDashboardRange('month')">Bulan Ini</button>
+                            <button class="btn btn-sm btn-secondary" onclick="app.filterDashboardRange('year')">Tahun Ini</button>
+                            <button class="btn btn-sm btn-secondary" onclick="app.filterDashboardRange('all')">Semua</button>
                         </div>
-                        <div class="stat-cards" id="dashboard-stats"></div>
+                        
+                        <div class="stat-cards" id="dashboard-stats" style="margin-bottom: 25px;"></div>
+
+                        <!-- PRO CHARTS GRID -->
+                        <div class="dashboard-grid-pro">
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">Analisis Transaksi & Profit</span>
+                                </div>
+                                <div style="flex:1; position:relative;">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <span class="chart-title">Top 5 Produk Terlaris</span>
+                                </div>
+                                <div style="flex:1; position:relative;">
+                                    <canvas id="productChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                     <div class="form-section">
                         <h3 class="form-section-title">Ringkasan Transaksi Terbaru (50 Teratas)</h3>
                         <div class="table-container">
@@ -4323,7 +4961,7 @@ async addNewNpwp() {
     tableBody.innerHTML = paginatedItems.map(item => `
         <tr>
             <td>${this.sanitizeInput(item.code)}</td>
-            <td>${this.sanitizeInput(item.name)}</td>
+            <td class="truncate-text">${this.sanitizeInput(item.name)}</td>
             <td>${this.sanitizeInput(item.unit)}</td>
             <td class="text-right">${this.formatCurrency(item.price || 0)}</td>
             <td class="action-cell">
@@ -4605,18 +5243,21 @@ ${transaction.isPpnDibebaskan ?
             const statsContainer = document.getElementById("dashboard-stats");
             const tableBody = document.querySelector("#dashboard-transactions-table tbody");
             if (!statsContainer || !tableBody) return;
-            const filters = document.getElementById("dashboard-filters");
-            const startDate = filters.querySelector(".start-date")?.value;
-            const endDate = filters.querySelector(".end-date")?.value;
+
+            // Date Filters based on state
+            let startDate = this.currentDashboardStart || "";
+            let endDate = this.currentDashboardEnd || "";
+
             const filterPredicate = t => (!startDate || t.tanggal >= startDate) && (!endDate || t.tanggal <= endDate);
+
             const allSales = [...this.data.penjualan, ...this.data.invoices.filter(inv => inv.transType === 'sale')];
             const allPurchases = [...this.data.pembelian, ...this.data.invoices.filter(inv => inv.transType === 'purchase')];
 
             const filteredSales = allSales.filter(filterPredicate);
             const filteredPurchases = allPurchases.filter(filterPredicate);
             
-            const totalSales = filteredSales.reduce((sum, t) => sum + (t.subtotal || 0) - (t.discount || 0), 0);
-            const totalPurchases = filteredPurchases.reduce((sum, t) => sum + (t.subtotal || 0) - (t.discount || 0), 0);
+            const totalSales = filteredSales.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
+            const totalPurchases = filteredPurchases.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
             const profit = totalSales - totalPurchases;
             
             const allTransactions = [
@@ -4626,17 +5267,30 @@ ${transaction.isPpnDibebaskan ?
                 ...this.data.suratJalan.map((t) => ({ ...t, type: "Surat Jalan", dataKey: "suratJalan", typeClass: "btn-warning" })),
             ].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-            statsContainer.innerHTML = `<div class="stat-card">
-                <div class="stat-card-title">Total Penjualan (Filtered)</div><div class="stat-card-value profit">${this.formatCurrency(totalSales)}</div>
-            </div><div class="stat-card">
-                <div class="stat-card-title">Total Pembelian (Filtered)</div><div class="stat-card-value loss">${this.formatCurrency(totalPurchases)}</div>
-            </div><div class="stat-card">
-                <div class="stat-card-title">Laba Kotor (Filtered)</div><div class="stat-card-value ${profit >= 0 ? "profit" : "loss"}">${this.formatCurrency(profit)}</div>
-            </div><div class="stat-card">
-                <div class="stat-card-title">Jumlah Transaksi (Total)</div><div class="stat-card-value">${this.formatNumber(allTransactions.length)}</div>
-            </div>`;
+            const displayTransactions = allTransactions.filter(filterPredicate).slice(0, 50);
 
-            tableBody.innerHTML = allTransactions.slice(0, 50).map(t => {
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-card-title">Total Penjualan</div>
+                    <div class="stat-card-value profit">${this.formatCurrency(totalSales)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">Total Pembelian</div>
+                    <div class="stat-card-value loss">${this.formatCurrency(totalPurchases)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">Laba Kotor</div>
+                    <div class="stat-card-value ${profit >= 0 ? "profit" : "loss"}">${this.formatCurrency(profit)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">Transaksi Periode Ini</div>
+                    <div class="stat-card-value">${this.formatNumber(displayTransactions.length)}</div>
+                </div>`;
+
+            // AUTO SCALE FONTS AFTER RENDER
+            this.autoScaleStatFonts();
+
+            tableBody.innerHTML = displayTransactions.map(t => {
                 const party = t.customer || t.pemasok || t.penerima || "N/A";
                 let printTemplate = 'faktur';
                 if(t.dataKey === 'invoices') printTemplate = 'invoice';
@@ -4644,13 +5298,78 @@ ${transaction.isPpnDibebaskan ?
                 
                 return `<tr>
                     <td><span class="btn btn-sm ${t.typeClass}">${t.type}</span></td>
-                    <td>${t.id}</td><td>${this.formatDate(t.tanggal)}</td><td>${party}</td>
+                    <td class="truncate-text">${t.id}</td>
+                    <td>${this.formatDate(t.tanggal)}</td>
+                    <td class="truncate-text">${party}</td>
                     <td class="text-right">${t.grandTotal !== undefined ? this.formatCurrency(t.grandTotal) : "-"}</td>
                     <td class="action-cell">
                         <button class="btn btn-sm btn-info" onclick="app.printTransaction('${t.dataKey}', '${t.id}', '${printTemplate}')">Cetak</button>
                         <button class="btn btn-sm btn-danger" onclick="app.deleteTransaction('${t.dataKey}', '${t.id}')">Hapus</button>
                     </td></tr>`;
             }).join('');
+
+            // Also refresh charts
+            this.renderDashboardChart(startDate, endDate);
+        }
+
+        autoScaleStatFonts() {
+            const values = document.querySelectorAll('.stat-card-value');
+            values.forEach(el => {
+                let size = 1.5; // Start from 1.5rem (from CSS clamp max)
+                el.style.fontSize = size + 'rem';
+                
+                // Extremely aggressive fitting loop
+                // We use offsetWidth of the parent to be extra safe
+                const parent = el.closest('.stat-card');
+                const maxAvailableWidth = parent ? parent.clientWidth - 24 : el.clientWidth; // 24 is padding (12*2)
+                
+                while (el.scrollWidth > maxAvailableWidth && size > 0.5) {
+                    size -= 0.05; // Finer increments
+                    el.style.fontSize = size + 'rem';
+                }
+            });
+        }
+
+        filterDashboardRange(range) {
+            const now = new Date();
+            let start = new Date();
+            let end = new Date();
+
+            switch(range) {
+                case 'today':
+                    start = now;
+                    break;
+                case 'week':
+                    start.setDate(now.getDate() - now.getDay());
+                    break;
+                case 'month':
+                    start.setDate(1);
+                    break;
+                case 'year':
+                    start.setMonth(0, 1);
+                    break;
+                case 'all':
+                    start = null;
+                    end = null;
+                    break;
+            }
+
+            const startStr = start ? start.toISOString().split('T')[0] : "";
+            const endStr = end ? end.toISOString().split('T')[0] : "";
+
+            // We don't have dashboard-filters in DOM anymore because I removed it in generateDashboardHTML
+            // Wait, I should add them back or use a different way.
+            // Actually, I'll just re-render with these dates passed.
+            
+            // I'll update my state if I had one, but let's just trigger renderDashboard with these.
+            // For now, I'll just pass them to renderDashboard.
+            
+            // Re-calling renderDashboard but we need to store these dates somewhere.
+            // Let's just use hidden inputs in the dashboard or just pass as args.
+            
+            this.currentDashboardStart = startStr;
+            this.currentDashboardEnd = endStr;
+            this.renderDashboard();
         }
         
         terbilang(nilai) {
@@ -4948,10 +5667,43 @@ ${transaction.isPpnDibebaskan ?
     });
 
     // Set initial visibility for the default active tab
-    const initialActiveTab = document.querySelector('.nav-tab.active');
+    const initialActiveTab = document.querySelector(".nav-tab.active");
     if (initialActiveTab) {
         updateFabVisibility(initialActiveTab.dataset.tab);
     }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+Shift+D for Dark Mode
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            e.preventDefault();
+            window.app.toggleDarkMode();
+        }
+        
+        // Alt+N for Penjualan
+        if (e.altKey && e.key.toLowerCase() === 'n') {
+            e.preventDefault();
+            const tab = document.querySelector('.nav-tab[data-tab="penjualan"]');
+            if(tab) tab.click();
+        }
+        
+        // Alt+P for Pembelian
+        if (e.altKey && e.key.toLowerCase() === 'p') {
+            e.preventDefault();
+            const tab = document.querySelector('.nav-tab[data-tab="pembelian"]');
+            if(tab) tab.click();
+        }
+
+        // Esc to close overlays
+        if (e.key === 'Escape') {
+            const overlays = document.querySelectorAll('.history-overlay, #item-editor-modal, .dropdown-options');
+            overlays.forEach(el => {
+                // Special handling for dropdowns to just hide them
+                if (el.classList.contains('dropdown-options')) el.style.display = 'none';
+                else if (el.style.display !== 'none') el.style.display = 'none';
+            });
+        }
+    });
 });
     </script>
 </body>
