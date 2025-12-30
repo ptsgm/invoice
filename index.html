@@ -1737,6 +1737,51 @@
             padding: 10px;
         }
       }
+
+    /* === APP FOOTER STYLING === */
+.app-footer {
+  text-align: center;
+  padding: 30px 15px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  color: var(--text);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Dark mode adjustment for footer border */
+body.dark-mode .app-footer {
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.app-footer p {
+  margin: 5px 0;
+}
+
+.app-footer strong {
+  font-weight: 600;
+}
+
+.app-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.app-footer a:hover {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+/* Sembunyikan footer saat dicetak */
+@media print {
+  .app-footer {
+    display: none !important;
+  }
+}
+
     </style>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -2019,7 +2064,16 @@
         
       </div>
     </div>
-
+<footer class="app-footer">
+        <p>
+            &copy; <script>document.write(new Date().getFullYear())</script> 
+            <strong>Sistem Akuntansi SGM</strong>. All Rights Reserved.
+        </p>
+        <p>
+            Dibuat dengan <span style="color: #e25555;">&hearts;</span> oleh 
+            <a href="#" target="_blank" title="Kunjungi Website Kami">Nunudev Studio</a>
+        </p>
+</footer>
     <div id="print-area"></div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -5708,3 +5762,4 @@ ${transaction.isPpnDibebaskan ?
     </script>
 </body>
 </html>
+
