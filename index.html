@@ -1795,7 +1795,7 @@ body.dark-mode .app-footer {
     </style>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="dark-mode">
     <div class="loading-overlay" id="loadingOverlay">
       <div class="loading-spinner"></div>
     </div>
@@ -1823,7 +1823,7 @@ body.dark-mode .app-footer {
         <button class="nav-tab" data-tab="penjualan" role="tab">Penjualan</button>
         <button class="nav-tab" data-tab="pembelian" role="tab">Pembelian</button>
         <button class="nav-tab" data-tab="data-transaksi" role="tab">Data Transaksi (Non PPN)</button>
-        <button class="nav-tab" data-tab="invoices" role="tab">Data Invoice</button>
+        <button class="nav-tab" data-tab="invoices" role="tab">Data Invoice (PPN)</button>
         <button class="nav-tab" data-tab="pengaturan" role="tab">Pengaturan</button>
         <button class="nav-tab" data-tab="edit" style="display:none;" id="edit-tab-btn">Edit Transaksi</button>
       </div>
@@ -2236,8 +2236,15 @@ hideHistoryOverlay(type) {
         }
 
         loadDarkMode() {
-            const isDark = localStorage.getItem('darkMode') === 'true';
-            if (isDark) document.body.classList.add('dark-mode');
+            // Default ke TRUE jika belum pernah diatur
+            const saved = localStorage.getItem('darkMode');
+            const isDark = (saved === null) ? true : (saved === 'true');
+            
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         }
 
         // Wrapper methods for edit form navigation (fixing app.nextStep is not a function)
@@ -4968,16 +4975,6 @@ async addNewNpwp() {
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <h3 class="form-section-title">Ringkasan Transaksi Terbaru (50 Teratas)</h3>
-                        <div class="table-container">
-                            <table class="data-table" id="dashboard-transactions-table">
-                                <thead>
-                                    <tr><th>Jenis</th><th>No. Transaksi</th><th>Tanggal</th><th>Nama</th><th class="text-right">Total</th><th class="action-cell">Aksi</th></tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
                     </div>`;
         }
 
@@ -5305,8 +5302,7 @@ ${transaction.isPpnDibebaskan ?
         
         async renderDashboard() {
             const statsContainer = document.getElementById("dashboard-stats");
-            const tableBody = document.querySelector("#dashboard-transactions-table tbody");
-            if (!statsContainer || !tableBody) return;
+            if (!statsContainer) return;
 
             // Date Filters based on state
             let startDate = this.currentDashboardStart || "";
@@ -5325,13 +5321,13 @@ ${transaction.isPpnDibebaskan ?
             const profit = totalSales - totalPurchases;
             
             const allTransactions = [
-                ...this.data.penjualan.map((t) => ({ ...t, type: "Penjualan", dataKey: "penjualan", typeClass: "btn-success" })),
-                ...this.data.pembelian.map((t) => ({ ...t, type: "Pembelian", dataKey: "pembelian", typeClass: "btn-danger" })),
-                ...this.data.invoices.map((t) => ({ ...t, type: "Invoice", dataKey: "invoices", typeClass: "btn-info" })),
-                ...this.data.suratJalan.map((t) => ({ ...t, type: "Surat Jalan", dataKey: "suratJalan", typeClass: "btn-warning" })),
-            ].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                ...this.data.penjualan,
+                ...this.data.pembelian,
+                ...this.data.invoices,
+                ...this.data.suratJalan
+            ];
 
-            const displayTransactions = allTransactions.filter(filterPredicate).slice(0, 50);
+            const displayTransactionsCount = allTransactions.filter(filterPredicate).length;
 
             statsContainer.innerHTML = `
                 <div class="stat-card">
@@ -5348,29 +5344,11 @@ ${transaction.isPpnDibebaskan ?
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-title">Transaksi Periode Ini</div>
-                    <div class="stat-card-value">${this.formatNumber(displayTransactions.length)}</div>
+                    <div class="stat-card-value">${this.formatNumber(displayTransactionsCount)}</div>
                 </div>`;
 
             // AUTO SCALE FONTS AFTER RENDER
             this.autoScaleStatFonts();
-
-            tableBody.innerHTML = displayTransactions.map(t => {
-                const party = t.customer || t.pemasok || t.penerima || "N/A";
-                let printTemplate = 'faktur';
-                if(t.dataKey === 'invoices') printTemplate = 'invoice';
-                if(t.dataKey === 'suratJalan') printTemplate = 'surat_jalan';
-                
-                return `<tr>
-                    <td><span class="btn btn-sm ${t.typeClass}">${t.type}</span></td>
-                    <td class="truncate-text">${t.id}</td>
-                    <td>${this.formatDate(t.tanggal)}</td>
-                    <td class="truncate-text">${party}</td>
-                    <td class="text-right">${t.grandTotal !== undefined ? this.formatCurrency(t.grandTotal) : "-"}</td>
-                    <td class="action-cell">
-                        <button class="btn btn-sm btn-info" onclick="app.printTransaction('${t.dataKey}', '${t.id}', '${printTemplate}')">Cetak</button>
-                        <button class="btn btn-sm btn-danger" onclick="app.deleteTransaction('${t.dataKey}', '${t.id}')">Hapus</button>
-                    </td></tr>`;
-            }).join('');
 
             // Also refresh charts
             this.renderDashboardChart(startDate, endDate);
@@ -5772,6 +5750,5 @@ ${transaction.isPpnDibebaskan ?
     </script>
 </body>
 </html>
-
 
 
