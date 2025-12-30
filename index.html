@@ -112,6 +112,16 @@
         color: var(--text);
         margin-bottom: -1px;
       }
+      
+      .nav-tab[data-tab="edit"] {
+          background: #fef3c7;
+          border-color: #f59e0b;
+          color: #d97706;
+      }
+      .nav-tab[data-tab="edit"].active {
+          background: #f59e0b;
+          color: white;
+      }
 
       .nav-tab.active {
         background: var(--primary);
@@ -1377,8 +1387,10 @@
         <button class="nav-tab active" data-tab="dashboard" role="tab">Dashboard</button>
         <button class="nav-tab" data-tab="penjualan" role="tab">Penjualan</button>
         <button class="nav-tab" data-tab="pembelian" role="tab">Pembelian</button>
+        <button class="nav-tab" data-tab="data-transaksi" role="tab">Data Transaksi (Non PPN)</button>
         <button class="nav-tab" data-tab="invoices" role="tab">Data Invoice</button>
         <button class="nav-tab" data-tab="pengaturan" role="tab">Pengaturan</button>
+        <button class="nav-tab" data-tab="edit" style="display:none;" id="edit-tab-btn">Edit Transaksi</button>
       </div>
 
       <div id="notification-area" class="notification"></div>
@@ -1386,6 +1398,7 @@
       <div id="dashboard" class="tab-content active" role="tabpanel"></div>
       <div id="penjualan" class="tab-content" role="tabpanel"></div>
       <div id="pembelian" class="tab-content" role="tabpanel"></div>
+      <div id="data-transaksi" class="tab-content" role="tabpanel"></div>
       <div id="invoices" class="tab-content" role="tabpanel"></div>
       <div id="suratJalan" class="tab-content" role="tabpanel"></div> 
 
@@ -1446,29 +1459,154 @@
         </div>
     </div>
     </div> <div id="npwp-management-section"></div>
-    <div class="form-section">
-      <h3 class="form-section-title">Backup & Restore</h3>
-      <p style="margin-bottom: 15px">
-        Simpan semua data transaksi dan data barang ke dalam satu file JSON,
-        atau pulihkan dari file cadangan.
-      </p>
-      <div class="actions-group">
-        <button type="button" id="backupDataBtn" class="btn btn-success">
-          Backup Semua Data
-        </button>
-        <button type="button" id="restoreDataBtn" class="btn btn-warning">
-          Restore Data
-        </button>
-        <input
-          type="file"
-          id="restoreFileInput"
-          style="display: none"
-          accept=".json"
-        />
-      </div>
-    </div>
-    <div id="trash-section"></div>
+    <div id="trash-section"></div> <!-- Move trash section here for better layout -->
 </div>
+
+<!-- EDIT TAB CONTENT -->
+<div id="edit" class="tab-content">
+    <div class="form-section">
+        <h3 class="form-section-title" id="edit-form-title">Edit Transaksi</h3>
+        <form id="editForm">
+             <input type="hidden" id="transType-edit"> <!-- Stores 'sale' or 'purchase' -->
+             
+             <div class="stepper" id="stepper-edit">
+                  <div class="step active" id="step-1-edit" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Informasi Utama</div>
+                  </div>
+                  <div class="step" id="step-2-edit" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Detail Barang</div>
+                  </div>
+                  <div class="step" id="step-3-edit" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Pembayaran</div>
+                  </div>
+            </div>
+
+            <div id="form-step-1-edit" class="form-step active">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tanggal</label>
+                        <input type="date" id="invoiceDate-edit" required>
+                    </div>
+                    <div class="form-group">
+                        <label>No. Transaksi</label>
+                        <input type="text" id="transNo-edit" readonly>
+                    </div>
+                </div>
+
+                <div class="form-section-title" style="font-size: 1.2rem; margin-top: 20px;">Informasi Partner</div>
+                <div class="form-grid">
+                    <div class="form-group filterable-dropdown">
+                        <label id="partyNameLabel-edit">Nama Partner</label>
+                        <input type="text" id="partyName-edit" onfocus="app.filterPartyNames('edit', true)" oninput="app.filterPartyNames('edit')" required autocomplete="off">
+                        <div class="dropdown-options" id="party-dropdown-edit"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Alamat</label>
+                        <input type="text" id="partyAddress-edit">
+                    </div>
+                    <div class="form-group">
+                        <label>Telepon</label>
+                        <input type="text" id="partyPhone-edit">
+                    </div>
+                </div>
+                 
+                 <div class="form-group" style="margin-top:15px; display:flex; flex-direction:row; align-items:center; gap:10px;">
+                    <input type="checkbox" id="includePpn-edit" style="width:auto;" onchange="document.getElementById('npwp-group-edit').classList.toggle('hidden', !this.checked); document.querySelector('.bebas-ppn-group-edit').classList.toggle('hidden', !this.checked); app.calculateTotals('edit');">
+                    <label for="includePpn-edit" style="margin:0; cursor:pointer;">Termasuk PPN 11%</label>
+                </div>
+                
+                 <div class="form-group bebas-ppn-group-edit hidden" id="bebas-ppn-group-edit" style="margin-top:10px; margin-left: 25px; display:flex; flex-direction:row; align-items:center; gap:10px;">
+                    <input type="checkbox" id="bebasPpn-edit" style="width:auto;" onchange="app.calculateTotals('edit');">
+                    <label for="bebasPpn-edit" style="margin:0; cursor:pointer;">PPN Dibebaskan (0%)</label>
+                </div>
+
+                <div id="npwp-group-edit" class="form-grid hidden" style="margin-top: 15px;">
+                    <div class="form-group">
+                        <label>NPWP / NIK (Wajib untuk PPN)</label>
+                        <input type="text" id="partyNpwp-edit">
+                    </div>
+                </div>
+
+                 <div class="actions-group" style="justify-content: flex-end;">
+                  <button type="button" class="btn btn-primary" onclick="app.nextStep('edit', 1)">Lanjut &raquo;</button>
+                </div>
+            </div>
+
+            <div id="form-step-2-edit" class="form-step">
+                <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr auto; align-items: end;">
+                     <div class="form-group filterable-dropdown">
+                        <label>Cari Barang</label>
+                        <input type="text" id="item-selector-edit" placeholder="Ketik kode atau nama..." onfocus="app.filterDropdown('edit', true)" oninput="app.filterDropdown('edit')" autocomplete="off">
+                        <div class="dropdown-options" id="dropdown-options-edit"></div>
+                    </div>
+                    <div class="form-group"><label>Jumlah</label><input type="number" id="itemQty-edit" value="0" min="0" step="any"></div>
+                    <div class="form-group"><label>Satuan</label><input type="text" id="itemUnit-edit" readonly></div>
+                    <div class="form-group"><label>Harga</label><input type="text" id="itemPrice-edit" class="rupiah-input" oninput="Utils.formatRupiahInput(this)"></div>
+                    <div class="form-group"><button type="button" class="btn btn-success" onclick="app.addItemToTempList('edit')">+</button></div>
+                </div>
+                <input type="hidden" id="itemCode-edit">
+
+                <div class="table-container">
+                    <table class="data-table" id="temp-items-table-edit">
+                        <thead><tr><th>No</th><th>Kode</th><th>Nama Barang</th><th class="text-right">Qty</th><th>Satuan</th><th class="text-right">Harga</th><th class="text-right">Total</th><th class="action-cell">Aksi</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                
+                 <div class="actions-group" style="justify-content: space-between;">
+                   <button type="button" class="btn btn-warning" onclick="app.prevStep('edit', 2)">&laquo; Kembali</button>
+                   <button type="button" class="btn btn-primary" onclick="app.nextStep('edit', 2)">Lanjut &raquo;</button>
+                </div>
+            </div>
+
+            <div id="form-step-3-edit" class="form-step">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Catatan</label>
+                        <textarea id="notes-edit" rows="3"></textarea>
+                    </div>
+                     <div class="form-group" id="ref-group-edit">
+                        <label>Referensi (No. PO / Lainnya)</label>
+                         <input type="text" id="ref-edit">
+                    </div>
+                     <div class="form-group">
+                        <label>No. Kendaraan (Surat Jalan)</label>
+                         <input type="text" id="vehicleNo-edit">
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <div class="summary-grid">
+                        <label>Subtotal</label><div class="total-amount-display" id="subtotal-edit">Rp 0</div>
+                        <label>Diskon (Rp)</label><input type="text" id="discount-edit" class="rupiah-input" value="0" oninput="Utils.formatRupiahInput(this); app.calculateTotals('edit')">
+                        <label>Ongkir (Rp)</label><input type="text" id="shippingCost-edit" class="rupiah-input" value="0" oninput="Utils.formatRupiahInput(this); app.calculateTotals('edit')">
+                        <label>PPN 11% <br><small id="dpp-info-edit"></small></label><div class="total-amount-display" id="ppn-edit">Rp 0</div>
+                        <label>DP / Uang Muka</label><input type="text" id="dp-edit" class="rupiah-input" value="0" oninput="Utils.formatRupiahInput(this); app.calculateTotals('edit')">
+                         <label>Metode Pembayaran</label>
+                        <select id="paymentMethod-edit">
+                            <option value="Tunai">Tunai</option>
+                            <option value="Transfer">Transfer</option>
+                            <option value="Tempo">Tempo</option>
+                        </select>
+                        <label style="font-size: 1.2rem; color: var(--primary);">Grand Total</label>
+                        <div class="total-amount-display" id="grandTotal-edit" style="background: var(--primary); color: white; font-size: 1.2rem;">Rp 0</div>
+                    </div>
+                </div>
+                 <div class="actions-group" style="justify-content: space-between; margin-top:20px;">
+                   <button type="button" class="btn btn-warning" onclick="app.prevStep('edit', 3)">&laquo; Kembali</button>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn btn-danger" onclick="app.cancelEdit()">Batal Edit</button>
+                        <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: 12px 30px;">Update Transaksi</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
         </div>
         
       </div>
@@ -1556,10 +1694,13 @@ hideHistoryOverlay(type) {
           this.data = null;
           this.trash = [];
           this.activeDropdown = null;
-          this.tempItems = { sale: [], purchase: [] };
+          this.trash = [];
+          this.activeDropdown = null;
+          this.tempItems = { sale: [], purchase: [], edit: [] };
           this.draftForms = { sale: null, purchase: null };
-
-          this.formSteps = { sale: 1, purchase: 1 };
+          
+          // Form step state including edit
+          this.formSteps = { sale: 1, purchase: 1, edit: 1 };
 
           this.masterItemsPage = 1
 
@@ -1574,6 +1715,7 @@ hideHistoryOverlay(type) {
           this.isLoading = false;
           this.eventControllers = new Map();
           this.notificationTimeout = null;
+          this.editingId = null; // Track currently editing transaction ID
         }
 
         async init() {
@@ -1595,6 +1737,34 @@ hideHistoryOverlay(type) {
           } finally {
             this.showLoading(false);
           }
+        }
+
+        // Wrapper methods for edit form navigation (fixing app.nextStep is not a function)
+        nextStep(type, currentStep) {
+            this.navigateToStep(type, currentStep + 1);
+        }
+
+        prevStep(type, currentStep) {
+            this.navigateToStep(type, currentStep - 1);
+        }
+
+        switchSubTab(type) {
+            // Hide all sub-views
+            document.querySelectorAll('.sub-view').forEach(el => el.style.display = 'none');
+            // Show target
+            const target = document.getElementById(`view-history-${type}`);
+            if(target) target.style.display = 'block';
+
+            // Update buttons
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            const activeBtn = document.getElementById(`btn-subtab-${type}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('btn-secondary');
+                activeBtn.classList.add('btn-primary');
+            }
         }
 
         showLoading(show) {
@@ -1622,36 +1792,37 @@ hideHistoryOverlay(type) {
 
     const historyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor"><path d="M320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/></svg>`;
 
+    // Clear the new tab content first
+    // Clear and Setup the new tab content with Sub-Navigation
+    const dataTransaksiContainer = document.getElementById("data-transaksi");
+    if (dataTransaksiContainer) {
+        dataTransaksiContainer.innerHTML = `
+            <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; background:white; display:flex; gap:10px; align-items:center;">
+                <label style="font-weight:600; margin-right:10px;">Pilih Data:</label>
+                <button id="btn-subtab-sale" class="btn btn-primary sub-tab-btn" onclick="app.switchSubTab('sale')">Riwayat Penjualan</button>
+                <button id="btn-subtab-purchase" class="btn btn-secondary sub-tab-btn" onclick="app.switchSubTab('purchase')">Riwayat Pembelian</button>
+            </div>
+        `;
+    }
+
     ["sale", "purchase"].forEach((type) => {
         const containerId = type === "sale" ? "penjualan" : "pembelian";
         const container = document.getElementById(containerId);
-        if (!container) return;
+        if (container) {
+             container.innerHTML = this.generateFormHTML(type);
+        }
 
-        container.innerHTML = this.generateFormHTML(type);
-
-        const historyHTML = this.generateHistoryHTML(type);
-        const overlay = document.createElement('div');
-        overlay.id = `history-overlay-${type}`;
-        overlay.className = 'history-overlay';
-        overlay.innerHTML = `<div class="history-overlay-content">${historyHTML}</div>`;
-        document.body.appendChild(overlay);
-
-        // Create the new FAB item with animated hint and icon button
-const fabItem = document.createElement('div');
-fabItem.id = `fab-${type}`; // ID for visibility control
-fabItem.className = 'fab-item';
-fabItem.style.display = 'none'; // Sembunyikan secara default
-const fabTitle = type === 'sale' ? 'Riwayat Penjualan' : 'Riwayat Pembelian';
-fabItem.innerHTML = `
-    <div class="fab-hint">
-        <div class="fab-hint-text">${fabTitle}</div>
-        <div class="fab-hint-arrow"></div>
-    </div>
-    <button class="floating-action-btn" onclick="app.showHistoryOverlay('${type}')" aria-label="${fabTitle}">
-        ${historyIconSVG}
-    </button>
-`;
-fabGroup.appendChild(fabItem);
+        // Render History to the NEW TAB "Data Transaksi"
+        if (dataTransaksiContainer) {
+            const historyHTML = this.generateHistoryHTML(type);
+            const isHidden = type === 'purchase'; // Default hide purchase
+            const wrapper = `
+                <div id="view-history-${type}" class="sub-view" style="display: ${isHidden ? 'none' : 'block'}; animation: fadeIn 0.3s ease;">
+                    ${historyHTML}
+                </div>
+            `;
+            dataTransaksiContainer.insertAdjacentHTML('beforeend', wrapper);
+        }
     });
 
     // Keep the rest of the buildDOM logic
@@ -1935,7 +2106,7 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
                 dashboardFilters.addEventListener("input", Utils.debounce(() => this.renderDashboard(), 300), { signal });
             }
 
-            ["sale", "purchase"].forEach((type) => {
+            ["sale", "purchase", "edit"].forEach((type) => {
                 this.bindFormEvents(type);
             });
 
@@ -1976,12 +2147,27 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
 
             form.addEventListener("input", Utils.debounce(() => this.saveDraft(type), 1000), { signal });
             
-            const partyType = type === 'sale' ? 'customer' : 'pemasok';
-            const partyInput = form.querySelector(`#${partyType}Name-${type}`);
+            let partyType = type === 'sale' ? 'customer' : 'pemasok';
+            // Logic for 'edit' to bind correctly
+            if (type === 'edit') {
+                 // In edit mode we can't fully know if it is customer or pemasok just by type 'edit'
+                 // But the ID in HTML is generic 'partyName-edit'
+                 // We will rely on 'transType-edit' hidden field at runtime or just bind the generic ID
+                 partyType = 'party'; 
+            }
+            
+            // If type is edit, ID is partyName-edit. If sale, customerName-sale.
+            const inputId = type === 'edit' ? `partyName-edit` : `${partyType}Name-${type}`;
+            const partyInput = form.querySelector(`#${inputId}`);
+
             if (partyInput) {
+                // For edit mode, we need to know what to filter (customer or pemasok) dynamically
                 partyInput.addEventListener("input", Utils.debounce(() => this.filterPartyNames(type), 300), { signal });
                 partyInput.addEventListener("focus", () => this.filterPartyNames(type, true), { signal });
-                const dropdown = form.querySelector(`#party-dropdown-${type}`);
+                
+                const dropdownId = type === 'edit' ? `party-dropdown-edit` : `party-dropdown-${type}`;
+                const dropdown = form.querySelector(`#${dropdownId}`);
+                
                 if (dropdown) {
                     dropdown.addEventListener("click", (e) => {
                         const option = e.target.closest(".dropdown-option");
@@ -2040,13 +2226,23 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
                 }
             }, { signal });
 
-            ["itemPrice", "shippingCost", "discount", "dp"].forEach((id) => {
+            ["itemPrice", "shippingCost", "discount", "dp", "itemQty", "itemUnit"].forEach((id) => {
                 const input = form.querySelector(`#${id}-${type}`);
                 if (input) {
                     input.addEventListener("input", (e) => {
                         if(input.classList.contains('rupiah-input')) Utils.formatRupiahInput(e.target);
                     });
                     input.addEventListener("blur", () => this.calculateTotals(type));
+                    
+                    // Trap Enter key for item inputs to add item instead of submit
+                    if (["itemPrice", "itemQty", "itemUnit"].includes(id)) {
+                        input.addEventListener("keydown", (e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                this.addItemToTempList(type);
+                            }
+                        });
+                    }
                 }
             });
             
@@ -2054,9 +2250,13 @@ document.getElementById("next-npwp-page")?.addEventListener("click", () => {
 if (ppnCheckbox) {
     ppnCheckbox.addEventListener("change", () => {
         this.calculateTotals(type);
-        const partyType = type === 'sale' ? 'customer' : 'pemasok';
+        
+        let partyType = type === 'sale' ? 'customer' : 'pemasok';
+        if (type === 'edit') partyType = 'party';
+        
         const npwpGroup = document.getElementById(`npwp-group-${type}`);
-        const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
+        const npwpId = type === 'edit' ? `partyNpwp-edit` : `${partyType}Npwp-${type}`;
+        const npwpInput = document.getElementById(npwpId);
         
         // ▼▼▼ PERUBAHAN DIMULAI ▼▼▼
         const bebasPpnGroup = document.getElementById(`bebas-ppn-group-${type}`);
@@ -3071,16 +3271,33 @@ async addNewNpwp() {
         }
 
         filterPartyNames(type, showAll = false) {
-            const partyType = type === "sale" ? "customer" : "pemasok";
-            const input = document.getElementById(`${partyType}Name-${type}`);
+            let partyType = type === "sale" ? "customer" : "pemasok";
+            // Logic for 'edit' ID selection
+            let inputId = `${partyType}Name-${type}`;
+            let dropdownId = `party-dropdown-${type}`;
+            
+            if (type === 'edit') {
+                 partyType = 'party'; // Just for variable consistency, real type determined below
+                 inputId = `partyName-edit`;
+                 dropdownId = `party-dropdown-edit`;
+            }
+
+            const input = document.getElementById(inputId);
             const filter = input?.value?.toUpperCase() || "";
-            const dropdown = document.getElementById(`party-dropdown-${type}`);
+            const dropdown = document.getElementById(dropdownId);
             if (!dropdown || !input) return;
 
             this.closeAllDropdowns();
             this.activeDropdown = dropdown;
             
-            const allPartyNames = [...this.partyDetails[partyType].keys()];
+            // Special handling for 'edit' to load correct party list
+            let targetPartyType = partyType;
+             if (type === 'edit') {
+                 const transType = document.getElementById('transType-edit').value;
+                 targetPartyType = transType === 'sale' ? 'customer' : 'pemasok';
+            }
+
+            const allPartyNames = [...this.partyDetails[targetPartyType].keys()];
             const filteredNames = showAll ? allPartyNames.sort() : allPartyNames.filter(name => name.toUpperCase().includes(filter)).sort();
             
             dropdown.innerHTML = filteredNames
@@ -3091,16 +3308,25 @@ async addNewNpwp() {
         }
         
         populatePartyDetails(name, type) {
-            const partyType = type === 'sale' ? 'customer' : 'pemasok';
+            let partyType = type === 'sale' ? 'customer' : 'pemasok';
+            // Handle edit type
+             if (type === 'edit') {
+                 const transType = document.getElementById('transType-edit').value;
+                 partyType = transType === 'sale' ? 'customer' : 'pemasok';
+            }
+
             const details = this.partyDetails[partyType].get(name);
             if (details) {
+                // Determine ID prefix
+                const prefix = type === 'edit' ? 'party' : partyType;
+                
                 // Perbaikan: Cek properti 'address' atau 'alamat'
-                document.getElementById(`${partyType}Address-${type}`).value = details.address || details.alamat || '';
+                document.getElementById(`${prefix}Address-${type}`).value = details.address || details.alamat || '';
                 
                 // Perbaikan: Cek properti 'phone' atau 'telepon'
-                document.getElementById(`${partyType}Phone-${type}`).value = details.phone || details.telepon || '';
+                document.getElementById(`${prefix}Phone-${type}`).value = details.phone || details.telepon || '';
                 
-                const npwpInput = document.getElementById(`${partyType}Npwp-${type}`);
+                const npwpInput = document.getElementById(`${prefix}Npwp-${type}`);
                 if (npwpInput) {
                     npwpInput.value = details.npwp || '';
                 }
@@ -3305,6 +3531,120 @@ async addNewNpwp() {
             }
         }
 
+        editTransaction(dataKey, id) {
+            // Find transaction first
+            const transaction = this.data[dataKey].find(t => t.id === id);
+            if (!transaction) {
+                this.showNotification("Transaksi tidak ditemukan", false);
+                return;
+            }
+            
+            // Determine form type based on dataKey or stored transType
+            let transType = 'sale'; // default
+            if (dataKey === 'invoices') {
+                transType = transaction.transType; 
+            } else if (dataKey === 'penjualan') {
+                transType = 'sale';
+            } else if (dataKey === 'pembelian') {
+                transType = 'purchase';
+            } else {
+                transType = transaction.transType || 'sale';
+            }
+
+            // --- SWITCH TO EDIT TAB ---
+            const editTab = document.querySelector(`.nav-tab[data-tab="edit"]`);
+            if(editTab) {
+                editTab.style.display = 'block'; // Make sure it's visible
+                editTab.click(); 
+            }
+            
+            const form = document.getElementById(`editForm`);
+            if (!form) return;
+
+             // Reset steps
+            this.navigateToStep('edit', 1);
+
+            // Hide history overlay if open (using original dataKey map for overlay ID)
+            const overlayType = dataKey === "penjualan" ? "sale" : dataKey === "pembelian" ? "purchase" : dataKey === "suratJalan" ? "suratJalan" : "invoice";
+            this.hideHistoryOverlay(overlayType);
+
+            // Set editing ID & Trans Type
+            this.editingId = id;
+            document.getElementById('transType-edit').value = transType;
+            
+            // Update Title & Labels based on Type
+            const isSale = transType === 'sale';
+            const titleEl = document.getElementById('edit-form-title');
+            if(titleEl) titleEl.textContent = isSale ? `Edit Penjualan: ${id}` : `Edit Pembelian: ${id}`;
+            
+            const partyLabel = document.getElementById('partyNameLabel-edit');
+            if(partyLabel) partyLabel.textContent = isSale ? 'Nama Customer' : 'Nama Pemasok';
+            
+            const refGroup = document.getElementById('ref-group-edit');
+            if(refGroup) refGroup.style.display = isSale ? 'block' : 'none';
+
+            // Restore Data to Form
+            // Dates & Basic Info
+            if(form.querySelector(`#invoiceDate-edit`)) form.querySelector(`#invoiceDate-edit`).value = transaction.tanggal;
+            if(form.querySelector(`#transNo-edit`)) form.querySelector(`#transNo-edit`).value = transaction.id;
+            
+            // Party Info
+            // Note: In edit form we use generic 'party' prefix
+            if(form.querySelector(`#partyName-edit`)) form.querySelector(`#partyName-edit`).value = transaction[isSale ? 'customer' : 'pemasok'] || transaction.customer || transaction.pemasok || transaction.penerima || "";
+            if(form.querySelector(`#partyAddress-edit`)) form.querySelector(`#partyAddress-edit`).value = transaction.alamat || "";
+            if(form.querySelector(`#partyPhone-edit`)) form.querySelector(`#partyPhone-edit`).value = transaction.telepon || "";
+            if(form.querySelector(`#partyNpwp-edit`)) form.querySelector(`#partyNpwp-edit`).value = transaction.npwp || "";
+            
+            document.getElementById(`npwp-group-edit`).classList.toggle('hidden', !transaction.npwp);
+
+            // PPN & Bebas PPN
+            const includePpnCheckbox = form.querySelector(`#includePpn-edit`);
+            if (includePpnCheckbox) {
+                const isInvoice = dataKey === 'invoices';
+                includePpnCheckbox.checked = isInvoice;
+                // Trigger change event to update UI visibility
+                includePpnCheckbox.dispatchEvent(new Event('change'));
+                
+                if (isInvoice) {
+                     const bebasPpnCheckbox = form.querySelector(`#bebasPpn-edit`);
+                     if(bebasPpnCheckbox) {
+                         bebasPpnCheckbox.checked = !!transaction.isPpnDibebaskan;
+                     }
+                }
+            }
+
+            // Other fields
+            if(form.querySelector(`#vehicleNo-edit`)) form.querySelector(`#vehicleNo-edit`).value = transaction.noKendaraan || "";
+            if(form.querySelector(`#paymentMethod-edit`)) form.querySelector(`#paymentMethod-edit`).value = transaction.metodePembayaran || "Tunai";
+            if(form.querySelector(`#notes-edit`)) form.querySelector(`#notes-edit`).value = transaction.notes || "";
+            if(form.querySelector(`#ref-edit`)) form.querySelector(`#ref-edit`).value = transaction.ref || "";
+            
+            // Financials
+            if(form.querySelector(`#discount-edit`)) form.querySelector(`#discount-edit`).value = this.formatCurrency(transaction.discount || 0);
+            if(form.querySelector(`#shippingCost-edit`)) form.querySelector(`#shippingCost-edit`).value = this.formatCurrency(transaction.shippingCost || 0);
+            if(form.querySelector(`#dp-edit`)) form.querySelector(`#dp-edit`).value = this.formatCurrency(transaction.dp || 0);
+
+            // Items
+            // Need to deep copy to avoid reference issues
+            this.tempItems['edit'] = transaction.items.map(item => ({...item}));
+            this.renderTempItemsTable('edit');
+            this.calculateTotals('edit'); // Recalc totals immediately
+            
+            this.showNotification(`Edit Mode: Transaksi ${id} dimuat.`);
+        }
+        
+        cancelEdit() {
+             if (confirm("Batalkan perubahan edit? Data yang belum disimpan akan hilang.")) {
+                this.editingId = null;
+                const tab = document.querySelector('.nav-tab[data-tab="dashboard"]');
+                if(tab) tab.click();
+                
+                // Hide edit tab
+                const editTab = document.querySelector(`.nav-tab[data-tab="edit"]`);
+                if(editTab) editTab.style.display = 'none';
+             }
+        }
+
         restoreDraft(type) {
             const draft = this.draftForms[type];
             if (!draft) return;
@@ -3392,6 +3732,7 @@ async addNewNpwp() {
                             ${isTransaction ? `<td class="text-right">${this.formatCurrency(item.grandTotal)}</td>` : `<td>${item.noKendaraan || ""}</td>`}
                             <td class="action-cell">
                                 ${printButtons}
+                                <button class="btn btn-sm btn-info" onclick="app.editTransaction('${dataKey}', '${item.id}')">Edit</button>
                                 <button class="btn btn-sm btn-danger" onclick="app.deleteTransaction('${dataKey}', '${item.id}')">Hapus</button>
                             </td>
                         </tr>`;
@@ -3566,27 +3907,46 @@ async addNewNpwp() {
                         throw new Error(`Field '${label}' harus diisi.`);
                     }
                 }
-                const partyType = type === "sale" ? "customer" : "pemasok";
-                const partyName = this.sanitizeInput(form.querySelector(`#${partyType}Name-${type}`).value.trim());
-                const address = this.sanitizeInput(form.querySelector(`#${partyType}Address-${type}`).value.trim());
-                const phone = this.sanitizeInput(form.querySelector(`#${partyType}Phone-${type}`).value.trim());
+                // Mapping generic fields to specific ones if editing
+                const transType = type === 'edit' ? document.getElementById('transType-edit').value : type;
                 
-                const npwp = this.sanitizeInput(form.querySelector(`#${partyType}Npwp-${type}`).value.trim());
+                const partyTypeCalc = type === 'edit' ? (transType === 'sale' ? 'customer' : 'pemasok') : partyType;
+                
+                const partyNameVal = type === 'edit' ? form.querySelector(`#partyName-edit`).value.trim() : form.querySelector(`#${partyType}Name-${type}`).value.trim();
+                const addressVal = type === 'edit' ? form.querySelector(`#partyAddress-edit`).value.trim() : form.querySelector(`#${partyType}Address-${type}`).value.trim();
+                const phoneVal = type === 'edit' ? form.querySelector(`#partyPhone-edit`).value.trim() : form.querySelector(`#${partyType}Phone-${type}`).value.trim();
+                const npwpVal = type === 'edit' ? form.querySelector(`#partyNpwp-edit`).value.trim() : form.querySelector(`#${partyType}Npwp-${type}`).value.trim();
+                
+                const partyName = this.sanitizeInput(partyNameVal);
+                const address = this.sanitizeInput(addressVal);
+                const phone = this.sanitizeInput(phoneVal);
+                const npwp = this.sanitizeInput(npwpVal);
+
                 if (partyName) {
-                    this.partyDetails[partyType].set(partyName, { address, phone, npwp });
+                    this.partyDetails[partyTypeCalc].set(partyName, { address, phone, npwp });
                 }
 
-                const isTransaction = type === "sale" || type === "purchase";
+                const isTransaction = transType === "sale" || transType === "purchase";
                 const includePpn = isTransaction && form.querySelector(`#includePpn-${type}`)?.checked;
                 const isPpnDibebaskan = form.querySelector(`#bebasPpn-${type}`)?.checked;
-                const dataKey = includePpn ? "invoices" : (type === "sale" ? "penjualan" : "pembelian");
-                const idType = includePpn ? "invoice" : type;
+                const dataKey = includePpn ? "invoices" : (transType === "sale" ? "penjualan" : "pembelian");
+                const idType = includePpn ? "invoice" : transType;
                 
                 if (includePpn && !npwp) {
                     throw new Error("Field 'NPWP/NIK' harus diisi jika menggunakan PPN.");
                 }
 
-                const newId = this.generateId(idType, includePpn ? type : null);
+                // --- EDIT LOGIC START ---
+                let newId;
+                if (this.editingId) {
+                    // We are editing
+                    newId = this.editingId;
+                } else {
+                    // New Transaction
+                    newId = this.generateId(idType, includePpn ? transType : null);
+                }
+                // --- EDIT LOGIC END ---
+
                 const totals = this.calculateTotals(type);
 
                 const newTrans = {
@@ -3595,29 +3955,54 @@ async addNewNpwp() {
                     notes: this.sanitizeInput(form.querySelector(`#notes-${type}`).value),
                     items: [...tempItems],
                     ...totals,
-                    [partyType]: partyName,
+                    [partyTypeCalc]: partyName,
                     alamat: address,
                     telepon: phone,
                     npwp: npwp,
-                    isPpnDibebaskan: includePpn && isPpnDibebaskan, // Save status only if PPN was applicable
+                    isPpnDibebaskan: includePpn && isPpnDibebaskan,
                     noKendaraan: this.sanitizeInput(form.querySelector(`#vehicleNo-${type}`)?.value),
                     metodePembayaran: form.querySelector(`#paymentMethod-${type}`).value,
-                    transType: type,
+                    transType: transType, 
                 };
                 
-                if (type === "sale") {
+                if (transType === "sale") {
                     newTrans.ref = this.sanitizeInput(form.querySelector(`#ref-${type}`).value);
                 }
 
-                if (includePpn) this.data.config.noInvoice++;
-                else if (type === "sale") this.data.config.noPenjualan++;
-                else if (type === "purchase") this.data.config.noPembelian++;
+                if (this.editingId) {
+                     // UPDATE EXISTING
+                     const index = this.data[dataKey].findIndex(t => t.id === newId);
+                     if (index !== -1) {
+                         this.data[dataKey][index] = newTrans;
+                         this.showNotification(`Transaksi ${newTrans.id} berhasil diperbarui.`);
+                     } else {
+                         // Fallback if not found (shouldn't happen)
+                         this.data[dataKey].unshift(newTrans);
+                     }
+                     // Exit Edit Mode
+                     this.editingId = null;
+                     
+                     // Hide edit tab if used
+                     if(type === 'edit') {
+                        document.querySelector(`.nav-tab[data-tab="edit"]`).style.display = 'none';
+                         const tab = document.querySelector('.nav-tab[data-tab="dashboard"]');
+                        if(tab) tab.click();
+                     }
+                     
+                } else {
+                    // CREATE NEW
+                    if (includePpn) this.data.config.noInvoice++;
+                    else if (transType === "sale") this.data.config.noPenjualan++;
+                    else if (transType === "purchase") this.data.config.noPembelian++;
+                    
+                    this.data[dataKey].unshift(newTrans);
+                    this.showNotification(`Transaksi ${newTrans.id} berhasil disimpan di ${dataKey}.`);
+                }
 
-                this.data[dataKey].unshift(newTrans);
                 this.saveData();
-                this.resetForm(type);
+                this.resetForm(type); 
                 await this.updateAllUI();
-                this.showNotification(`Transaksi ${newTrans.id} berhasil disimpan di ${dataKey}.`);
+                
             } catch (error) {
                 Utils.logError("Transaction save failed", error);
                 this.showNotification(`Gagal: ${error.message}`, false);
@@ -3634,15 +4019,20 @@ async addNewNpwp() {
             this.renderTempItemsTable(type);
             form.querySelector(`#invoiceDate-${type}`).value = new Date().toISOString().slice(0, 10);
             
-            const partyType = type === "sale" ? "customer" : "pemasok";
+            let partyType = type === "sale" ? "customer" : "pemasok";
+            if (type === 'edit') partyType = 'party';
+
             document.getElementById(`npwp-group-${type}`).classList.add('hidden');
-            document.getElementById(`${partyType}Npwp-${type}`).required = false;
+            const npwpId = type === 'edit' ? `partyNpwp-edit` : `${partyType}Npwp-${type}`;
+            const npwpInput = document.getElementById(npwpId);
+            if(npwpInput) npwpInput.required = false;
 
             form.querySelector(`#transNo-${type}`).value = this.generateId(type); 
             
             this.draftForms[type] = null;
             localStorage.setItem(this.DRAFT_KEY, JSON.stringify(this.draftForms));
 
+            this.editingId = null; // Clear editing state
             this.navigateToStep(type, 1)
         }
 
@@ -3681,8 +4071,6 @@ async addNewNpwp() {
             return `<div class="form-section" style="margin-top: 40px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
     <h3 class="form-section-title" style="margin-bottom:0; border:none; padding-bottom:0;">Riwayat ${title}</h3>
-    ${/* Kondisi untuk menampilkan tombol hanya di overlay penjualan/pembelian */''}
-    ${(type === 'sale' || type === 'purchase') ? `<button class="btn btn-danger close-overlay-btn" onclick="app.hideHistoryOverlay('${type}')">&times;</button>` : ''}
 </div>
                 <div class="history-filters" id="history-filters-${type}">
                     <div class="form-group"><label>Cari (ID, Nama)</label><input type="text" class="search-query" placeholder="Ketik untuk mencari..."></div>
