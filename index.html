@@ -1405,6 +1405,34 @@
       <div id="pengaturan" class="tab-content" role="tabpanel">
         
         <div class="form-section">
+            <h3 class="form-section-title">Informasi Perusahaan</h3>
+            <div class="form-grid">
+                <div class="form-group"><label>Nama Perusahaan</label><input type="text" id="config-namaPerusahaan"></div>
+                <div class="form-group"><label>Tagline / Slogan</label><input type="text" id="config-tagline"></div>
+                <div class="form-group"><label>Alamat</label><input type="text" id="config-alamatPerusahaan"></div>
+                <div class="form-group"><label>Kontak (Telp/Email)</label><input type="text" id="config-kontak"></div>
+                <div class="form-group"><label>Nomor Rekening (Utama)</label><input type="text" id="config-rekening"></div>
+                <div class="form-group"><label>Nomor Rekening (Khusus PPN)</label><input type="text" id="config-rekeningPpn"></div>
+                <div class="form-group"><label>URL Logo</label><input type="text" id="config-logoUrl" placeholder="https://..."></div>
+            </div>
+            <div class="actions-group">
+                <button class="btn btn-primary" onclick="app.saveConfig()">Simpan Informasi</button>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="form-section-title">Cadangan & Pemulihan Data</h3>
+            <div class="actions-group">
+                <button onclick="app.backupData()" class="btn btn-success">Download Backup (JSON)</button>
+                <div style="position:relative; display:inline-block;">
+                        <input type="file" id="restoreFile" style="display:none" onchange="app.restoreData(event)" accept=".json">
+                        <button onclick="document.getElementById('restoreFile').click()" class="btn btn-warning">Restore Data (JSON)</button>
+                </div>
+                <button onclick="app.clearMasterItems()" class="btn btn-danger">Hapus Semua Master Barang</button>
+            </div>
+        </div>
+        
+        <div class="form-section">
     <h3 class="form-section-title">Manajemen Data Barang</h3>
 
     <div id="item-editor-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001; display:flex; align-items:center; justify-content:center; display:none;">
