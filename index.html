@@ -1740,18 +1740,30 @@
 
     /* === APP FOOTER STYLING === */
 .app-footer {
+  background-color: #ffffff; /* Latar belakang Putih di mode terang */
+  color: var(--dark);        /* Teks gelap agar kontras */
+  
   text-align: center;
   padding: 30px 15px;
-  margin-top: 20px;
-  border-top: 1px solid rgba(0,0,0,0.05);
-  color: var(--text);
-  font-size: 0.9rem;
-  opacity: 0.8;
+  margin-top: 30px;
+  
+  /* Memberikan sedikit bayangan di atas agar terlihat terpisah dari konten */
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05); 
+  border-top: 1px solid var(--border);
+  
+  /* Opsional: Membuat sudut atas sedikit melengkung */
+  border-radius: 15px 15px 0 0; 
+  position: relative;
+  z-index: 10;
 }
 
-/* Dark mode adjustment for footer border */
+/* === MODIFIKASI KHUSUS DARK MODE === */
+/* Penting: Agar footer tidak tetap putih silau saat mode gelap aktif */
 body.dark-mode .app-footer {
+  background-color: var(--card-bg); /* Menggunakan warna kartu gelap */
+  color: var(--text);               /* Teks kembali terang */
   border-top: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 }
 
 .app-footer p {
@@ -1767,20 +1779,18 @@ body.dark-mode .app-footer {
   text-decoration: none;
   font-weight: 700;
   transition: all 0.3s ease;
-  position: relative;
 }
 
 .app-footer a:hover {
   color: var(--secondary);
-  text-decoration: none;
 }
 
-/* Sembunyikan footer saat dicetak */
 @media print {
   .app-footer {
     display: none !important;
   }
 }
+
 
     </style>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -5762,4 +5772,5 @@ ${transaction.isPpnDibebaskan ?
     </script>
 </body>
 </html>
+
 
