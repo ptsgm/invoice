@@ -2179,9 +2179,64 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Firebase SDK (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Firebase Config & Initialization -->
+    <script>
+        // MASUKKAN KONFIGURASI FIREBASE ANDA DI SINI
+        const firebaseConfig = {
+  apiKey: "AIzaSyDe4a_6HgPnCPVC4yY9a9A651DLYHx49_o",
+  authDomain: "ptsgm-37c7f.firebaseapp.com",
+  databaseURL: "https://ptsgm-37c7f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ptsgm-37c7f",
+  storageBucket: "ptsgm-37c7f.firebasestorage.app",
+  messagingSenderId: "725323187370",
+  appId: "1:725323187370:web:2262ea48db0d5f8ccf3cd3",
+  measurementId: "G-JKR9EY7HMZ"
+};
+        
+        // Cek jika konfigurasi masih default
+        const isFirebaseConfigured = firebaseConfig.apiKey !== "REPLACE_WITH_YOUR_API_KEY";
+        
+        if (isFirebaseConfigured) {
+            firebase.initializeApp(firebaseConfig);
+            window.firebaseDb = firebase.database();
+            window.firebaseAuth = firebase.auth();
+        }
+    </script>
 </head>
 
 <body class="dark-mode">
+    
+    <!-- LOGIN OVERLAY -->
+    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--background); z-index:99999; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+        <div style="background:var(--surface); padding:40px; border-radius:12px; box-shadow:var(--shadow); width:90%; max-width:400px; text-align:center;">
+            <h2 style="margin-top:0; color:var(--primary);">Sistem Akuntansi SGM</h2>
+            <p style="color:var(--dark); margin-bottom:25px;">Silakan Login / Daftar untuk mengakses database cloud.</p>
+            
+            <div id="firebase-warning" style="display:none; color:var(--danger); margin-bottom:20px; font-weight:bold; background:#fee2e2; padding:10px; border-radius:6px; font-size:0.9em;">
+                Konfigurasi Firebase belum diisi! Buka file index.html dan masukkan firebaseConfig Anda.
+            </div>
+
+            <div class="form-group" style="text-align:left;">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required>
+            </div>
+            <div class="form-group" style="text-align:left;">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" required>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+                <button class="btn btn-primary" id="btn-login" style="width:100%;" onclick="app.loginWithFirebase()">Login</button>
+            </div>
+            <div id="login-error" style="color:var(--danger); margin-top:15px; font-size:0.9em; min-height:20px;"></div>
+        </div>
+    </div>
+    
+    <!-- HEADER APP MAIN -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
     </div>
@@ -2213,9 +2268,11 @@
             <button class="nav-tab active" data-tab="dashboard" role="tab">Dashboard</button>
             <button class="nav-tab" data-tab="penjualan" role="tab">Penjualan</button>
             <button class="nav-tab" data-tab="pembelian" role="tab">Pembelian</button>
+            <button class="nav-tab" data-tab="laporan-stok" role="tab">Laporan Stok</button>
             <button class="nav-tab" data-tab="data-transaksi" role="tab">Data Transaksi (Non PPN)</button>
             <button class="nav-tab" data-tab="invoices" role="tab">Data Invoice (PPN)</button>
             <button class="nav-tab" data-tab="pengaturan" role="tab">Pengaturan</button>
+            
             <button class="nav-tab" data-tab="edit" style="display:none;" id="edit-tab-btn">Edit Transaksi</button>
         </div>
 
@@ -2224,6 +2281,30 @@
         <div id="dashboard" class="tab-content active" role="tabpanel"></div>
         <div id="penjualan" class="tab-content" role="tabpanel"></div>
         <div id="pembelian" class="tab-content" role="tabpanel"></div>
+        <div id="laporan-stok" class="tab-content" role="tabpanel">
+            <div class="header-actions">
+                <h2>Laporan Stok Barang</h2>
+                <div class="actions-group">
+                    <input type="text" id="search-stok" placeholder="Cari barang...">
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th class="text-right">Stok Awal</th>
+                            <th class="text-right">Masuk (Pembelian)</th>
+                            <th class="text-right">Keluar (Penjualan)</th>
+                            <th class="text-right">Sisa Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laporan-stok-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div id="data-transaksi" class="tab-content" role="tabpanel"></div>
         <div id="invoices" class="tab-content" role="tabpanel"></div>
         <div id="suratJalan" class="tab-content" role="tabpanel"></div>
@@ -2266,6 +2347,14 @@
             </div>
 
             <div class="form-section">
+                <h3 class="form-section-title">Akun & Cloud Database</h3>
+                <p style="margin-bottom:10px; color:var(--dark);">Email Login: <strong id="cloud-user-email">Belum Login</strong></p>
+                <div class="actions-group">
+                    <button onclick="app.logoutFirebase()" class="btn btn-danger">Logout (Keluar)</button>
+                </div>
+            </div>
+
+            <div class="form-section">
                 <h3 class="form-section-title">Manajemen Data Barang</h3>
 
                 <div id="item-editor-modal"
@@ -2280,8 +2369,8 @@
                             <div class="form-group"><label>Nama Barang</label><input type="text" id="edit-item-name"
                                     required></div>
                             <div class="form-group"><label>Satuan</label><input type="text" id="edit-item-unit"></div>
-                            <div class="form-group"><label>Harga</label><input type="text" id="edit-item-price"
-                                    class="rupiah-input"></div>
+                            <div class="form-group"><label>Harga</label><input type="text" id="edit-item-price" class="rupiah-input"></div>
+                            <div class="form-group"><label>Stok Awal</label><input type="number" id="edit-item-stock" class="number-input" value="0" min="0"></div>
                         </div>
                         <div class="actions-group">
                             <button type="submit" class="btn btn-primary">Simpan Barang</button>
@@ -2308,6 +2397,7 @@
                                 <th>Nama Barang</th>
                                 <th>Satuan</th>
                                 <th class="text-right">Harga Jual</th>
+                                <th class="text-right">Sisa Stok</th>
                                 <th class="action-cell">Aksi</th>
                             </tr>
                         </thead>
@@ -2635,6 +2725,54 @@
                 this.editingId = null; // Track currently editing transaction ID
             }
 
+            // --- FIREBASE METHODS ---
+            
+            showLoginError(msg) {
+                const errDiv = document.getElementById('login-error');
+                if (errDiv) errDiv.textContent = msg;
+            }
+
+            async loginWithFirebase() {
+                if (!window.firebaseAuth) return this.showLoginError("Konfigurasi Firebase belum diisi!");
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-password').value;
+                if(!email || !pass) return this.showLoginError("Email dan password harus diisi.");
+                
+                try {
+                    document.getElementById('btn-login').textContent = "Loading...";
+                    await window.firebaseAuth.signInWithEmailAndPassword(email, pass);
+                } catch(err) {
+                    this.showLoginError("Error: " + err.message);
+                } finally {
+                    document.getElementById('btn-login').textContent = "Login";
+                }
+            }
+
+            async registerWithFirebase() {
+                if (!window.firebaseAuth) return this.showLoginError("Konfigurasi Firebase belum diisi!");
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-password').value;
+                if(!email || !pass) return this.showLoginError("Email dan password harus diisi.");
+                
+                try {
+                    document.getElementById('btn-register').textContent = "Loading...";
+                    await window.firebaseAuth.createUserWithEmailAndPassword(email, pass);
+                } catch(err) {
+                    this.showLoginError("Error: " + err.message);
+                } finally {
+                    document.getElementById('btn-register').textContent = "Daftar Akun Baru";
+                }
+            }
+
+            async logoutFirebase() {
+                if(window.firebaseAuth) {
+                    await window.firebaseAuth.signOut();
+                    window.location.reload();
+                }
+            }
+
+            // --- END FIREBASE METHODS ---
+
             async init() {
                 try {
                     this.cleanup();
@@ -2643,15 +2781,40 @@
                     // Load Dark Mode Preference
                     this.loadDarkMode();
 
-                    this.showLoading(true);
-                    await this.loadData();
-                    this.buildDOM();
-                    this.bindGlobalEvents();
-                    await this.updateAllUI();
+                    if (!window.firebaseAuth) {
+                        document.getElementById('firebase-warning').style.display = 'block';
+                        return; // Berhenti di sini, biarkan overlay login terus tampil beserta warning.
+                    }
 
-                    // NEW: Load Drafts & Render Chart
-                    this.loadDrafts();
-                    setTimeout(() => this.renderDashboardChart(), 500);
+                    // Tampilkan overlay loading
+                    this.showLoading(true);
+
+                    // Pantau status login Firebase
+                    window.firebaseAuth.onAuthStateChanged(async (user) => {
+                        if (user) {
+                            // SUDAH LOGIN
+                            document.getElementById('login-overlay').style.display = 'none';
+                            
+                            const emailEl = document.getElementById('cloud-user-email');
+                            if(emailEl) emailEl.textContent = user.email;
+
+                            await this.loadData();
+                            this.buildDOM();
+                            this.bindGlobalEvents();
+                            await this.updateAllUI();
+
+                            // NEW: Load Drafts & Render Chart
+                            this.loadDrafts();
+                            setTimeout(() => this.renderDashboardChart(), 500);
+
+                            // Matikan loading karena sukses
+                            this.showLoading(false);
+                        } else {
+                            // BELUM LOGIN
+                            document.getElementById('login-overlay').style.display = 'flex';
+                            this.showLoading(false);
+                        }
+                    });
 
                     // RESPONSIVE AUTO-SCALE LISTENER
                     window.addEventListener('resize', Utils.debounce(() => {
@@ -2895,6 +3058,7 @@
         <div class="form-grid">
           <div class="form-group filterable-dropdown" style="grid-column: 1 / -1;"><label for="item-selector-${type}">Cari Barang (Nama/Kode)</label><input type="text" id="item-selector-${type}" autocomplete="off" placeholder="Ketik nama atau kode barang..."><div class="dropdown-options" id="dropdown-options-${type}"></div></div>
           <div class="form-group"><label for="itemCode-${type}">Kode Barang</label><input type="text" id="itemCode-${type}" readonly></div>
+          <div class="form-group"><label for="itemStock-${type}">Sisa Stok</label><input type="text" id="itemStock-${type}" readonly></div>
           <div class="form-group"><label for="itemQty-${type}">Jumlah</label><input type="number" id="itemQty-${type}" min="0" step="0.01" value="0" required></div>
           <div class="form-group"><label for="itemUnit-${type}">Satuan</label><input type="text" id="itemUnit-${type}"></div>
           <div class="form-group"><label for="itemPrice-${type}">Harga Satuan (Rp)</label><input type="text" id="itemPrice-${type}" class="rupiah-input" value="0" required></div>
@@ -3018,6 +3182,10 @@
                 document.getElementById("search-master-items")?.addEventListener("input", Utils.debounce(() => {
                     this.masterItemsPage = 1; // Reset ke halaman 1 setiap kali mencari
                     this.renderMasterItemsTable();
+                }, 300), { signal });
+
+                document.getElementById("search-stok")?.addEventListener("input", Utils.debounce(() => {
+                    this.renderLaporanStok();
                 }, 300), { signal });
 
                 document.getElementById("prev-item-page")?.addEventListener("click", () => {
@@ -3464,6 +3632,7 @@
                     // this.updateMasterItemCountDisplay(); // Fungsi ini sekarang dipanggil di dalam renderMasterItemsTable
                     this.loadConfigToForm();
                     this.renderTrashTable();
+                    this.renderLaporanStok();
                 } catch (error) {
                     Utils.logError("UI update failed", error);
                     this.showNotification("Gagal memperbarui UI", false);
@@ -3765,6 +3934,45 @@
             }
 
             // ... (all other methods remain the same as the previous version)
+
+            // --- HELPER UNTUK SANITIZE KEY FIREBASE ---
+            sanitizeFirebaseKey(key) {
+                if (!key) return key;
+                return key.replace(/\./g, '%2E')
+                          .replace(/#/g, '%23')
+                          .replace(/\$/g, '%24')
+                          .replace(/\//g, '%2F')
+                          .replace(/\[/g, '%5B')
+                          .replace(/\]/g, '%5D');
+            }
+
+            decodeFirebaseKey(key) {
+                if (!key) return key;
+                return key.replace(/%2E/g, '.')
+                          .replace(/%23/g, '#')
+                          .replace(/%24/g, '$')
+                          .replace(/%2F/g, '/')
+                          .replace(/%5B/g, '[')
+                          .replace(/%5D/g, ']');
+            }
+
+            serializePartyMap(partyMap) {
+                const result = {};
+                for (const [key, value] of partyMap.entries()) {
+                    result[this.sanitizeFirebaseKey(key)] = value;
+                }
+                return result;
+            }
+
+            deserializePartyObj(partyObj) {
+                const result = new Map();
+                if (!partyObj) return result;
+                for (const [key, value] of Object.entries(partyObj)) {
+                    result.set(this.decodeFirebaseKey(key), value);
+                }
+                return result;
+            }
+            // --- END HELPER ---
 
             // Minor modification to loadData and saveData to handle the new structure
             loadData() {
@@ -4307,49 +4515,98 @@
 
                 return new Promise((resolve, reject) => {
                     try {
-                        const dataFromStorage = localStorage.getItem(this.STORAGE_KEY);
-                        if (dataFromStorage) {
-                            const parsedData = JSON.parse(dataFromStorage);
-                            this.data = {
-                                ...defaultData, ...parsedData,
-                                config: { ...defaultData.config, ...(parsedData.config || {}) },
-                                partyDetails: parsedData.partyDetails || defaultData.partyDetails,
-                                invoices: parsedData.invoices || [],
-                            };
+                        const processData = (parsedData) => {
+                            if (parsedData) {
+                                this.data = {
+                                    ...defaultData, ...parsedData,
+                                    config: { ...defaultData.config, ...(parsedData.config || {}) },
+                                    partyDetails: parsedData.partyDetails || defaultData.partyDetails,
+                                    invoices: parsedData.invoices || [],
+                                };
+                            } else {
+                                this.data = defaultData;
+                            }
+
+                            this.partyDetails.customer = this.deserializePartyObj(this.data.partyDetails.customer);
+                            this.partyDetails.pemasok = this.deserializePartyObj(this.data.partyDetails.pemasok);
+                        };
+
+                        if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                            // Ambil dari Firebase
+                            const uid = window.firebaseAuth.currentUser.uid;
+                            window.firebaseDb.ref('users/' + uid + '/data').once('value')
+                                .then(snapshot => {
+                                    const fbData = snapshot.val();
+                                    processData(fbData);
+
+                                    // Load trash
+                                    window.firebaseDb.ref('users/' + uid + '/trash').once('value').then(trashSnap => {
+                                        this.trash = trashSnap.val() || [];
+                                        const cutoff = new Date();
+                                        cutoff.setDate(cutoff.getDate() - 30);
+                                        this.trash = this.trash.filter(item => new Date(item.deletedAt) >= cutoff);
+                                        this.buildItemIndex();
+                                        resolve();
+                                    });
+                                })
+                                .catch(err => reject(err));
                         } else {
-                            this.data = defaultData;
+                            // Ambil dari Local Storage (Fallback)
+                            const dataFromStorage = localStorage.getItem(this.STORAGE_KEY);
+                            if (dataFromStorage) {
+                                processData(JSON.parse(dataFromStorage));
+                            } else {
+                                processData(null);
+                            }
+
+                            const trashData = localStorage.getItem(this.TRASH_KEY);
+                            if (trashData) {
+                                this.trash = JSON.parse(trashData);
+                                const cutoff = new Date();
+                                cutoff.setDate(cutoff.getDate() - 30);
+                                this.trash = this.trash.filter(item => new Date(item.deletedAt) >= cutoff);
+                                this.saveTrash();
+                            } else {
+                                this.trash = [];
+                            }
+                            this.buildItemIndex();
+                            resolve();
                         }
-
-                        this.partyDetails.customer = new Map(Object.entries(this.data.partyDetails.customer || {}));
-                        this.partyDetails.pemasok = new Map(Object.entries(this.data.partyDetails.pemasok || {}));
-
-                        const trashData = localStorage.getItem(this.TRASH_KEY);
-                        if (trashData) {
-                            this.trash = JSON.parse(trashData);
-                            const cutoff = new Date();
-                            cutoff.setDate(cutoff.getDate() - 30);
-                            this.trash = this.trash.filter(item => new Date(item.deletedAt) >= cutoff);
-                            localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
-                        } else { this.trash = []; }
-
-                        this.buildItemIndex();
-                        resolve();
-                    } catch (e) {
+                    } catch (error) {
                         this.data = defaultData; this.trash = [];
                         this.buildItemIndex();
-                        reject(e);
+                        reject(error);
                     }
                 });
             }
 
-            saveData() {
+            async saveData() {
                 try {
-                    this.data.partyDetails.customer = Object.fromEntries(this.partyDetails.customer);
-                    this.data.partyDetails.pemasok = Object.fromEntries(this.partyDetails.pemasok);
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+                    this.data.partyDetails.customer = this.serializePartyMap(this.partyDetails.customer);
+                    this.data.partyDetails.pemasok = this.serializePartyMap(this.partyDetails.pemasok);
+                    
+                    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                        const uid = window.firebaseAuth.currentUser.uid;
+                        await window.firebaseDb.ref('users/' + uid + '/data').set(this.data);
+                    } else {
+                        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
+                    }
                 } catch (error) {
                     Utils.logError("Failed to save data", error);
                     this.showNotification("Gagal menyimpan data ke storage", false);
+                }
+            }
+
+            async saveTrash() {
+                try {
+                    if (window.firebaseAuth && window.firebaseAuth.currentUser) {
+                        const uid = window.firebaseAuth.currentUser.uid;
+                        await window.firebaseDb.ref('users/' + uid + '/trash').set(this.trash);
+                    } else {
+                        localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                    }
+                } catch (error) {
+                    Utils.logError("Failed to save trash", error);
                 }
             }
 
@@ -4367,6 +4624,9 @@
                 form.querySelector(`#itemCode-${type}`).value = item.code;
                 form.querySelector(`#itemUnit-${type}`).value = item.unit || "";
                 form.querySelector(`#itemPrice-${type}`).value = this.formatNumber(item.price || 0);
+                if (form.querySelector(`#itemStock-${type}`)) {
+                    form.querySelector(`#itemStock-${type}`).value = this.formatNumber(this.hitungSisaStok(item.code));
+                }
                 form.querySelector(`#itemQty-${type}`).focus();
                 this.closeAllDropdowns();
             }
@@ -4409,6 +4669,17 @@
                     return;
                 }
 
+                // Cek sisa stok jika ini adalah transaksi penjualan (sale) atau surat jalan (jika ada)
+                // Jika sedang mengedit, kita beri peringatan standar saja
+                if (type === 'sale' || (type === 'edit' && document.getElementById('edit-transType')?.value === 'sale')) {
+                    const sisaStok = this.hitungSisaStok(itemCode);
+                    if (qty > sisaStok) {
+                        if (!confirm(`PERINGATAN: Jumlah barang (${qty}) melebihi sisa stok yang tercatat (${sisaStok}). Lanjutkan?`)) {
+                            return;
+                        }
+                    }
+                }
+
                 const newItem = {
                     id: Date.now(),
                     code: itemCode,
@@ -4423,6 +4694,7 @@
                 this.renderTempItemsTable(type);
                 form.querySelector(`#item-selector-${type}`).value = "";
                 form.querySelector(`#itemCode-${type}`).value = "";
+                if (form.querySelector(`#itemStock-${type}`)) form.querySelector(`#itemStock-${type}`).value = "";
                 form.querySelector(`#itemQty-${type}`).value = "0";
                 form.querySelector(`#itemPrice-${type}`).value = "0";
                 form.querySelector(`#itemUnit-${type}`).value = "";
@@ -4507,13 +4779,13 @@
                 if (confirm(`Apakah Anda yakin ingin menghapus transaksi ID: ${id}? Transaksi akan dipindahkan ke Trash.`)) {
                     try {
                         this.showLoading(true);
-                        const index = this.data[dataKey].findIndex(item => item.id === id);
+                        const index = this.data[dataKey].findIndex(item => String(item.id) === String(id));
                         if (index > -1) {
                             const [transaction] = this.data[dataKey].splice(index, 1);
                             const trashedItem = { ...transaction, dataKey, deletedAt: new Date().toISOString() };
                             this.trash.unshift(trashedItem);
 
-                            localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                            this.saveTrash();
                             this.saveData();
                             await this.updateAllUI();
 
@@ -4571,7 +4843,7 @@
             }
 
             async restoreTransaction(dataKey, id, fromUndo = false) {
-                const index = this.trash.findIndex(t => t.id === id && t.dataKey === dataKey);
+                const index = this.trash.findIndex(t => String(t.id) === String(id) && t.dataKey === dataKey);
                 if (index === -1) {
                     if (fromUndo) this.showNotification("Transaksi sudah dipulihkan.", false);
                     return;
@@ -4585,7 +4857,7 @@
                 this.data[originalDataKey].unshift(item);
                 this.data[originalDataKey].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-                localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                this.saveTrash();
                 this.saveData();
                 await this.updateAllUI();
                 this.renderTrashTable();
@@ -4595,7 +4867,7 @@
             permanentlyDeleteTransaction(id) {
                 if (confirm(`Anda YAKIN ingin menghapus transaksi ${id} secara permanen? Tindakan ini tidak dapat dibatalkan.`)) {
                     this.trash = this.trash.filter(t => t.id !== id);
-                    localStorage.setItem(this.TRASH_KEY, JSON.stringify(this.trash));
+                    this.saveTrash();
                     this.renderTrashTable();
                     this.showNotification(`Transaksi ${id} telah dihapus permanen.`);
                 }
@@ -4692,7 +4964,7 @@
 
             editTransaction(dataKey, id) {
                 // Find transaction first
-                const transaction = this.data[dataKey].find(t => t.id === id);
+                const transaction = this.data[dataKey].find(t => String(t.id) === String(id));
                 if (!transaction) {
                     this.showNotification("Transaksi tidak ditemukan", false);
                     return;
@@ -5046,7 +5318,7 @@
                 const id = `${String(num).padStart(3, "0")}.${prefix}.${year}${month}`;
                 const dataKey = type === "sale" ? "penjualan" : type === "purchase" ? "pembelian" : type;
 
-                if (this.data[dataKey] && this.data[dataKey].some(t => t.id === id)) {
+                if (this.data[dataKey] && this.data[dataKey].some(t => String(t.id) === String(id))) {
                     this.data.config[configKey]++;
                     return this.generateId(type, transType);
                 }
@@ -5444,6 +5716,7 @@
                             <div class="form-group"><label for="newItemName">Nama Barang</label><input type="text" id="newItemName" required maxlength="100"></div>
                             <div class="form-group"><label for="newItemUnit">Satuan</label><input type="text" id="newItemUnit" placeholder="e.g., kg, unit, m"></div>
                             <div class="form-group"><label for="newItemPrice">Harga Jual Default</label><input type="text" id="newItemPrice" class="rupiah-input" value="0"></div>
+                            <div class="form-group"><label for="newItemStock">Stok Awal</label><input type="number" id="newItemStock" class="number-input" value="0" min="0"></div>
                             <div class="form-group"><button type="submit" class="btn btn-primary">Tambah ke Master</button></div>
                         </div>
                     </form>`;
@@ -5475,6 +5748,7 @@
             <td class="truncate-text">${this.sanitizeInput(item.name)}</td>
             <td>${this.sanitizeInput(item.unit)}</td>
             <td class="text-right">${this.formatCurrency(item.price || 0)}</td>
+            <td class="text-right">${this.formatNumber(this.hitungSisaStok(item.code))}</td>
             <td class="action-cell">
                 <button class="btn btn-sm btn-warning" onclick="app.showItemEditor('${item.code}')">Edit</button>
                 <button class="btn btn-sm btn-danger" onclick="app.deleteMasterItem('${item.code}')">Hapus</button>
@@ -5489,6 +5763,32 @@
                 document.getElementById('next-item-page').disabled = this.masterItemsPage >= totalPages;
 
                 this.updateMasterItemCountDisplay(filteredItems.length);
+            }
+
+            renderLaporanStok() {
+                const tableBody = document.getElementById("laporan-stok-table-body");
+                if (!tableBody) return;
+
+                const searchInput = document.getElementById("search-stok");
+                const filter = searchInput ? searchInput.value.toUpperCase() : "";
+
+                const filteredItems = this.data.masterItems.filter(item =>
+                    item.name.toUpperCase().includes(filter) || item.code.toUpperCase().includes(filter)
+                );
+
+                tableBody.innerHTML = filteredItems.map(item => {
+                    const stats = this.hitungStatistikStok(item.code);
+                    return `
+                        <tr>
+                            <td>${this.sanitizeInput(item.code)}</td>
+                            <td class="truncate-text">${this.sanitizeInput(item.name)}</td>
+                            <td class="text-right">${this.formatNumber(stats.stokAwal)}</td>
+                            <td class="text-right">${this.formatNumber(stats.masuk)}</td>
+                            <td class="text-right">${this.formatNumber(stats.keluar)}</td>
+                            <td class="text-right" style="font-weight: bold;">${this.formatNumber(stats.sisa)}</td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
             /**
@@ -5508,13 +5808,14 @@
                         document.getElementById('edit-item-name').value = item.name;
                         document.getElementById('edit-item-unit').value = item.unit;
                         document.getElementById('edit-item-price').value = this.formatNumber(item.price || 0);
+                        document.getElementById('edit-item-stock').value = item.stokAwal || 0;
                     }
                 } else { // Mode Tambah Baru
                     document.getElementById('edit-item-original-code').value = '';
+                    document.getElementById('edit-item-stock').value = '0';
                 }
 
-                // GANTI BARIS INI
-                modal.style.display = 'flex'; // MENJADI SEPERTI INI
+                modal.style.display = 'flex';
                 document.getElementById('edit-item-code').focus();
             }
 
@@ -5527,7 +5828,8 @@
             }
 
             /**
-             * Menyimpan data barang dari modal (baik tambah baru maupun edit).
+             * Menyimpan master barang dari modal editor.
+             * Bisa untuk tambah baru atau edit (ditentukan oleh hidden input).
              */
             saveMasterItemFromModal(event) {
                 event.preventDefault();
@@ -5536,6 +5838,7 @@
                 const name = document.getElementById('edit-item-name').value.trim();
                 const unit = document.getElementById('edit-item-unit').value.trim();
                 const price = parseInt(document.getElementById('edit-item-price').value.replace(/[^0-9]/g, ""), 10) || 0;
+                const stokAwal = parseInt(document.getElementById('edit-item-stock').value, 10) || 0;
 
                 if (!code || !name) {
                     this.showNotification("Kode dan Nama Barang harus diisi.", false);
@@ -5551,11 +5854,11 @@
                 if (originalCode) { // Mode Edit
                     const itemIndex = this.data.masterItems.findIndex(i => i.code === originalCode);
                     if (itemIndex > -1) {
-                        this.data.masterItems[itemIndex] = { code, name, unit, price };
+                        this.data.masterItems[itemIndex] = { code, name, unit, price, stokAwal };
                         this.showNotification(`Barang '${name}' berhasil diperbarui.`);
                     }
                 } else { // Mode Tambah Baru
-                    this.data.masterItems.unshift({ code, name, unit, price });
+                    this.data.masterItems.unshift({ code, name, unit, price, stokAwal });
                     this.showNotification(`Barang '${name}' berhasil ditambahkan.`);
                 }
 
@@ -5932,6 +6235,60 @@ ${transaction.isPpnDibebaskan ?
                 }
             }
 
+            hitungStatistikStok(itemCode) {
+                const item = this.data.masterItems.find(i => i.code === itemCode);
+                if (!item) return { stokAwal: 0, masuk: 0, keluar: 0, sisa: 0 };
+                
+                let stokAwal = parseInt(item.stokAwal, 10) || 0;
+                let masuk = 0;
+                let keluar = 0;
+                
+                // Pembelian
+                this.data.pembelian.forEach(trans => {
+                    trans.items.forEach(tItem => {
+                        if (tItem.code === itemCode) masuk += (parseInt(tItem.qty, 10) || 0);
+                    });
+                });
+                
+                // Penjualan
+                this.data.penjualan.forEach(trans => {
+                    trans.items.forEach(tItem => {
+                        if (tItem.code === itemCode) keluar += (parseInt(tItem.qty, 10) || 0);
+                    });
+                });
+                
+                // Surat Jalan
+                this.data.suratJalan.forEach(trans => {
+                    trans.items.forEach(tItem => {
+                        if (tItem.code === itemCode) keluar += (parseInt(tItem.qty, 10) || 0);
+                    });
+                });
+
+                // Invoices
+                this.data.invoices.forEach(trans => {
+                    if (trans.transType === 'purchase') {
+                        trans.items.forEach(tItem => {
+                            if (tItem.code === itemCode) masuk += (parseInt(tItem.qty, 10) || 0);
+                        });
+                    } else if (trans.transType === 'sale') {
+                        trans.items.forEach(tItem => {
+                            if (tItem.code === itemCode) keluar += (parseInt(tItem.qty, 10) || 0);
+                        });
+                    }
+                });
+                
+                return {
+                    stokAwal: stokAwal,
+                    masuk: masuk,
+                    keluar: keluar,
+                    sisa: stokAwal + masuk - keluar
+                };
+            }
+
+            hitungSisaStok(itemCode) {
+                return this.hitungStatistikStok(itemCode).sisa;
+            }
+
             loadConfigToForm() {
                 const config = this.data.config;
                 Object.keys(config).forEach(key => {
@@ -6002,8 +6359,10 @@ ${transaction.isPpnDibebaskan ?
                         if (restoredData.config && restoredData.penjualan && restoredData.pembelian) {
                             if (confirm("Yakin ingin memulihkan data? Data saat ini akan ditimpa.")) {
                                 this.data = restoredData;
-                                this.saveData();
-                                await this.init(); // Re-initialize the app
+                                this.partyDetails.customer = this.deserializePartyObj(this.data.partyDetails?.customer);
+                                this.partyDetails.pemasok = this.deserializePartyObj(this.data.partyDetails?.pemasok);
+                                
+                                await this.saveData();
                                 this.showNotification("Data berhasil dipulihkan. Halaman akan dimuat ulang.");
                                 setTimeout(() => window.location.reload(), 1500);
                             }
@@ -6079,12 +6438,13 @@ ${transaction.isPpnDibebaskan ?
                 const name = document.getElementById("newItemName").value.trim();
                 const unit = document.getElementById("newItemUnit").value.trim();
                 const price = parseInt(document.getElementById("newItemPrice").value.replace(/[^0-9]/g, ""), 10) || 0;
+                const stokAwal = parseInt(document.getElementById("newItemStock").value, 10) || 0;
 
                 if (!code || !name) { this.showNotification("Kode dan Nama Barang harus diisi.", false); return; }
                 if (!/^[A-Za-z0-9-]{1,20}$/.test(code)) { this.showNotification("Kode hanya boleh berisi huruf, angka, dan hubung (-), maks 20 karakter.", false); return; }
                 if (this.data.masterItems.some((item) => item.code.toUpperCase() === code.toUpperCase())) { this.showNotification(`Kode barang '${code}' sudah ada.`, false); return; }
 
-                this.data.masterItems.unshift({ code, name, unit, price: price || 0 });
+                this.data.masterItems.unshift({ code, name, unit, price: price || 0, stokAwal });
                 this.buildItemIndex();
                 this.saveData();
                 this.renderMasterItemsTextarea();
@@ -6094,7 +6454,7 @@ ${transaction.isPpnDibebaskan ?
             }
 
             printTransaction(dataKey, id, template) {
-                const transaction = this.data[dataKey]?.find((t) => t.id === id);
+                const transaction = this.data[dataKey]?.find((t) => String(t.id) === String(id));
                 if (!transaction) {
                     this.showNotification("Transaksi tidak ditemukan.", false);
                     return;
