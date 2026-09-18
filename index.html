@@ -4669,16 +4669,6 @@
                     return;
                 }
 
-                // Cek sisa stok jika ini adalah transaksi penjualan (sale) atau surat jalan (jika ada)
-                // Jika sedang mengedit, kita beri peringatan standar saja
-                if (type === 'sale' || (type === 'edit' && document.getElementById('edit-transType')?.value === 'sale')) {
-                    const sisaStok = this.hitungSisaStok(itemCode);
-                    if (qty > sisaStok) {
-                        if (!confirm(`PERINGATAN: Jumlah barang (${qty}) melebihi sisa stok yang tercatat (${sisaStok}). Lanjutkan?`)) {
-                            return;
-                        }
-                    }
-                }
 
                 const newItem = {
                     id: Date.now(),
