@@ -3111,6 +3111,25 @@
               ${step2_tambahBarang}
               ${step3_ringkasan}
             </form>
+            
+            <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);">Riwayat Terakhir (Hanya Lihat)</h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>No. Ref</th>
+                                <th>${partyLabel}</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mini-history-${type}">
+                            <!-- Diisi oleh JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
           </div>`;
             }
 
@@ -5111,6 +5130,31 @@
                 this.renderHistoryTable("pembelian", "purchase-history-table");
                 this.renderHistoryTable("invoices", "invoice-history-table");
                 this.renderHistoryTable("suratJalan", "suratJalan-history-table");
+                
+                this.renderMiniHistory("sale");
+                this.renderMiniHistory("purchase");
+            }
+
+            renderMiniHistory(type) {
+                const tbody = document.getElementById(`mini-history-${type}`);
+                if (!tbody) return;
+
+                const dataKey = type === "sale" ? "penjualan" : "pembelian";
+                const data = [...this.data[dataKey]].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5); // Ambil 5 terakhir
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center">Belum ada riwayat transaksi.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr style="opacity: 0.8; background-color: var(--background);">
+                        <td>${Utils.formatDate(item.date)}</td>
+                        <td>${item.id}</td>
+                        <td>${item.partyName}</td>
+                        <td>Rp ${Utils.formatNumber(item.total)}</td>
+                    </tr>
+                `).join('');
             }
 
             renderHistoryTable(dataKey, tableId, page = 1) {
