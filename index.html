@@ -3115,13 +3115,13 @@
             <div style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
                 <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);">Riwayat Terakhir (Hanya Lihat)</h3>
                 <div class="table-container">
-                    <table class="table">
-                        <thead>
+                    <table class="data-table" style="box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <thead style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white;">
                             <tr>
-                                <th>Tanggal</th>
-                                <th>No. Ref</th>
-                                <th>${partyLabel}</th>
-                                <th>Total</th>
+                                <th style="border: none;">Tanggal</th>
+                                <th style="border: none;">No. Ref</th>
+                                <th style="border: none;">${partyLabel}</th>
+                                <th style="border: none;">Total</th>
                             </tr>
                         </thead>
                         <tbody id="mini-history-${type}">
@@ -5148,11 +5148,11 @@
                 }
 
                 tbody.innerHTML = data.map(item => `
-                    <tr style="opacity: 0.8; background-color: var(--background);">
+                    <tr style="transition: all 0.2s ease;">
                         <td>${this.formatDate(item.tanggal)}</td>
                         <td>${item.id}</td>
                         <td>${item.customer || item.pemasok || '-'}</td>
-                        <td>Rp ${this.formatNumber(item.total)}</td>
+                        <td style="font-weight: bold; color: var(--primary);">Rp ${this.formatNumber(item.grandTotal)}</td>
                     </tr>
                 `).join('');
             }
