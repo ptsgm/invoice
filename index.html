@@ -5140,7 +5140,7 @@
                 if (!tbody) return;
 
                 const dataKey = type === "sale" ? "penjualan" : "pembelian";
-                const data = [...this.data[dataKey]].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5); // Ambil 5 terakhir
+                const data = [...this.data[dataKey]].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).slice(0, 5); // Ambil 5 terakhir
 
                 if (data.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" class="text-center">Belum ada riwayat transaksi.</td></tr>`;
@@ -5149,10 +5149,10 @@
 
                 tbody.innerHTML = data.map(item => `
                     <tr style="opacity: 0.8; background-color: var(--background);">
-                        <td>${Utils.formatDate(item.date)}</td>
+                        <td>${this.formatDate(item.tanggal)}</td>
                         <td>${item.id}</td>
-                        <td>${item.partyName}</td>
-                        <td>Rp ${Utils.formatNumber(item.total)}</td>
+                        <td>${item.customer || item.pemasok || '-'}</td>
+                        <td>Rp ${this.formatNumber(item.total)}</td>
                     </tr>
                 `).join('');
             }
