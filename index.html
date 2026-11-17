@@ -2176,6 +2176,75 @@
                 display: none !important;
             }
         }
+
+        .print-date-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 2001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .print-date-modal-card {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: var(--shadow);
+        }
+
+        .print-date-info {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            font-size: 0.9rem;
+        }
+
+        .print-date-info div {
+            margin: 4px 0;
+        }
+
+        .print-date-quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .print-date-preview {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .btn-outline:hover:not(:disabled) {
+            background: var(--background);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        body.dark-mode input[type="date"] {
+            color-scheme: dark;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
@@ -2618,6 +2687,29 @@
                 Studio</a>
         </p>
     </footer>
+    <div id="print-date-modal" class="print-date-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="print-date-modal-title">
+        <form id="print-date-form" class="print-date-modal-card">
+            <h4 id="print-date-modal-title" class="form-section-title" style="margin-top:0; font-size: 1.25rem; margin-bottom: 15px;">Atur Tanggal Cetak Invoice</h4>
+            <div class="print-date-info">
+                <div><strong>No. Invoice:</strong> <span id="print-date-invoice-id">-</span></div>
+                <div><strong>Customer/Pemasok:</strong> <span id="print-date-party">-</span></div>
+                <div><strong>Tanggal Asli:</strong> <span id="print-date-original">-</span></div>
+            </div>
+            <div class="form-group">
+                <label for="print-custom-date">Tanggal pada Dokumen Print</label>
+                <input type="date" id="print-custom-date" required>
+                <div class="print-date-quick-actions">
+                    <button type="button" class="btn btn-sm btn-outline" id="print-date-today-btn">Gunakan Hari Ini</button>
+                    <button type="button" class="btn btn-sm btn-outline" id="print-date-reset-btn">Reset ke Tanggal Asli</button>
+                </div>
+                <div class="print-date-preview" id="print-date-preview"></div>
+            </div>
+            <div class="actions-group" style="justify-content: flex-end; margin-top: 20px;">
+                <button type="button" id="cancel-print-date-btn" class="btn btn-warning">Batal</button>
+                <button type="submit" class="btn btn-primary">Cetak Invoice</button>
+            </div>
+        </form>
+    </div>
     <div id="print-area"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -2723,6 +2815,7 @@
                 this.eventControllers = new Map();
                 this.notificationTimeout = null;
                 this.editingId = null; // Track currently editing transaction ID
+                this.pendingPrint = null;
             }
 
             // --- FIREBASE METHODS ---
@@ -3238,6 +3331,23 @@
                 document.getElementById("next-npwp-page")?.addEventListener("click", () => {
                     this.npwpPage++;
                     this.renderNpwpTable();
+                }, { signal });
+
+                document.getElementById("print-date-form")?.addEventListener("submit", (e) => this.confirmPrintWithDate(e), { signal });
+                document.getElementById("cancel-print-date-btn")?.addEventListener("click", () => this.hidePrintDateModal(), { signal });
+                const customPrintDateInput = document.getElementById("print-custom-date");
+                customPrintDateInput?.addEventListener("input", () => this.updatePrintDatePreview(), { signal });
+                customPrintDateInput?.addEventListener("change", () => this.updatePrintDatePreview(), { signal });
+                document.getElementById("print-date-today-btn")?.addEventListener("click", () => this.setPrintDateValue(this.getLocalTodayISO()), { signal });
+                document.getElementById("print-date-reset-btn")?.addEventListener("click", () => {
+                    if (this.pendingPrint) {
+                        this.setPrintDateValue(this.pendingPrint.originalDate);
+                    }
+                }, { signal });
+                document.getElementById("print-date-modal")?.addEventListener("click", (e) => {
+                    if (e.target.id === "print-date-modal") {
+                        this.hidePrintDateModal();
+                    }
                 }, { signal });
 
 
@@ -6236,6 +6346,10 @@ ${transaction.isPpnDibebaskan ?
             formatDate(dateString) {
                 try {
                     if (!dateString) return "-";
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                        const [year, month, day] = dateString.split("-").map(Number);
+                        return new Date(year, month - 1, day).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+                    }
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) {
                         const parts = dateString.split(/[-T]/);
@@ -6487,13 +6601,100 @@ ${transaction.isPpnDibebaskan ?
                 document.getElementById("add-master-item-form-element").reset();
             }
 
-            printTransaction(dataKey, id, template) {
+            getLocalTodayISO() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            normalizeDateForInput(dateString) {
+                if (!dateString) return this.getLocalTodayISO();
+                if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+                    return dateString.slice(0, 10);
+                }
+                const parsed = new Date(dateString);
+                if (!isNaN(parsed.getTime())) {
+                    const year = parsed.getFullYear();
+                    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+                    const day = String(parsed.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+                return this.getLocalTodayISO();
+            }
+
+            setPrintDateValue(dateValue) {
+                const dateInput = document.getElementById('print-custom-date');
+                if (dateInput) {
+                    dateInput.value = dateValue;
+                    this.updatePrintDatePreview();
+                }
+            }
+
+            updatePrintDatePreview() {
+                const dateInput = document.getElementById('print-custom-date');
+                const previewEl = document.getElementById('print-date-preview');
+                if (!dateInput || !previewEl) return;
+
+                if (dateInput.value) {
+                    previewEl.textContent = `Tampilan di dokumen: ${this.formatDate(dateInput.value)}`;
+                } else {
+                    previewEl.textContent = '';
+                }
+            }
+
+            showPrintDateModal(dataKey, id, template, transaction) {
+                const modal = document.getElementById('print-date-modal');
+                if (!modal) {
+                    this.executePrint(transaction, template);
+                    return;
+                }
+
+                const originalDate = this.normalizeDateForInput(transaction.tanggal);
+                this.pendingPrint = { dataKey, id, template, originalDate };
+
+                document.getElementById('print-date-invoice-id').textContent = transaction.id || '-';
+                document.getElementById('print-date-party').textContent = transaction.customer || transaction.pemasok || transaction.penerima || '-';
+                document.getElementById('print-date-original').textContent = this.formatDate(transaction.tanggal);
+
+                this.setPrintDateValue(originalDate);
+                modal.style.display = 'flex';
+                document.getElementById('print-custom-date')?.focus();
+            }
+
+            hidePrintDateModal() {
+                const modal = document.getElementById('print-date-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                this.pendingPrint = null;
+            }
+
+            confirmPrintWithDate(event) {
+                event.preventDefault();
+                if (!this.pendingPrint) return;
+
+                const { dataKey, id, template } = this.pendingPrint;
                 const transaction = this.data[dataKey]?.find((t) => String(t.id) === String(id));
                 if (!transaction) {
+                    this.hidePrintDateModal();
                     this.showNotification("Transaksi tidak ditemukan.", false);
                     return;
                 }
 
+                const customDate = document.getElementById('print-custom-date')?.value;
+                if (!customDate) {
+                    this.showNotification("Harap pilih tanggal cetak terlebih dahulu.", false);
+                    return;
+                }
+
+                const transactionForPrint = { ...transaction, tanggal: customDate };
+                this.hidePrintDateModal();
+                this.executePrint(transactionForPrint, template);
+            }
+
+            executePrint(transaction, template) {
                 const printArea = document.getElementById("print-area");
                 printArea.innerHTML = this.generatePrintHTML(transaction, template);
 
@@ -6505,6 +6706,21 @@ ${transaction.isPpnDibebaskan ?
                     document.body.classList.remove('printing');
                     printArea.innerHTML = "";
                 }, 500);
+            }
+
+            printTransaction(dataKey, id, template) {
+                const transaction = this.data[dataKey]?.find((t) => String(t.id) === String(id));
+                if (!transaction) {
+                    this.showNotification("Transaksi tidak ditemukan.", false);
+                    return;
+                }
+
+                if (dataKey === 'invoices' && template === 'invoice') {
+                    this.showPrintDateModal(dataKey, id, template, transaction);
+                    return;
+                }
+
+                this.executePrint(transaction, template);
             }
 
         }
@@ -6588,6 +6804,9 @@ ${transaction.isPpnDibebaskan ?
                         if (el.classList.contains('dropdown-options')) el.style.display = 'none';
                         else if (el.style.display !== 'none') el.style.display = 'none';
                     });
+                    if (window.app && typeof window.app.hidePrintDateModal === 'function') {
+                        window.app.hidePrintDateModal();
+                    }
                 }
             });
         });
